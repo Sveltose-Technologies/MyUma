@@ -1,4 +1,6 @@
-import API from "../../api/api"; // Path to your main axios instance
+// import API from "https://nrislaw.rxchartsquare.com/"; // Path to your main axios instance
+
+import API from "../../services/apiClient";
 
 export const loginAPI = async (credentials) => {
   const response = await API.post("/auth/login", credentials);
@@ -6,6 +8,8 @@ export const loginAPI = async (credentials) => {
 };
 
 export const registerAPI = async (userData) => {
-  const response = await API.post("/auth/register", userData);
+  console.log("userData", userData);
+
+  const response = await API.post("auth/signup", userData);
   return response.data;
 };
