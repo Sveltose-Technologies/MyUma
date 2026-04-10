@@ -1,15 +1,16 @@
 import React from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();  
 
-  // Function to handle navigation and close sidebar manually
+  // Helper function to check if the path is active
+  const isActive = (path) => location.pathname === path;
+
   const handleNavigation = (path) => {
-    // 1. Navigate to the path
     navigate(path);
 
-    // 2. Find the offcanvas element and close it using Bootstrap's API
     const offcanvasElement = document.getElementById("navbarOffcanvas");
     if (offcanvasElement) {
       const bsOffcanvas =
@@ -17,7 +18,6 @@ export default function Navbar() {
       if (bsOffcanvas) {
         bsOffcanvas.hide();
       } else {
-        // Fallback: manually remove classes if JS instance is not found
         offcanvasElement.classList.remove("show");
         const backdrop = document.querySelector(".offcanvas-backdrop");
         if (backdrop) backdrop.remove();
@@ -73,21 +73,21 @@ export default function Navbar() {
               <li className="nav-item">
                 <button
                   onClick={() => handleNavigation("/")}
-                  className="nav-link-uma bg-transparent border-0 w-100 text-start text-lg-center">
+                  className={`nav-link-uma bg-transparent border-0 w-100 text-start text-lg-center ${isActive("/") ? "active" : ""}`}>
                   Home
                 </button>
               </li>
               <li className="nav-item">
                 <button
                   onClick={() => handleNavigation("/pricing")}
-                  className="nav-link-uma bg-transparent border-0 w-100 text-start text-lg-center">
+                  className={`nav-link-uma bg-transparent border-0 w-100 text-start text-lg-center ${isActive("/pricing") ? "active" : ""}`}>
                   Pricing
                 </button>
               </li>
               <li className="nav-item">
                 <button
-                  onClick={() => handleNavigation("/#")}
-                  className="nav-link-uma bg-transparent border-0 w-100 text-start text-lg-center">
+                  onClick={() => handleNavigation("#")}
+                  className={`nav-link-uma bg-transparent border-0 w-100 text-start text-lg-center ${isActive("/blog") ? "active" : ""}`}>
                   Blog
                 </button>
               </li>
@@ -97,7 +97,7 @@ export default function Navbar() {
             <div className="d-flex flex-column flex-lg-row align-items-center gap-3 mt-4 mt-lg-0">
               <button
                 onClick={() => handleNavigation("/login")}
-                className="btn-tan-solid w-100 px-4 py-2 text-center">
+                className={`btn-tan-solid w-100 px-4 py-2 text-center ${isActive("/login") ? "opacity-75" : ""}`}>
                 Sign In
               </button>
             </div>
