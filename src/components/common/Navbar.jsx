@@ -120,7 +120,7 @@ export default function Navbar() {
                         <li>
                           <button
                             className="dropdown-item py-2 border-bottom"
-                            onClick={() => handleNavigation("/my-listings")}
+                            // onClick={() => handleNavigation("/my-listings")}
                           >
                             <i className="bi bi-file-earmark-text me-2"></i> My
                             Listing
@@ -129,7 +129,7 @@ export default function Navbar() {
                         <li>
                           <button
                             className="dropdown-item py-2 border-bottom"
-                            onClick={() => handleNavigation("/reviews")}
+                            // onClick={() => handleNavigation("/reviews")}
                           >
                             <i className="bi bi-star me-2"></i> Reviews
                           </button>
@@ -137,7 +137,7 @@ export default function Navbar() {
                         <li>
                           <button
                             className="dropdown-item py-2 border-bottom"
-                            onClick={() => handleNavigation("/bookmarks")}
+                            // onClick={() => handleNavigation("/bookmarks")}
                           >
                             <i className="bi bi-bookmark me-2"></i> Bookmarks
                           </button>
@@ -145,7 +145,7 @@ export default function Navbar() {
                         <li>
                           <button
                             className="dropdown-item py-2 border-bottom"
-                            onClick={() => handleNavigation("/messages")}
+                            // onClick={() => handleNavigation("/messages")}
                           >
                             <i className="bi bi-chat-left-text me-2"></i>{" "}
                             Message
@@ -154,7 +154,7 @@ export default function Navbar() {
                         <li>
                           <button
                             className="dropdown-item py-2 border-bottom"
-                            onClick={() => handleNavigation("/profile")}
+                            // onClick={() => handleNavigation("/profile")}
                           >
                             <i className="bi bi-person me-2"></i> My Profile
                           </button>
@@ -173,7 +173,7 @@ export default function Navbar() {
 
                     {/* NEW LISTING BUTTON */}
                     <button
-                      onClick={() => handleNavigation("/add-listing")}
+                      // onClick={() => handleNavigation("/add-listing")}
                       className="btn-tan-solid flex-fill px-3 py-2 text-center text-nowrap"
                       style={{ fontSize: "14px" }}
                     >
@@ -182,7 +182,7 @@ export default function Navbar() {
 
                     {/* BROWSE LISTINGS BUTTON */}
                     <button
-                      onClick={() => handleNavigation("/listings")}
+                      // onClick={() => handleNavigation("/listings")}
                       className="btn-tan-solid flex-fill px-3 py-2 text-center text-nowrap"
                       style={{ fontSize: "14px" }}
                     >
