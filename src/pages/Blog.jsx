@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Blog = () => {
   const blogPosts = [
@@ -64,6 +65,16 @@ const Blog = () => {
     },
   ];
 
+  // Function to create a URL-friendly name (slug)
+  const createSlug = (title) => {
+    return title
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "") // Remove special characters
+      .replace(/[\s_-]+/g, "-") // Replace spaces with -
+      .replace(/^-+|-+$/g, ""); // Remove leading/trailing dashes
+  };
+
   return (
     <div className="blog-section py-5 bg-light">
       <div className="container px-4">
@@ -75,75 +86,81 @@ const Blog = () => {
           <h1 className="text-navy fw-800 display-5 display-md-4">
             Our Latest Stories
           </h1>
-          <div
-            className="bg-tan mx-auto mt-3"
-            style={{ height: "4px", width: "60px" }}></div>
+          <div className="border-gold w-25 mx-auto mt-3 rounded"></div>
         </div>
 
-        {/* Featured Post - Fully Responsive Stacking */}
+        {/* Featured Post Link */}
         <div className="row mb-5">
           <div className="col-12">
-            <div className="card border-0 shadow-lg overflow-hidden rounded-4">
-              <div className="row g-0">
-                <div className="col-lg-8">
-                  <img
-                    src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200"
-                    className="img-fluid h-100 w-100"
-                    alt="Featured"
-                    style={{ objectFit: "cover", minHeight: "300px" }}
-                  />
-                </div>
-                <div className="col-lg-4 bg-navy d-flex align-items-center">
-                  <div className="p-4 p-md-5">
-                    <span className="badge bg-tan text-navy mb-3 px-3 py-2 fw-bold">
-                      HOT TOPIC
-                    </span>
-                    <h2 className="text-white fw-800 mb-3 h3 h2-md">
-                      Global Real Estate Market Forecast 2025
-                    </h2>
-                    <p className="text-white opacity-75 small mb-0">
-                      An in-depth analysis of emerging markets and urban
-                      development shifts expected in the coming year.
-                    </p>
+            <Link
+              to={`/blog/${createSlug("Global Real Estate Market Forecast 2025")}`}
+              className="text-decoration-none">
+              <div className="card border-0 shadow-lg overflow-hidden rounded-4 transition-hover">
+                <div className="row g-0">
+                  <div className="col-lg-8">
+                    <img
+                      src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200"
+                      className="img-fluid h-100 w-100 object-fit-cover"
+                      alt="Featured"
+                      style={{ minHeight: "300px" }}
+                    />
+                  </div>
+                  <div className="col-lg-4 bg-navy d-flex align-items-center">
+                    <div className="p-4 p-md-5">
+                      <span className="badge bg-tan text-navy mb-3 px-3 py-2 fw-bold">
+                        HOT TOPIC
+                      </span>
+                      <h2 className="text-white fw-800 mb-3 h3 h2-md">
+                        Global Real Estate Market Forecast 2025
+                      </h2>
+                      <p className="text-white opacity-75 small mb-0">
+                        An in-depth analysis of emerging markets and urban
+                        development shifts expected in the coming year.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
 
-        {/* Blog Grid */}
+        {/* Blog Grid Links */}
         <div className="row g-4">
           {blogPosts.map((post) => (
             <div key={post.id} className="col-12 col-md-6 col-lg-4">
-              <div className="card h-100 border-0 shadow-sm transition-hover rounded-4 overflow-hidden bg-white">
-                <div className="position-relative">
-                  <img
-                    src={post.image}
-                    className="card-img-top"
-                    alt={post.title}
-                    style={{ height: "220px", objectFit: "cover" }}
-                  />
-                  <div className="position-absolute top-0 end-0 m-3">
-                    <span className="badge bg-tan text-navy py-2 px-3 fw-bold shadow-sm">
-                      {post.category}
-                    </span>
+              <Link
+                to={`/blog/${createSlug(post.title)}`}
+                className="text-decoration-none">
+                <div className="card h-100 border-0 shadow-sm transition-hover rounded-4 overflow-hidden bg-white">
+                  <div className="position-relative">
+                    <img
+                      src={post.image}
+                      className="card-img-top object-fit-cover"
+                      alt={post.title}
+                      style={{ height: "220px" }}
+                    />
+                    <div className="position-absolute top-0 end-0 m-3">
+                      <span className="badge bg-tan text-navy py-2 px-3 fw-bold shadow-sm">
+                        {post.category}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="card-body p-4 d-flex flex-column">
+                    <div className="d-flex align-items-center mb-2">
+                      <small className="text-muted fw-bold text-uppercase ls-1">
+                        {post.date}
+                      </small>
+                    </div>
+                    <h5 className="card-title text-navy fw-800 mb-3 lh-sm">
+                      {post.title}
+                    </h5>
+                    <p className="card-text text-secondary mb-0 small">
+                      {post.description}
+                    </p>
                   </div>
                 </div>
-                <div className="card-body p-4 d-flex flex-column">
-                  <div className="d-flex align-items-center mb-2">
-                    <small className="text-muted fw-bold text-uppercase ls-1">
-                      {post.date}
-                    </small>
-                  </div>
-                  <h5 className="card-title text-navy fw-800 mb-3 lh-sm">
-                    {post.title}
-                  </h5>
-                  <p className="card-text text-secondary mb-0 small">
-                    {post.description}
-                  </p>
-                </div>
-              </div>
+              </Link>
             </div>
           ))}
         </div>

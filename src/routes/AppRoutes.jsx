@@ -6,7 +6,7 @@ import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
 import Pricing from "../pages/Pricing";
 import Blog from "../pages/Blog";
-
+import BlogDetail from "../pages/BlogDetail";
 const AppRoutes = () => {
   return (
     <Router>
@@ -18,6 +18,7 @@ const AppRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogDetail />} />
         </Routes>
       </div>
 
