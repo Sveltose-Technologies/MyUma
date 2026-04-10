@@ -5,6 +5,7 @@ import Login from "../features/auth/Login";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
 import Pricing from "../pages/Pricing";
+import Blog from "../pages/Blog";
 
 const AppRoutes = () => {
   return (
@@ -16,6 +17,7 @@ const AppRoutes = () => {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/blog" element={<Blog />} />
         </Routes>
       </div>
 
