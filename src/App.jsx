@@ -1,14 +1,19 @@
 import React from "react";
-import AppRoutes from "./routes/AppRoutes"; // Import your routes
+import AppRoutes from "./routes/AppRoutes";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js"; // <--- YE LINE ZAROORI HAI
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "./index.css";
-import "bootstrap-icons/font/bootstrap-icons.css"; // Icons
+import "bootstrap-icons/font/bootstrap-icons.css";
+
+// ✅ ADD THIS
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
     <div className="App">
       <AppRoutes />
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }

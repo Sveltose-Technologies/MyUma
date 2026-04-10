@@ -86,7 +86,7 @@ export default function Navbar() {
               </li>
               <li className="nav-item">
                 <button
-                  onClick={() => handleNavigation("/blog")}
+                  onClick={() => handleNavigation("/#")}
                   className="nav-link-uma bg-transparent border-0 w-100 text-start text-lg-center">
                   Blog
                 </button>
