@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginUser, registerUser, verifyOtp } from "./authSlice";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { setToken, setUser } from "../../utils/storage";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ const Login = () => {
   const [otp, setOtp] = useState("");
 
   // Role management
-  const [role, setRole] = useState("owner");
+  const [role, setRole] = useState("guest");
 
   const [loginData, setLoginData] = useState({
     email: "",
@@ -39,7 +40,10 @@ const Login = () => {
     e.preventDefault();
     const res = await dispatch(loginUser(loginData));
     if (res.meta.requestStatus === "fulfilled") {
-      toast.success("Login Successful ✅");
+      console.log("login reponse ", res?.payload?.auth?.token);
+      setUser(res?.payload?.auth);
+      setToken(res?.payload?.auth?.token);
+      toast.success("Login Successful");
       navigate("/");
     } else {
       toast.error(res.payload || "Login Failed ❌");
