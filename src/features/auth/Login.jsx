@@ -4,17 +4,33 @@ import { loginUser, registerUser, verifyOtp } from "./authSlice";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { setToken, setUser } from "../../utils/storage";
-import { forgotPasswordAPI } from "./api";
+import { forgotPasswordAPI, resetPasswordAPI, verifyOtpAPI } from "./api";
 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { otpEmail } = useSelector((state) => state.auth);
 
+  const [mode, setMode] = useState("login");
   const [isLoginTab, setIsLoginTab] = useState(true);
   const [showOtp, setShowOtp] = useState(false);
   const [otp, setOtp] = useState("");
+  const [showModal, setShowModal] = useState(false);
   const [resetEmail, setResetEmail] = useState(""); // State for forgot password modal
+  const handleCloseModal = () => {
+    setShowModal(false);
+
+    // ✅ REMOVE BACKDROP MANUALLY
+    const handleCloseModal = () => {
+      setShowModal(false);
+    };
+  };
+
+  const [changePasswordData, setChangePasswordData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
 
   const [role, setRole] = useState("guest");
 
@@ -67,13 +83,46 @@ const Login = () => {
 
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    if (forgot) {
+
+    // 👉 FORGOT PASSWORD FLOW
+    if (mode === "otp-forgot") {
+      try {
+        const res = await verifyOtpAPI({
+          email: resetEmail,
+          otp: otp,
+        });
+
+        if (res?.message === "OTP verified successfully") {
+          toast.success("OTP verified successfully ✅");
+
+          setShowOtp(false);
+          setOtp("");
+
+          setShowModal(true); // ✅ open modal
+
+          return;
+        } else {
+          toast.error(res?.message || "Invalid OTP ❌");
+        }
+      } catch (err) {
+        toast.error(err?.response?.data?.message || "OTP Failed ❌");
+      }
+
+      return;
     }
+
+    // 👉 SIGNUP FLOW
+    console.log("otp", otp);
+
     const res = await dispatch(verifyOtp({ email: otpEmail, otp: otp }));
+    console.log("reponse ", res);
+
     if (res.meta.requestStatus === "fulfilled") {
       toast.success("Signup Successful ✅");
+
       setShowOtp(false);
       setIsLoginTab(true);
+
       navigate("/");
     } else {
       toast.error(res.payload || "Invalid OTP ❌");
@@ -82,12 +131,51 @@ const Login = () => {
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
-    const res = await forgotPasswordAPI({ email: resetEmail });
-    // Logic for forgot password (API call) goes here
+
+    await forgotPasswordAPI({ email: resetEmail });
+
     setShowOtp(true);
-    toast.info(`Reset OTP sent to ${resetEmail}  📩`);
-    setResetEmail("");
-    // Close modal manually if not using data-bs-dismiss
+    setMode("otp-forgot");
+
+    toast.info(`Reset OTP sent to ${resetEmail} 📩`);
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+
+    if (changePasswordData.password !== changePasswordData.confirmPassword) {
+      toast.error("Passwords do not match ❌");
+      return;
+    }
+
+    try {
+      const res = await resetPasswordAPI({
+        email: resetEmail,
+        newPassword: changePasswordData.password,
+        confirmPassword: changePasswordData.confirmPassword,
+      });
+      console.log("res", res);
+
+      if (res?.message === "Password reset successful") {
+        toast.success("Password reset successful ✅");
+
+        // ✅ CLOSE MODAL CLEANLY
+        handleCloseModal();
+
+        // ✅ RESET STATES
+        setShowOtp(false);
+        setOtp("");
+        setMode("login");
+        setIsLoginTab(true);
+
+        // ✅ NAVIGATE CLEAN
+        navigate("/login", { replace: true });
+      } else {
+        toast.error(res?.message || "Reset failed ❌");
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Reset failed ❌");
+    }
   };
 
   return (
@@ -105,6 +193,87 @@ const Login = () => {
               >
                 MyUma
               </h2>
+              {showModal && (
+                <div className="modal fade show d-block" tabIndex="-1">
+                  <div className="modal-dialog modal-dialog-centered">
+                    <div className="modal-content rounded-4">
+                      {/* HEADER */}
+                      <div className="modal-header">
+                        <h5 className="modal-title">Change Password</h5>
+                        <button
+                          type="button"
+                          className="btn-close"
+                          onClick={handleCloseModal}
+                        ></button>
+                      </div>
+
+                      {/* BODY */}
+                      <form onSubmit={handleChangePassword}>
+                        <div className="modal-body">
+                          <input
+                            type="email"
+                            className="form-control mb-3"
+                            placeholder="Email"
+                            value={resetEmail}
+                            readOnly
+                            onChange={(e) =>
+                              setChangePasswordData({
+                                ...changePasswordData,
+                                email: e.target.value,
+                              })
+                            }
+                          />
+
+                          <input
+                            type="password"
+                            className="form-control mb-3"
+                            placeholder="New Password"
+                            value={changePasswordData.password}
+                            onChange={(e) =>
+                              setChangePasswordData({
+                                ...changePasswordData,
+                                password: e.target.value,
+                              })
+                            }
+                          />
+
+                          <input
+                            type="password"
+                            className="form-control mb-3"
+                            placeholder="Confirm Password"
+                            value={changePasswordData.confirmPassword}
+                            onChange={(e) =>
+                              setChangePasswordData({
+                                ...changePasswordData,
+                                confirmPassword: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+
+                        {/* FOOTER */}
+                        <div className="modal-footer">
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={handleCloseModal}
+                          >
+                            Cancel
+                          </button>
+
+                          <button
+                            type="submit"
+                            className="btn text-white"
+                            style={{ backgroundColor: themeStyles.primaryBg }}
+                          >
+                            Update Password
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {showOtp ? (
                 <form onSubmit={handleVerifyOtp}>
@@ -320,7 +489,6 @@ const Login = () => {
               <button
                 type="button"
                 className="btn-close"
-                data-bs-dismiss="modal"
                 aria-label="Close"
               ></button>
             </div>
