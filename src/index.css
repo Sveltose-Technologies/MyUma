@@ -1,39 +1,103 @@
+/* --- 1. CORE VARIABLES & THEME --- */
 :root {
   --navy: #002147;
   --tan: #de9f57;
   --white: #ffffff;
+  --transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
+/* --- 2. THE UNIFIED BUTTON (Use this everywhere) --- */
+
+/* Navy Solid Variation */
+.uma-btn-navy {
+  background-color: var(--navy) !important;
+  color: var(--white) !important;
+  border: 1px solid var(--navy) !important;
+    padding: 10px 24px;
+    border-radius: 20px;
+}
+
+.uma-btn-navy:hover {
+  background-color: #001630 !important; /* Slightly darker navy on hover */
+  color: var(--white) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 33, 71, 0.2);
+}
+.uma-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-decoration: none !important;
+  border-radius: 4px;
+  transition: var(--transition);
+  border: none;
+  cursor: pointer;
+}
+
+/* Tan Solid Variation (Primary) */
+.uma-btn-primary {
+  background-color: var(--tan) !important;
+  color: var(--navy) !important;
+}
+
+/* Outline White Variation (Secondary) */
+.uma-btn-outline {
+  background: transparent;
+  border: 1px solid white !important;
+  color: white !important;
+}
+
+/* Hover Effects */
+.uma-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(222, 159, 87, 0.3);
+}
+
+.uma-btn-primary:hover {
+  background-color: #c98a46 !important;
+}
+
+.uma-btn-outline:hover {
+  background-color: white !important;
+  color: var(--navy) !important;
+}
+
+/* --- 3. UTILITY CLASSES --- */
 .bg-navy { background-color: var(--navy) !important; }
 .text-navy { color: var(--navy) !important; }
-.bg-gold { background-color: var(--gold) !important; }
-.text-gold { color: var(--gold) !important; }
-
-.btn-gold { background-color: var(--gold) !important; color: var(--navy) !important; font-weight: 700; border: none; }
-.btn-gold:hover { background-color: #c98a46 !important; transform: translateY(-3px); transition: 0.3s; }
-
-.border-gold { border-color: var(--gold) !important; }
-/* --- NAVBAR STYLES --- */
-.bg-navy { background-color: var(--navy); }
-.brand-text { font-weight: 800; font-size: 1.6rem; letter-spacing: 1px; }
+.bg-tan { background-color: var(--tan) !important; }
 .text-tan { color: var(--tan) !important; }
+
+.fw-800 { font-weight: 800; }
+.ls-1 { letter-spacing: 1px; }
+.ls-2 { letter-spacing: 2px; }
+
+/* Custom Borders */
+.border-gold-top { border-top: 4px solid var(--tan) !important; }
+.border-gold { border-color: var(--tan) !important; }
+
+/* --- 4. NAVBAR STYLES --- */
+.brand-text { font-weight: 800; font-size: 1.6rem; letter-spacing: 1px; }
 
 .nav-link-uma {
   color: rgba(255, 255, 255, 0.85);
   font-weight: 500;
   padding: 8px 20px !important;
-  transition: 0.3s ease;
-  text-decoration: none !important; /* No underline */
-  border: none !important; /* No border */
+  transition: var(--transition);
+  text-decoration: none !important;
 }
 
-/* Hover & Active: No underline, just color change */
 .nav-link-uma:hover, 
 .nav-link-uma.active {
   color: var(--tan) !important;
-  background: transparent !important;
 }
 
+/* Cart Badge */
 .uma-cart { position: relative; cursor: pointer; font-size: 1.4rem; }
 .uma-badge-tan {
   position: absolute;
@@ -47,22 +111,13 @@
   font-weight: 700;
 }
 
-.btn-tan-solid {
-  background: var(--tan);
-  color: var(--navy);
-  border: none;
-  border-radius: 4px;
-  padding: 10px 24px;
-  font-weight: 700;
-  transition: 0.3s;
-}
-.btn-tan-solid:hover { transform: translateY(-2px); background: #c98a46; }
-
-/* --- BANNER STYLES --- */
+/* --- 5. BANNER & HERO --- */
 .uma-banner {
   height: 80vh;
   background-size: cover;
   background-position: center;
+  display: flex;
+  align-items: center;
 }
 
 .uma-hero-box {
@@ -75,97 +130,36 @@
   font-weight: 700;
   letter-spacing: 3px;
   display: block;
-  margin-bottom: 10px;
+  text-transform: uppercase;
 }
 
-.uma-title {
-  font-size: 3.5rem;
-  font-weight: 800;
-  line-height: 1.2;
-}
-
-.uma-desc {
-  font-size: 1.1rem;
-  opacity: 0.9;
-  margin-top: 15px;
-}
-
-.btn-outline-white {
-  background: transparent;
-  border: 1px solid white;
-  color: white;
-  border-radius: 4px;
-  font-weight: 600;
-  transition: 0.3s;
-}
-.btn-outline-white:hover { background: white; color: var(--navy); }
+.uma-title { font-size: 3.5rem; font-weight: 800; line-height: 1.2; }
+.uma-desc { font-size: 1.1rem; opacity: 0.9; }
 
 @keyframes umaFadeUp {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-
-/* Add these to your existing index.css */
-
-.border-4 { border-width: 4px !important; }
-
-/* Custom class for the top border of the card using your tan color */
-.border-gold {
-  border-top: 4px solid var(--tan) !important;
-}
-
-/* Ensure the background tan is available */
-.bg-tan { 
-  background-color: var(--tan) !important; 
-}
-
-/* Card hover effect for better UI */
-.card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 1rem 3rem rgba(0, 33, 71, 0.1) !important;
-}
-
-/* --- MODERN PRICING UTILITIES --- */
-
-.fw-800 { font-weight: 800; }
-.ls-1 { letter-spacing: 1px; }
-.ls-2 { letter-spacing: 2px; }
-
-/* The Hover Effect: Card lifts up */
+/* --- 6. CARDS & HOVER EFFECTS --- */
 .transition-hover {
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: var(--transition);
 }
 
 .transition-hover:hover {
   transform: translateY(-12px);
+  box-shadow: 0 1rem 3rem rgba(0, 33, 71, 0.15) !important;
 }
 
-/* Ring Effect for the Popular Card */
+/* Pricing Special */
 .ring-navy {
   outline: 2px solid var(--navy);
   outline-offset: -2px;
 }
 
-/* Custom Outlined Button for the non-popular plans */
-.btn-outline-navy {
-  border: 2px solid var(--navy) !important;
-  color: var(--navy) !important;
-  background: transparent;
-  transition: 0.3s;
-}
-
-.btn-outline-navy:hover {
-  background: var(--navy) !important;
-  color: white !important;
-}
-
-/* Responsive adjustment */
+/* --- 7. RESPONSIVE ADJUSTMENTS --- */
 @media (max-width: 991px) {
+  .uma-title { font-size: 2.5rem; }
   .transition-hover:hover {
     transform: none;
   }

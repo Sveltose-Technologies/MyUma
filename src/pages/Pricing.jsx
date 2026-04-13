@@ -136,8 +136,7 @@ const Pricing = () => {
                   </ul>
 
                   <div className="mt-auto">
-                    <button
-                      className={`btn w-100 py-3 rounded-4 fw-bold transition-all shadow-sm ${
+                   <button className={`uma-btn-navy uma-btn-navy:hover ${
                         plan.isFeatured
                           ? "bg-navy text-white"
                           : "bg-navy text-white"

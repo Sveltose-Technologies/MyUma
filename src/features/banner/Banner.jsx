@@ -61,14 +61,14 @@ export default function Banner() {
                       </p>
 
                       {/* Buttons: Stacked on mobile, side-by-side on SM and up */}
-                      <div className="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-start gap-3 mt-4">
+                      {/* <div className="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-start gap-3 mt-4">
                         <button className="btn-tan-solid px-4 py-3 px-md-5">
                           Get Started
                         </button>
                         <button className="btn-outline-white px-4 py-3 px-md-5">
                           Learn More
                         </button>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>

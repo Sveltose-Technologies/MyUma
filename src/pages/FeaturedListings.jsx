@@ -69,7 +69,7 @@ const FeaturedListings = () => {
                     <i className="bi bi-geo-alt-fill text-gold me-1"></i>{" "}
                     {item.loc}
                   </p>
-                  <button className="btn btn-outline-dark w-100 rounded-3 fw-bold py-2 border-2">
+                  <button className="uma-btn-navy uma-btn-navy:hover ">
                     View Full Details
                   </button>
                 </div>
