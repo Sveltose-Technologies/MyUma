@@ -34,7 +34,8 @@ export default function Navbar() {
         {/* Brand Logo */}
         <Link
           className="navbar-brand d-flex align-items-center text-decoration-none"
-          to="/">
+          to="/"
+        >
           <span className="brand-text text-white fs-3 fw-bold">
             My<span className="text-tan">Uma</span>
           </span>
@@ -45,14 +46,16 @@ export default function Navbar() {
           className="navbar-toggler border-0 shadow-none bg-light"
           type="button"
           data-bs-toggle="offcanvas"
-          data-bs-target="#navbarOffcanvas">
+          data-bs-target="#navbarOffcanvas"
+        >
           <span className="navbar-toggler-icon"></span>
         </button>
 
         {/* Sidebar Container */}
         <div
           className="offcanvas offcanvas-end bg-navy border-0"
-          id="navbarOffcanvas">
+          id="navbarOffcanvas"
+        >
           <div className="offcanvas-header px-4 pt-4">
             <h5 className="offcanvas-title text-white fw-bold">
               My<span className="text-tan">Uma</span>
@@ -60,7 +63,8 @@ export default function Navbar() {
             <button
               type="button"
               className="btn-close btn-close-white"
-              data-bs-dismiss="offcanvas"></button>
+              data-bs-dismiss="offcanvas"
+            ></button>
           </div>
 
           <div className="offcanvas-body">
@@ -68,21 +72,24 @@ export default function Navbar() {
               <li className="nav-item">
                 <button
                   onClick={() => handleNavigation("/")}
-                  className="nav-link-uma bg-transparent border-0">
+                  className="nav-link-uma bg-transparent border-0"
+                >
                   Home
                 </button>
               </li>
               <li className="nav-item">
                 <button
                   onClick={() => handleNavigation("/pricing")}
-                  className="nav-link-uma bg-transparent border-0">
+                  className="nav-link-uma bg-transparent border-0"
+                >
                   Pricing
                 </button>
               </li>
               <li className="nav-item">
                 <button
                   onClick={() => handleNavigation("/blog")}
-                  className="nav-link-uma bg-transparent border-0">
+                  className="nav-link-uma bg-transparent border-0"
+                >
                   Blog
                 </button>
               </li>
@@ -105,7 +112,8 @@ export default function Navbar() {
                           backgroundColor: "#6c757d",
                           border: "none",
                           fontSize: "14px",
-                        }}>
+                        }}
+                      >
                         <i className="bi bi-person-circle"></i> My Account
                       </button>
                       <ul className="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 py-0 overflow-hidden">
@@ -146,7 +154,7 @@ export default function Navbar() {
                         <li>
                           <button
                             className="dropdown-item py-2 border-bottom"
-                            // onClick={() => handleNavigation("/profile")}
+                            onClick={() => handleNavigation("/profile")}
                           >
                             <i className="bi bi-person me-2"></i> My Profile
                           </button>
@@ -154,7 +162,8 @@ export default function Navbar() {
                         <li>
                           <button
                             className="dropdown-item py-2 text-danger fw-bold bg-light"
-                            onClick={handleLogout}>
+                            onClick={handleLogout}
+                          >
                             <i className="bi bi-box-arrow-right me-2"></i>{" "}
                             Logout
                           </button>
@@ -166,7 +175,8 @@ export default function Navbar() {
                     <button
                       // onClick={() => handleNavigation("/add-listing")}
                       className="btn-tan-solid flex-fill px-3 py-2 text-center text-nowrap"
-                      style={{ fontSize: "14px" }}>
+                      style={{ fontSize: "14px" }}
+                    >
                       New Listing
                     </button>
 
@@ -174,7 +184,8 @@ export default function Navbar() {
                     <button
                       // onClick={() => handleNavigation("/listings")}
                       className="btn-tan-solid flex-fill px-3 py-2 text-center text-nowrap"
-                      style={{ fontSize: "14px" }}>
+                      style={{ fontSize: "14px" }}
+                    >
                       Browse Listings
                     </button>
                   </div>
@@ -183,7 +194,8 @@ export default function Navbar() {
                 /* SIGN IN BUTTON */
                 <button
                   onClick={() => handleNavigation("/login")}
-                  className="uma-btn uma-btn-primary ">
+                  className="uma-btn uma-btn-primary "
+                >
                   Sign In
                 </button>
               )}

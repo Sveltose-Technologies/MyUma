@@ -7,6 +7,7 @@ import Footer from "../components/common/Footer";
 import Pricing from "../pages/Pricing";
 import Blog from "../pages/Blog";
 import BlogDetail from "../pages/BlogDetail";
+import ProfileUpdate from "../pages/profile";
 const AppRoutes = () => {
   return (
     <Router>
@@ -19,6 +20,7 @@ const AppRoutes = () => {
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogDetail />} />
+          <Route path="/profile" element={<ProfileUpdate />} />
         </Routes>
       </div>
 
