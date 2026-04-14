@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { getProfile } from "../features/auth/api";
 import { getUser } from "../utils/storage";
+import { getProfileAPI, updateProfileAPI } from "../features/auth/api";
 
 const ProfileUpdate = () => {
-  const [role, setRole] = useState("guest");
+  const [role, setRole] = useState("user");
   const [profileImage, setProfileImage] = useState(null);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -30,20 +30,79 @@ const ProfileUpdate = () => {
     }
   };
   const getprofileHandler = async () => {
-    const user = await getUser("user"); // Assuming you store user ID in localStorage after login
-    console.log("user", user);
+    const user = getUser();
+    console.log("profile update user profile.js ", user);
+
+    // ✅ FIX: use _id
+    if (!user?.id) {
+      toast.error("User not found ❌");
+      return;
+    }
 
     try {
-      // const response = await getProfile(userId); // replace userId with actual user ID
+      // ✅ FIX: correct id
+      const res = await getProfileAPI(user.id);
+
+      console.log("Fetched profile FULL:", res);
+
+      // ✅ SAFE extraction
+      const profile = res || null;
+
+      console.log("Extracted profile:", profile);
+
+      if (!profile) {
+        toast.error("Invalid profile data ❌");
+        return;
+      }
+
+      // ✅ AUTO-FILL
+      setFormData({
+        firstName: profile?.auth?.fullName || "",
+        email: profile?.auth?.email || "",
+        password: "",
+        address: profile?.auth?.address || "",
+      });
+
+      setRole(profile?.auth?.role || "user");
     } catch (error) {
-      console.log(error);
-    } // API call to fetch profile data and set it to state
+      console.error("Error fetching profile:", error);
+      toast.error("Failed to load profile data ❌");
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.success("Profile Updated Successfully! ✨");
+    // toast.success("Profile Updated Successfully! ✨");
     // API logic here
+    const user = getUser();
+    console.log("Form Data", formData);
+
+    const updatePayload = {
+      fullName: formData.fullName, // ✅ correct
+      email: formData.email,
+      password: formData.password,
+      address: formData.address,
+      role,
+    };
+
+    console.log("Sending Payload:", updatePayload);
+
+    // 3. Ensure we use the correct ID property (matching your storage util)
+    const userId = user?.id || user?._id;
+
+    if (!userId) {
+      toast.error("User session expired. Please login again.");
+      return;
+    }
+
+    try {
+      const response = await updateProfileAPI(userId, formData); // ✅ FIX: correct id and API call
+      console.log("Profile update response:", response);
+      toast.success("Profile Updated Successfully! ✨");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile ❌");
+    }
   };
   useEffect(() => {
     getprofileHandler();
@@ -63,7 +122,7 @@ const ProfileUpdate = () => {
                   className="col-md-4 text-white text-center p-4"
                   style={{ backgroundColor: themeStyles.primaryBg }}
                 >
-                  <div className="position-relative d-inline-block mb-3">
+                  {/* <div className="position-relative d-inline-block mb-3">
                     <img
                       src={profileImage || "https://via.placeholder.com/120"}
                       alt="Avatar"
@@ -91,8 +150,8 @@ const ProfileUpdate = () => {
                         onChange={handleImageChange}
                       />
                     </label>
-                  </div>
-                  <h5 className="fw-bold mb-1">Update Avatar</h5>
+                  </div> */}
+                  {/* <h5 className="fw-bold mb-1">Update Avatar</h5> */}
                   <p className="small opacity-75">
                     Make your profile stand out
                   </p>
@@ -127,17 +186,18 @@ const ProfileUpdate = () => {
                       <div className="d-flex gap-2">
                         <button
                           type="button"
-                          className={`btn btn-sm flex-fill py-2 transition-all ${role === "guest" ? "btn-dark shadow" : "btn-outline-secondary opacity-50"}`}
-                          onClick={() => setRole("guest")}
+                          className={`btn btn-sm flex-fill py-2 transition-all ${role === "user" ? "btn-dark shadow" : "btn-outline-secondary opacity-50"}`}
+                          value={formData.role}
+                          onClick={() => setRole("user")}
                         >
-                          Guest
+                          User
                         </button>
                         <button
                           type="button"
-                          className={`btn btn-sm flex-fill py-2 transition-all ${role === "owner" ? "btn-dark shadow" : "btn-outline-secondary opacity-50"}`}
-                          onClick={() => setRole("owner")}
+                          className={`btn btn-sm flex-fill py-2 transition-all ${role === "admin" ? "btn-dark shadow" : "btn-outline-secondary opacity-50"}`}
+                          onClick={() => setRole("admin")}
                         >
-                          Owner
+                          Admin
                         </button>
                       </div>
                     </div>
@@ -149,9 +209,10 @@ const ProfileUpdate = () => {
                         </label>
                         <input
                           type="text"
-                          name="firstName"
+                          name="fullName"
                           className="form-control py-2 bg-light border-0 shadow-sm"
                           placeholder="John"
+                          value={formData.fullName}
                           onChange={handleInputChange}
                         />
                       </div>
@@ -164,6 +225,7 @@ const ProfileUpdate = () => {
                           name="email"
                           className="form-control py-2 bg-light border-0 shadow-sm"
                           placeholder="john@example.com"
+                          value={formData.email}
                           onChange={handleInputChange}
                         />
                       </div>
@@ -188,6 +250,7 @@ const ProfileUpdate = () => {
                           className="form-control py-2 bg-light border-0 shadow-sm"
                           rows="3"
                           placeholder="123 Luxury St, Appartment 4B"
+                          value={formData.address}
                           onChange={handleInputChange}
                         ></textarea>
                       </div>

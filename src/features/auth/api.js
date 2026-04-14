@@ -36,13 +36,20 @@ export const resetPasswordAPI = async (data) => {
 };
 
 // get profile
-export const getProfile = async (id) => {
-  const response = await API.get(`/auth/get-by-id/${id}`);
+
+export const getProfileAPI = async (id) => {
+  const response = await API.get(`/auth/get-by-id/${id}`); // Adjust URL to your backend
+  console.log("get profile id Response ", response?.data?.auth);
   return response.data;
 };
 
 // update profile
-export const updateProfile = async (id, data) => {
+export const updateProfileAPI = async (id, data) => {
+  console.log("update Profile INSIDE apiiiii IDD", id);
+  console.log("update Profile INSIDE apiiiii DATA", data);
+
   const response = await API.put(`/auth/update/${id}`, data);
+  console.log("UPDATED APIIII", response);
+
   return response.data;
 };
