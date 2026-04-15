@@ -8,6 +8,9 @@ import Pricing from "../pages/Pricing";
 import Blog from "../pages/Blog";
 import BlogDetail from "../pages/BlogDetail";
 import ProfileUpdate from "../pages/profile";
+import Listing from "../pages/Listing";
+import BrowseListings from "../pages/BrowseListings";
+import ListingDetails from "../pages/ListingDetails";
 const AppRoutes = () => {
   return (
     <Router>
@@ -21,6 +24,9 @@ const AppRoutes = () => {
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogDetail />} />
           <Route path="/profile" element={<ProfileUpdate />} />
+          <Route path="/listing" element={<Listing />} />
+          <Route path="/browse" element={<BrowseListings />} />
+          <Route path="/listing/:id" element={<ListingDetails />} />
         </Routes>
       </div>
 

@@ -53,3 +53,17 @@ export const updateProfileAPI = async (id, data) => {
 
   return response.data;
 };
+
+//get all category
+
+export const getCategoriesAPI = async () => {
+  try {
+    const response = await API.get("/category/get-all"); // Adjust to your actual endpoint
+    console.log("Get Categories Response:", response?.data?.categories);
+    return response.data; // This returns the whole object { success, categories, etc. }
+  } catch (error) {
+    console.error("Error in getCategoriesAPI:", error);
+    throw error;
+  }
+};
+// get all category

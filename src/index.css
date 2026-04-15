@@ -164,3 +164,44 @@
     transform: none;
   }
 }
+
+/* Browse Listings  */
+/* Smooth hover lift effect */
+.listing-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.listing-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(0, 31, 63, 0.12) !important;
+}
+
+/* Make images pop */
+.listing-card img {
+  transition: transform 0.5s ease;
+}
+
+.listing-card:hover img {
+  transform: scale(1.05);
+}
+
+/* Scrollable sidebar for filters on desktop */
+.sticky-top {
+  z-index: 10;
+}
+
+/* Custom shadow for white buttons */
+.btn-white {
+  background: white;
+  color: #001f3f;
+}
+
+/* Responsive spacing for mobile */
+@media (max-width: 991.98px) {
+  .sticky-top {
+    position: relative !important;
+    top: 0 !important;
+    margin-bottom: 2rem;
+  }
+}
+/* Browse Listings  */

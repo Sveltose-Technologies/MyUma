@@ -103,7 +103,7 @@ export default function Navbar() {
                     {/* MY ACCOUNT DROPDOWN */}
                     <div className="dropdown flex-fill">
                       <button
-                        className="btn btn-secondary dropdown-toggle px-3 py-2 w-100 d-flex align-items-center justify-content-center gap-2"
+                        className=" btn btn-secondary dropdown-toggle px-3 py-2 w-100 d-flex align-items-center justify-content-center gap-2"
                         type="button"
                         id="accountDropdown"
                         data-bs-toggle="dropdown"
@@ -120,7 +120,7 @@ export default function Navbar() {
                         <li>
                           <button
                             className="dropdown-item py-2 border-bottom"
-                            // onClick={() => handleNavigation("/my-listings")}
+                            onClick={() => handleNavigation("/listing")}
                           >
                             <i className="bi bi-file-earmark-text me-2"></i> My
                             Listing
@@ -173,18 +173,18 @@ export default function Navbar() {
 
                     {/* NEW LISTING BUTTON */}
                     <button
-                      // onClick={() => handleNavigation("/add-listing")}
-                      className="btn-tan-solid flex-fill px-3 py-2 text-center text-nowrap"
-                      style={{ fontSize: "14px" }}
+                      onClick={() => handleNavigation("/listing")}
+                      className="uma-btn uma-btn-primary"
+                      style={{ fontSize: "14px", height: "37px" }}
                     >
                       New Listing
                     </button>
 
                     {/* BROWSE LISTINGS BUTTON */}
                     <button
-                      // onClick={() => handleNavigation("/listings")}
-                      className="btn-tan-solid flex-fill px-3 py-2 text-center text-nowrap"
-                      style={{ fontSize: "14px" }}
+                      onClick={() => handleNavigation("/browse")}
+                      className="uma-btn uma-btn-primary"
+                      style={{ fontSize: "14px", height: "37px" }}
                     >
                       Browse Listings
                     </button>
