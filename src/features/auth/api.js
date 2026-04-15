@@ -67,3 +67,22 @@ export const getCategoriesAPI = async () => {
   }
 };
 // get all category
+
+// listing post api
+// Function to create a new listing
+export const createListingAPI = async (formData) => {
+  try {
+    const response = await API.post("/newListing/add", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    console.log("Create Listing Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error in createListingAPI:", error);
+    throw error;
+  }
+};
+// listing post api

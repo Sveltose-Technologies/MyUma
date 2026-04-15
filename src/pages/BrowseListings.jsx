@@ -127,6 +127,7 @@ const BrowseListings = () => {
     );
   };
 
+  
   const filteredListings = listings.filter((item) => {
     const titleMatch = item.title
       .toLowerCase()
