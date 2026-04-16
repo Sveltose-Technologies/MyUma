@@ -11,6 +11,9 @@ import ProfileUpdate from "../pages/profile";
 import Listing from "../pages/Listing";
 import BrowseListings from "../pages/BrowseListings";
 import ListingDetails from "../pages/ListingDetails";
+import AboutUs from "../pages/AboutUs";
+import PrivacyPolicy from "../pages/PrivacyPolicy";
+import TermsConditions from "../pages/TermsConditions";
 const AppRoutes = () => {
   return (
     <Router>
@@ -27,6 +30,9 @@ const AppRoutes = () => {
           <Route path="/listing" element={<Listing />} />
           <Route path="/browse" element={<BrowseListings />} />
           <Route path="/listing/:id" element={<ListingDetails />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsConditions />} />
         </Routes>
       </div>
 

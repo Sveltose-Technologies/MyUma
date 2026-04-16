@@ -9,7 +9,8 @@ const Footer = () => {
           <div className="col-lg-4 col-md-12">
             <Link
               className="navbar-brand d-flex align-items-center text-decoration-none"
-              to="/">
+              to="/"
+            >
               <span className="brand-text text-white fs-2 fw-bold pb-2">
                 My<span className="text-tan">Uma</span>
               </span>
@@ -23,19 +24,22 @@ const Footer = () => {
               <a
                 href="#"
                 className="btn bg-gold rounded-circle d-flex align-items-center justify-content-center p-0"
-                style={{ width: "35px", height: "35px" }}>
+                style={{ width: "35px", height: "35px" }}
+              >
                 <i className="bi bi-facebook text-navy"></i>
               </a>
               <a
                 href="#"
                 className="btn bg-gold rounded-circle d-flex align-items-center justify-content-center p-0"
-                style={{ width: "35px", height: "35px" }}>
+                style={{ width: "35px", height: "35px" }}
+              >
                 <i className="bi bi-instagram text-navy"></i>
               </a>
               <a
                 href="#"
                 className="btn bg-gold rounded-circle d-flex align-items-center justify-content-center p-0"
-                style={{ width: "35px", height: "35px" }}>
+                style={{ width: "35px", height: "35px" }}
+              >
                 <i className="bi bi-twitter-x text-navy"></i>
               </a>
             </div>
@@ -46,18 +50,21 @@ const Footer = () => {
             <h6 className="fw-bold text-gold mb-4 text-uppercase">Explore</h6>
             <ul className="list-unstyled">
               <li className="mb-2">
-                <a href="#" className="text-white-50 text-decoration-none">
-                  Listings
+                <a
+                  href="/privacy"
+                  className="text-white-50 text-decoration-none"
+                >
+                  Privacy Policy
                 </a>
               </li>
               <li className="mb-2">
-                <a href="#" className="text-white-50 text-decoration-none">
-                  Categories
+                <a href="/about" className="text-white-50 text-decoration-none">
+                  About Us
                 </a>
               </li>
               <li className="mb-2">
-                <a href="#" className="text-white-50 text-decoration-none">
-                  Reviews
+                <a href="/terms" className="text-white-50 text-decoration-none">
+                  Terms & Conditions
                 </a>
               </li>
             </ul>
@@ -120,7 +127,8 @@ const Footer = () => {
           <div className="col-md-6 text-center text-md-end">
             <a
               href="#"
-              className="text-white-50 small text-decoration-none me-3">
+              className="text-white-50 small text-decoration-none me-3"
+            >
               Privacy
             </a>
             <a href="#" className="text-white-50 small text-decoration-none">
