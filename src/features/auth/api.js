@@ -86,3 +86,41 @@ export const createListingAPI = async (formData) => {
   }
 };
 // listing post api
+
+// About us api
+
+export const getAboutUsAPI = async () => {
+  try {
+    const response = await API.get("/aboutus/get-all");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching About Us:", error);
+    throw error;
+  }
+};
+// About us apiend
+
+// terms and condition api
+
+export const getTermsAPI = async () => {
+  try {
+    const response = await API.get("/termcondition/get-all");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching Terms:", error);
+    throw error;
+  }
+};
+// terms and condition api
+
+// privacy policy api
+export const getPrivacyPolicyAPI = async () => {
+  try {
+    const response = await API.get("/privacy-policy/get-all");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching Privacy Policy:", error);
+    throw error;
+  }
+};
+// privacy policy api

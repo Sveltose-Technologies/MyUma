@@ -50,22 +50,28 @@ const Footer = () => {
             <h6 className="fw-bold text-gold mb-4 text-uppercase">Explore</h6>
             <ul className="list-unstyled">
               <li className="mb-2">
-                <a
-                  href="/privacy"
+                <Link
+                  to="/privacy"
                   className="text-white-50 text-decoration-none"
                 >
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li className="mb-2">
-                <a href="/about" className="text-white-50 text-decoration-none">
+                <Link
+                  to="/about"
+                  className="text-white-50 text-decoration-none"
+                >
                   About Us
-                </a>
+                </Link>
               </li>
               <li className="mb-2">
-                <a href="/terms" className="text-white-50 text-decoration-none">
+                <Link
+                  to="/terms"
+                  className="text-white-50 text-decoration-none"
+                >
                   Terms & Conditions
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
