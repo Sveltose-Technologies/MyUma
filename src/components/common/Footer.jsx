@@ -6,7 +6,6 @@ const Footer = () => {
   const footerAPI = async () => {
     try {
       const response = await getFooterAPI();
-      const data = await response;
       if (response && response.length > 0) {
         setFooterData(response[0]);
       }

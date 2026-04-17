@@ -16,10 +16,7 @@ export const registerAPI = async (userData) => {
 
 // ✅ VERIFY OTP
 export const verifyOtpAPI = async (data) => {
-  console.log("data otp", data);
-
   const response = await API.post("/auth/verify-otp", data);
-  console.log("OTP verification response:", response);
   return response.data;
 };
 
@@ -39,7 +36,7 @@ export const resetPasswordAPI = async (data) => {
 export const getBannerAPI = async () => {
   try {
     const response = await API.get("/home-banner/get-all");
-    return response.data; // This returns the whole object { success, banners, etc. }
+    return response.data;
   } catch (error) {
     console.error("Error in getBannerAPI:", error);
     throw error;
@@ -51,17 +48,12 @@ export const getBannerAPI = async () => {
 
 export const getProfileAPI = async (id) => {
   const response = await API.get(`/auth/get-by-id/${id}`); // Adjust URL to your backend
-  console.log("get profile id Response ", response?.data?.auth);
   return response.data;
 };
 // update profile
 
 export const updateProfileAPI = async (id, data) => {
-  console.log("update Profile INSIDE apiiiii IDD", id);
-  console.log("update Profile INSIDE apiiiii DATA", data);
-
   const response = await API.put(`/auth/update/${id}`, data);
-  console.log("UPDATED APIIII", response);
 
   return response.data;
 };
@@ -71,7 +63,6 @@ export const updateProfileAPI = async (id, data) => {
 export const getCategoriesAPI = async () => {
   try {
     const response = await API.get("/category/get-all"); // Adjust to your actual endpoint
-    console.log("Get Categories Response:", response?.data?.categories);
     return response.data; // This returns the whole object { success, categories, etc. }
   } catch (error) {
     console.error("Error in getCategoriesAPI:", error);
@@ -90,7 +81,6 @@ export const createListingAPI = async (formData) => {
       },
     });
 
-    console.log("Create Listing Response:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error in createListingAPI:", error);
@@ -113,7 +103,6 @@ export const getAboutUsAPI = async () => {
 // About us apiend
 
 // terms and condition api
-
 export const getTermsAPI = async () => {
   try {
     const response = await API.get("/termcondition/get-all");
@@ -123,7 +112,6 @@ export const getTermsAPI = async () => {
     throw error;
   }
 };
-// terms and condition api
 
 // privacy policy api
 export const getPrivacyPolicyAPI = async () => {
@@ -135,10 +123,8 @@ export const getPrivacyPolicyAPI = async () => {
     throw error;
   }
 };
-// privacy policy api
 
 // footer api
-
 export const getFooterAPI = async () => {
   try {
     const response = await API.get("/footer-text/get-all");
@@ -148,4 +134,14 @@ export const getFooterAPI = async () => {
     throw error;
   }
 };
-// end footer api
+
+// plans api
+export const getPlansAPI = async () => {
+  try {
+    const response = await API.get("/pricing/get-all"); // Adjust to your actual endpoint
+    return response.data; // This returns the whole object { success, plans, etc. }
+  } catch (error) {
+    console.error("Error in getPlansAPI:", error);
+    throw error;
+  }
+};

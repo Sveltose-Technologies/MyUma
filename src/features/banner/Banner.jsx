@@ -5,22 +5,6 @@ import { baseUrl } from "../../services/baseUrl";
 
 export default function Banner() {
   const [bannerSlider, setBannerSlider] = useState([]);
-  // const slides = [
-  //   {
-  //     id: 1,
-  //     tag: "PREMIUM SOLUTIONS",
-  //     title: "Elevate Your Digital Experience",
-  //     desc: "Streamlined tools designed to simplify your workflow and enhance productivity.",
-  //     img: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2070",
-  //   },
-  //   {
-  //     id: 2,
-  //     tag: "GLOBAL CONNECT",
-  //     title: "Seamless Integration for Teams",
-  //     desc: "Connect your global operations with our powerful, secure platform.",
-  //     img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070",
-  //   },
-  // ];
 
   const getBanner = async () => {
     try {
