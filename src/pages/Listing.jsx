@@ -287,7 +287,12 @@ const Listing = () => {
                           type="text"
                           name={field}
                           className="form-control border-0 bg-light"
-                          placeholder={`${field} URL`}
+                          /* Conditional Placeholder Logic */
+                          placeholder={
+                            field === "whatsappNo"
+                              ? "WhatsApp Number"
+                              : `${field.charAt(0).toUpperCase() + field.slice(1)} URL`
+                          }
                           onChange={handleInputChange}
                         />
                       </div>

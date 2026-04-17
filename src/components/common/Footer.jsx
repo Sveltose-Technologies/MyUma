@@ -1,6 +1,25 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { getFooterAPI } from "../../features/auth/api";
 const Footer = () => {
+  const [footerData, setFooterData] = useState(null);
+  const footerAPI = async () => {
+    try {
+      const response = await getFooterAPI();
+      const data = await response;
+      if (response && response.length > 0) {
+        setFooterData(response[0]);
+      }
+    } catch (error) {
+      console.error("Error fetching footer data:", error);
+    }
+  };
+
+  useEffect(() => {
+    footerAPI();
+  }, []);
+
+  console.log(footerData, "footerData");
   return (
     <footer className="bg-navy text-white pt-5 pb-3">
       <div className="container">
@@ -16,9 +35,7 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-white-50 mb-4">
-              Connecting you with top-rated local businesses and services.
-              Discover the best your city has to offer with our professional
-              directory.
+              {footerData?.content || "local businesses and services."}
             </p>
             <div className="d-flex gap-2">
               <a
@@ -104,18 +121,20 @@ const Footer = () => {
             <div className="d-flex mb-3">
               <i className="bi bi-geo-alt text-gold me-3"></i>
               <span className="text-white-50 small">
-                123 Business Street, New York, NY 10001
+                {footerData?.address || ""}
               </span>
             </div>
             <div className="d-flex mb-3">
               <i className="bi bi-envelope text-gold me-3"></i>
               <span className="text-white-50 small">
-                support@directorypro.com
+                {footerData?.email || "support@directorypro.com"}
               </span>
             </div>
             <div className="d-flex">
               <i className="bi bi-telephone text-gold me-3"></i>
-              <span className="text-white-50 small">+1 (234) 567 890</span>
+              <span className="text-white-50 small">
+                {footerData?.contactNo || "+1 (234) 567 891"}
+              </span>
             </div>
           </div>
         </div>
@@ -127,7 +146,7 @@ const Footer = () => {
         <div className="row">
           <div className="col-md-6 text-center text-md-start">
             <p className="text-white-50 small mb-0">
-              © {new Date().getFullYear()} DirectoryPro. All Rights Reserved.
+              © {new Date().getFullYear()} MyUma. All Rights Reserved.
             </p>
           </div>
           <div className="col-md-6 text-center text-md-end">

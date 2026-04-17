@@ -1,44 +1,66 @@
-
 "use client";
-import React from "react";
+import { useEffect, useState } from "react";
+import { getBannerAPI } from "../auth/api";
+import { baseUrl } from "../../services/baseUrl";
 
 export default function Banner() {
-  const slides = [
-    {
-      id: 1,
-      tag: "PREMIUM SOLUTIONS",
-      title: "Elevate Your Digital Experience",
-      desc: "Streamlined tools designed to simplify your workflow and enhance productivity.",
-      img: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2070",
-    },
-    {
-      id: 2,
-      tag: "GLOBAL CONNECT",
-      title: "Seamless Integration for Teams",
-      desc: "Connect your global operations with our powerful, secure platform.",
-      img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070",
-    },
-  ];
+  const [bannerSlider, setBannerSlider] = useState([]);
+  // const slides = [
+  //   {
+  //     id: 1,
+  //     tag: "PREMIUM SOLUTIONS",
+  //     title: "Elevate Your Digital Experience",
+  //     desc: "Streamlined tools designed to simplify your workflow and enhance productivity.",
+  //     img: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2070",
+  //   },
+  //   {
+  //     id: 2,
+  //     tag: "GLOBAL CONNECT",
+  //     title: "Seamless Integration for Teams",
+  //     desc: "Connect your global operations with our powerful, secure platform.",
+  //     img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070",
+  //   },
+  // ];
+
+  const getBanner = async () => {
+    try {
+      const response = await getBannerAPI();
+      console.log("Banner API Response in Banner.jsx:", response?.homeBanner);
+      if (response?.homeBanner) {
+        setBannerSlider(response.homeBanner);
+      } else {
+        console.warn("No homeBanner data found in API response");
+      }
+    } catch (error) {
+      console.error("Error fetching banner data:", error);
+    }
+  };
+  useEffect(() => {
+    getBanner();
+  }, []);
 
   return (
     <div
       id="umaHero"
       className="carousel slide carousel-fade"
-      data-bs-ride="carousel">
+      data-bs-ride="carousel"
+    >
       <div className="carousel-inner">
-        {slides.map((slide, index) => (
+        {bannerSlider.map((slide, index) => (
           <div
             key={slide.id}
             className={`carousel-item ${index === 0 ? "active" : ""}`}
-            data-bs-interval="5000">
+            data-bs-interval="5000"
+          >
             <div
               className="uma-banner d-flex align-items-center"
               style={{
-                backgroundImage: `linear-gradient(rgba(0,33,71,0.75), rgba(0,33,71,0.75)), url(${slide.img})`,
+                backgroundImage: `linear-gradient(rgba(0,33,71,0.75), rgba(0,33,71,0.75)), url(${baseUrl}${slide.bannerImage})`,
                 minHeight: "80vh",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
-              }}>
+              }}
+            >
               <div className="container px-4">
                 <div className="row">
                   <div className="col-12 col-lg-8">
@@ -56,8 +78,9 @@ export default function Banner() {
                       {/* Description: Hidden on very small screens or made smaller */}
                       <p
                         className="uma-desc lead mb-4 mx-auto mx-lg-0"
-                        style={{ maxWidth: "600px" }}>
-                        {slide.desc}
+                        style={{ maxWidth: "600px" }}
+                      >
+                        {slide.contant}
                       </p>
 
                       {/* Buttons: Stacked on mobile, side-by-side on SM and up */}
@@ -77,8 +100,6 @@ export default function Banner() {
           </div>
         ))}
       </div>
-
-  
     </div>
   );
 }

@@ -7,7 +7,7 @@ const ProfileUpdate = () => {
   const [role, setRole] = useState("user");
   const [profileImage, setProfileImage] = useState(null);
   const [formData, setFormData] = useState({
-    firstName: "",
+    fullName: "",
     email: "",
     password: "",
     address: "",
@@ -33,15 +33,14 @@ const ProfileUpdate = () => {
     const user = getUser();
     console.log("profile update user profile.js ", user);
 
-    // ✅ FIX: use _id
-    if (!user?.id) {
+    const userId = user?._id || user?.id;
+    if (!userId) {
       toast.error("User not found ❌");
       return;
     }
 
     try {
-      // ✅ FIX: correct id
-      const res = await getProfileAPI(user.id);
+      const res = await getProfileAPI(userId);
 
       console.log("Fetched profile FULL:", res);
 
@@ -57,13 +56,13 @@ const ProfileUpdate = () => {
 
       // ✅ AUTO-FILL
       setFormData({
-        firstName: profile?.auth?.fullName || "",
-        email: profile?.auth?.email || "",
+        fullName: profile?.auth?.fullName || profile?.fullName || "",
+        email: profile?.auth?.email || profile?.email || "",
         password: "",
-        address: profile?.auth?.address || "",
+        address: profile?.auth?.address || profile?.address || "",
       });
 
-      setRole(profile?.auth?.role || "user");
+      setRole(profile?.auth?.role || profile?.role || "user");
     } catch (error) {
       console.error("Error fetching profile:", error);
       toast.error("Failed to load profile data ❌");
@@ -78,7 +77,7 @@ const ProfileUpdate = () => {
     console.log("Form Data", formData);
 
     const updatePayload = {
-      fullName: formData.fullName, // ✅ correct
+      fullName: formData.fullName,
       email: formData.email,
       password: formData.password,
       address: formData.address,
@@ -87,8 +86,7 @@ const ProfileUpdate = () => {
 
     console.log("Sending Payload:", updatePayload);
 
-    // 3. Ensure we use the correct ID property (matching your storage util)
-    const userId = user?.id || user?._id;
+    const userId = user?._id || user?.id;
 
     if (!userId) {
       toast.error("User session expired. Please login again.");
@@ -96,7 +94,7 @@ const ProfileUpdate = () => {
     }
 
     try {
-      const response = await updateProfileAPI(userId, formData); // ✅ FIX: correct id and API call
+      const response = await updateProfileAPI(userId, formData);
       console.log("Profile update response:", response);
       toast.success("Profile Updated Successfully! ✨");
     } catch (error) {

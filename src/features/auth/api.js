@@ -35,6 +35,18 @@ export const resetPasswordAPI = async (data) => {
   return response.data;
 };
 
+// Bannner API
+export const getBannerAPI = async () => {
+  try {
+    const response = await API.get("/home-banner/get-all");
+    return response.data; // This returns the whole object { success, banners, etc. }
+  } catch (error) {
+    console.error("Error in getBannerAPI:", error);
+    throw error;
+  }
+};
+// end Bannner API
+
 // get profile
 
 export const getProfileAPI = async (id) => {
@@ -42,8 +54,8 @@ export const getProfileAPI = async (id) => {
   console.log("get profile id Response ", response?.data?.auth);
   return response.data;
 };
-
 // update profile
+
 export const updateProfileAPI = async (id, data) => {
   console.log("update Profile INSIDE apiiiii IDD", id);
   console.log("update Profile INSIDE apiiiii DATA", data);
@@ -124,3 +136,16 @@ export const getPrivacyPolicyAPI = async () => {
   }
 };
 // privacy policy api
+
+// footer api
+
+export const getFooterAPI = async () => {
+  try {
+    const response = await API.get("/footer-text/get-all");
+    return response?.data?.footer;
+  } catch (error) {
+    console.error("Error fetching Footer:", error);
+    throw error;
+  }
+};
+// end footer api
