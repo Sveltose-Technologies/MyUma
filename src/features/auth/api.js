@@ -1,7 +1,25 @@
 // import API from "https://nrislaw.rxchartsquare.com/"; // Path to your main axios instance
 
 import API from "../../services/apiClient";
+// Base URL for Images
+const IMAGE_BASE_URL = "https://nrislaw.rxchartsquare.com/";
 
+// Common Image URL Helper
+export const getImgURL = (imagePath) => {
+  if (!imagePath) {
+    return "https://via.placeholder.com/300x200?text=No+Image";
+  }
+
+  
+  if (imagePath.startsWith("http")) {
+    return imagePath;
+  }
+
+ 
+  const cleanPath = imagePath.startsWith("/") ? imagePath.slice(1) : imagePath;
+  
+  return `${IMAGE_BASE_URL}${cleanPath}`;
+};
 // ✅ LOGIN
 export const loginAPI = async (credentials) => {
   const response = await API.post("/auth/login", credentials);
