@@ -10,14 +10,12 @@ export const getImgURL = (imagePath) => {
     return "https://via.placeholder.com/300x200?text=No+Image";
   }
 
-  
   if (imagePath.startsWith("http")) {
     return imagePath;
   }
 
- 
   const cleanPath = imagePath.startsWith("/") ? imagePath.slice(1) : imagePath;
-  
+
   return `${IMAGE_BASE_URL}${cleanPath}`;
 };
 // ✅ LOGIN
@@ -160,6 +158,28 @@ export const getPlansAPI = async () => {
     return response.data; // This returns the whole object { success, plans, etc. }
   } catch (error) {
     console.error("Error in getPlansAPI:", error);
+    throw error;
+  }
+};
+
+// Blog
+export const getBLogsApi = async () => {
+  try {
+    const response = await API.get("/blog/get-all");
+    return response?.data;
+  } catch (error) {
+    console.error("Error in getBlogApi", error);
+    throw error;
+  }
+};
+
+// blogDetails
+export const getBlogDetailsApi = async (id) => {
+  try {
+    const reponse = await API.get(`/blog/get-by-id/${id}`);
+    return reponse?.data;
+  } catch (error) {
+    console.error("Error in Blog Details", error);
     throw error;
   }
 };

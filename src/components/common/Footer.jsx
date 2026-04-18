@@ -18,7 +18,6 @@ const Footer = () => {
     footerAPI();
   }, []);
 
-  console.log(footerData, "footerData");
   return (
     <footer className="bg-navy text-white pt-5 pb-3">
       <div className="container">

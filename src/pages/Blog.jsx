@@ -79,15 +79,15 @@
 //     <div className="blog-section py-5 bg-light">
 //       <div className="container px-4">
 //         {/* Section Header */}
-        // <div className="text-center mb-5 mt-2 mt-md-4">
-        //   <span className="text-tan fw-bold ls-2 text-uppercase d-block mb-2 small">
-        //     Journal & News
-        //   </span>
-        //   <h1 className="text-navy fw-800 display-5 display-md-4">
-        //     Our Latest Stories
-        //   </h1>
-        //   <div className="border-gold w-25 mx-auto mt-3 rounded"></div>
-        // </div>
+// <div className="text-center mb-5 mt-2 mt-md-4">
+//   <span className="text-tan fw-bold ls-2 text-uppercase d-block mb-2 small">
+//     Journal & News
+//   </span>
+//   <h1 className="text-navy fw-800 display-5 display-md-4">
+//     Our Latest Stories
+//   </h1>
+//   <div className="border-gold w-25 mx-auto mt-3 rounded"></div>
+// </div>
 
 //         {/* Featured Post Link */}
 //         <div className="row mb-5">
@@ -170,14 +170,17 @@
 // };
 
 // export default Blog;
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { getBLogsApi } from "../features/auth/api";
+import { baseUrl } from "../services/baseUrl";
 
 const Blog = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterDate, setFilterDate] = useState("");
   const [category, setCategory] = useState("All");
   const [sortBy, setSortBy] = useState("recent");
+  const [allblogs, setAllBlogs] = useState([]);
 
   const blogPosts = [
     {
@@ -224,23 +227,36 @@ const Blog = () => {
   ];
 
   const filteredPosts = useMemo(() => {
-    let result = blogPosts.filter((post) => {
+    let result = allblogs.filter((post) => {
+      // 1. Get category name safely from the object
+      const postCategory = post.blogCategoryId?.title || "Uncategorized";
+
+      // 2. Format the API date to YYYY-MM-DD for the date picker comparison
+      const postDateFull = post.createdAt ? post.createdAt.split("T")[0] : "";
+
       const matchesSearch = post.title
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
-      const matchesDate = filterDate === "" || post.date === filterDate;
-      const matchesCategory = category === "All" || post.category === category;
+
+      const matchesDate = filterDate === "" || postDateFull === filterDate;
+
+      const matchesCategory = category === "All" || postCategory === category;
+
       return matchesSearch && matchesDate && matchesCategory;
     });
 
     if (sortBy === "recent")
-      return result.sort((a, b) => new Date(b.date) - new Date(a.date));
-    if (sortBy === "az")
-      return result.sort((a, b) => a.title.localeCompare(b.title));
-    return result;
-  }, [searchQuery, filterDate, category, sortBy]);
+      return result.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+      );
 
-  const categories = ["All", ...new Set(blogPosts.map((p) => p.category))];
+    return result;
+  }, [allblogs, searchQuery, filterDate, category, sortBy]);
+
+  const categories = [
+    "All",
+    ...new Set(allblogs.map((p) => p.blogCategoryId?.title).filter(Boolean)),
+  ];
   const createSlug = (title) =>
     title
       .toLowerCase()
@@ -248,6 +264,26 @@ const Blog = () => {
       .replace(/[^\w\s-]/g, "")
       .replace(/[\s_-]+/g, "-")
       .replace(/^-+|-+$/g, "");
+
+  const getBlogs = async () => {
+    try {
+      const response = await getBLogsApi();
+      console.log("BlogResponse ", response?.blogs);
+      setAllBlogs(response?.blogs);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    getBlogs();
+  }, []);
+  // Helper function to extract plain text from HTML
+  const stripHtml = (htmlString) => {
+    if (!htmlString) return "";
+    const doc = new DOMParser().parseFromString(htmlString, "text/html");
+    return doc.body.textContent || "";
+  };
 
   return (
     // Main section with Top Padding to prevent Header Overlap
@@ -266,7 +302,8 @@ const Blog = () => {
           <div className="col-12 col-lg-3">
             <div
               className="card border-0 shadow-sm rounded-4 p-4 sticky-lg-top"
-              style={{ top: "100px", zIndex: 10 }}>
+              style={{ top: "100px", zIndex: 10 }}
+            >
               <h6 className="text-navy fw-800 mb-4 ls-1 text-uppercase">
                 Filter Results
               </h6>
@@ -284,7 +321,6 @@ const Blog = () => {
                 />
               </div>
 
-              
               <div className="mb-4">
                 <label className="form-label text-navy fw-bold small">
                   2. SELECT DATE
@@ -297,7 +333,6 @@ const Blog = () => {
                 />
               </div>
 
-           
               <div className="mb-4">
                 <label className="form-label text-navy fw-bold small">
                   3. CATEGORY
@@ -305,7 +340,8 @@ const Blog = () => {
                 <select
                   className="form-select form-select-lg fs-6 shadow-none border-light-subtle"
                   value={category}
-                  onChange={(e) => setCategory(e.target.value)}>
+                  onChange={(e) => setCategory(e.target.value)}
+                >
                   {categories.map((cat) => (
                     <option key={cat} value={cat}>
                       {cat}
@@ -314,8 +350,6 @@ const Blog = () => {
                 </select>
               </div>
 
-            
-
               <button
                 className="btn btn-outline-secondary w-100 fw-bold border-light-subtle"
                 onClick={() => {
@@ -323,20 +357,21 @@ const Blog = () => {
                   setFilterDate("");
                   setCategory("All");
                   setSortBy("recent");
-                }}>
+                }}
+              >
                 RESET FILTERS
               </button>
             </div>
           </div>
 
-         
           <div className="col-12 col-lg-9">
             {/* FEATURED POST - Responsive Layout */}
             {!searchQuery && !filterDate && category === "All" && (
               <div className="mb-5">
                 <Link
                   to={`/blog/${createSlug("Global Real Estate Market Forecast 2025")}`}
-                  className="text-decoration-none">
+                  className="text-decoration-none"
+                >
                   <div className="card border-0 shadow-lg overflow-hidden rounded-4 transition-hover bg-navy">
                     <div className="row g-0">
                       <div className="col-md-7 col-lg-8">
@@ -354,7 +389,7 @@ const Blog = () => {
                           </span>
                           <h2 className="text-white fw-800 mb-3 display-6 display-md-5">
                             Global Real Estate Market Forecast 2025
-                          </h2> 
+                          </h2>
                           <p className="text-white opacity-75 small">
                             Analysis of emerging markets and shifts in the
                             coming year.
@@ -367,53 +402,59 @@ const Blog = () => {
               </div>
             )}
 
-          
             <div className="row g-4">
-              {filteredPosts.length > 0 ? (
-                filteredPosts.map((post) => (
-                  <div key={post.id} className="col-12 col-md-6 col-xl-4">
+              {filteredPosts.map((post) => {
+                // Format Date for display
+                const displayDate = new Date(post.createdAt).toLocaleDateString(
+                  "en-US",
+                  {
+                    month: "short",
+                    day: "2-digit",
+                    year: "numeric",
+                  },
+                );
+
+                return (
+                  <div key={post._id} className="col-12 col-md-6 col-xl-4">
                     <Link
-                      to={`/blog/${createSlug(post.title)}`}
-                      className="text-decoration-none">
+                      to={`/blog/${createSlug(post._id)}`}
+                      className="text-decoration-none"
+                    >
                       <div className="card h-100 border-0 shadow-sm transition-hover rounded-4 overflow-hidden bg-white">
                         <div className="position-relative">
                           <img
-                            src={post.image}
+                            src={`${baseUrl}${post.image}`}
                             className="card-img-top object-fit-cover"
                             alt={post.title}
                             style={{ height: "220px" }}
                           />
                           <div className="position-absolute top-0 end-0 m-3">
                             <span className="badge bg-tan text-navy py-2 px-3 fw-bold shadow-sm small">
-                              {post.category}
+                              {/* Render nested category title */}
+                              {post.blogCategoryId?.title}
                             </span>
                           </div>
                         </div>
                         <div className="card-body p-4 d-flex flex-column">
                           <small className="text-muted fw-bold text-uppercase mb-2">
-                            {post.displayDate}
+                            {displayDate}
                           </small>
                           <h5 className="card-title text-navy fw-800 mb-3 lh-sm">
                             {post.title}
                           </h5>
-                          <p className="card-text text-secondary mb-0 small">
-                            {post.description}
-                          </p>
+                          {/* Replace your current description paragraph with this */}
+                          <div
+                            className="card-text text-secondary mb-0 small line-clamp-2"
+                            dangerouslySetInnerHTML={{
+                              __html: post.description,
+                            }}
+                          />
                         </div>
                       </div>
                     </Link>
                   </div>
-                ))
-              ) : (
-                <div className="col-12 text-center py-5">
-                  <div className="card border-0 shadow-sm rounded-4 p-5 bg-white">
-                    <h3 className="text-navy fw-800">No Stories Found</h3>
-                    <p className="text-muted">
-                      Try removing some filters to see more posts.
-                    </p>
-                  </div>
-                </div>
-              )}
+                );
+              })}
             </div>
           </div>
         </div>
