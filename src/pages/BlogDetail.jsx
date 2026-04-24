@@ -1,169 +1,163 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { getBlogDetailsApi } from "../features/auth/api";
-import { baseUrl } from "../services/baseUrl";
+import { useParams, Link, useLocation } from "react-router-dom";
+import { getBlogDetailsApi, getImgURL } from "../features/auth/api";
 
 const BlogDetail = () => {
-  const { id } = useParams();
-  const [detailsBlog, setDetailsBlog] = useState({});
-  console.log("Details of Blog", detailsBlog);
+  const { slug } = useParams();
+  const location = useLocation();
+  const [detailsBlog, setDetailsBlog] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const blogId = location.state?.blogId;
 
   const getBlogDetails = async (id) => {
     try {
+      setLoading(true);
       const response = await getBlogDetailsApi(id);
-      setDetailsBlog(response?.blog);
+      if (response?.blog) {
+        setDetailsBlog(response.blog);
+      }
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching blog details:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    getBlogDetails(id);
-  }, []);
+    if (blogId) {
+      getBlogDetails(blogId);
+    }
+  }, [blogId]);
 
-  // Scroll to top on page load
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // 1. Comment State Logic
-  const [comments, setComments] = useState([
-    {
-      id: 1,
-      name: "James Wilson",
-      date: "Feb 14, 2025",
-      text: "This was incredibly helpful! As a first-time buyer, the budget section really clarified things for me.",
-      initials: "JW",
-    },
-    {
-      id: 2,
-      name: "Sarah Jenkins",
-      date: "Feb 15, 2025",
-      text: "Do you have any recommendations for specific emerging neighborhoods in 2025?",
-      initials: "SJ",
-    },
-  ]);
+  if (loading) {
+    return (
+      <div className="min-vh-100 d-flex align-items-center justify-content-center">
+        <div className="spinner-border text-primary" role="status"></div>
+      </div>
+    );
+  }
 
-  const [newComment, setNewComment] = useState({ name: "", text: "" });
+  if (!detailsBlog) return null;
 
-  const handleCommentSubmit = (e) => {
-    e.preventDefault();
-    if (newComment.name && newComment.text) {
-      const addition = {
-        id: Date.now(),
-        name: newComment.name,
-        date: "Just now",
-        text: newComment.text,
-        initials: newComment.name.charAt(0).toUpperCase(),
-      };
-      setComments([...comments, addition]);
-      setNewComment({ name: "", text: "" });
-    }
-  };
+  const displayDate = new Date(detailsBlog.createdAt).toLocaleDateString(
+    "en-US",
+    { month: "short", day: "2-digit", year: "numeric" },
+  );
 
-  const post = {
-    title: "10 Tips for First-Time Home Buyers in 2025",
-    category: "Real Estate",
-    date: "Feb 12, 2025",
-    image:
-      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=800",
-  };
-  // Helper function to extract plain text from HTML
-  const stripHtml = (htmlString) => {
-    if (!htmlString) return "";
-    const doc = new DOMParser().parseFromString(htmlString, "text/html");
-    return doc.body.textContent || "";
-  };
-
-  const displayDate = detailsBlog?.createdAt
-    ? new Date(detailsBlog.createdAt).toLocaleDateString("en-US", {
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-      })
-    : "Loading date...";
   return (
     <div className="bg-white min-vh-100 py-5">
+      {/* IMPROVED CSS: Text is Left-Aligned, Box is Centered */}
+      <style>
+        {`
+          .blog-detail-content {
+            width: 100%;
+            text-align: left !important; /* Text starts from left */
+          }
+          
+          .blog-detail-content * {
+            text-align: left !important;
+            max-width: 100% !important;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+          }
+
+          /* This ensures paragraphs take full width so they don't float right */
+          .blog-detail-content p {
+            width: 100% !important;
+            margin-bottom: 1.5rem;
+            display: block;
+          }
+
+          .blog-detail-content img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+          }
+        `}
+      </style>
+
       <div className="container px-4">
-        {/* Header Section */}
+        {/* Navigation & Title */}
         <div className="row justify-content-center text-center mb-5">
           <div className="col-12 col-lg-8">
-            <nav className="mb-3">
+            <nav className="mb-4">
               <Link
                 to="/blog"
-                className="text-tan fw-bold text-decoration-none small text-uppercase ls-2"
-              >
-                <i className="bi bi-arrow-left me-1"></i> Back to Blog
+                className="text-decoration-none fw-bold small text-uppercase"
+                style={{ color: "#c49a6c" }}>
+                <i className="bi bi-arrow-left me-1"></i> Back to Journal
               </Link>
             </nav>
-            <h1 className="text-navy fw-800 display-5 mb-3">
+            <h1
+              className="fw-bolder display-4 mb-3"
+              style={{ color: "#1a2b49" }}>
               {detailsBlog.title}
             </h1>
-            <div className="text-muted small fw-bold text-uppercase ls-1">
-              {/* 2. Safely access the nested category title and use the formatted date */}
-              {detailsBlog?.blogCategoryId?.title || "Uncategorized"}
-              <span className="text-tan mx-2">•</span>
-              {displayDate}
+            <div className="text-muted small fw-bold text-uppercase">
+              <span style={{ color: "#c49a6c" }}>
+                {detailsBlog?.blogCategoryId?.title || "Real Estate"}
+              </span>
+              <span className="mx-3 opacity-50">|</span>
+              <span>{displayDate}</span>
             </div>
           </div>
         </div>
 
-        {/* Image Section */}
+        {/* Featured Image */}
         <div className="row justify-content-center mb-5">
-          <div className="col-12 col-md-10 col-lg-8">
-            <div className="ratio ratio-16x9 shadow-sm">
+          <div className="col-12 col-md-10">
+            <div className="ratio ratio-21x9 shadow-sm rounded-4 overflow-hidden">
               <img
-                src={`${baseUrl}${detailsBlog?.image}`}
-                className="rounded-4 object-fit-cover w-100 h-100"
-                alt={post.title}
+                src={getImgURL(detailsBlog.image)}
+                className="img-fluid object-fit-cover"
+                alt={detailsBlog.title}
               />
             </div>
           </div>
         </div>
 
-        {/* Content Section */}
+        {/* 2. DESCRIPTION SECTION - LEFT ALIGNED WITHIN CENTERED COLUMN */}
         <div className="row justify-content-center">
-          <div className="col-12 col-lg-7">
+          <div className="col-12 col-md-10 col-lg-8">
             <article className="text-secondary fs-5 lh-lg mb-5">
-              <p className="fw-bold text-navy mb-4"></p>
-              <p className="mb-4"> {stripHtml(detailsBlog.description)}</p>
-
               <div
-                className="border-gold w-25 my-5 rounded"
-                style={{ borderTop: "3px solid var(--tan)" }}
-              ></div>
+                className="blog-detail-content"
+                dangerouslySetInnerHTML={{ __html: detailsBlog.description }}
+              />
+
+              {/* Decorative Line Centered */}
+              <div className="d-flex justify-content-center my-5">
+                <div
+                  style={{
+                    width: "80px",
+                    height: "4px",
+                    backgroundColor: "#c49a6c",
+                  }}
+                  className="rounded"></div>
+              </div>
             </article>
 
-            {/* --- COMMENT SECTION START --- */}
-            <div className="mt-5 pt-5 border-top">
-              {/* Comment Form */}
-              <div className="card border-0 bg-light p-4 rounded-4 shadow-sm">
-                <h5 className="text-navy fw-800 mb-3">Leave a Response</h5>
-                <form onSubmit={handleCommentSubmit}>
-                  <div className="row g-3">
-                    <div className="col-12">
-                      <textarea
-                        className="form-control border-1 shadow-none px-3 py-3 rounded-3"
-                        rows="4"
-                        placeholder="Write your comment here..."
-                        value={newComment.text}
-                        onChange={(e) =>
-                          setNewComment({ ...newComment, text: e.target.value })
-                        }
-                        required
-                      ></textarea>
-                    </div>
-
-                    <div className="col-md-6">
-                      <button className="uma-btn-navy uma-btn-navy:hover ">
-                        Post Comment
-                      </button>
-                    </div>
-                  </div>
-                </form>
+            {/* Response Form */}
+            <div className="mt-5 pt-5 border-top d-flex justify-content-center">
+              <div
+                className="card border-0 bg-light p-4 p-md-5 rounded-4 shadow-sm w-100"
+                style={{ maxWidth: "700px" }}>
+                <h4 className="fw-bold mb-4 text-center">Leave a Response</h4>
+                <textarea
+                  className="form-control border-0 mb-3 rounded-4 p-3 shadow-none"
+                  rows="5"
+                  placeholder="Share your thoughts..."></textarea>
+                <button className="btn btn-dark w-100 rounded-pill py-3 fw-bold">
+                  POST COMMENT
+                </button>
               </div>
             </div>
-            {/* --- COMMENT SECTION END --- */}
           </div>
         </div>
       </div>

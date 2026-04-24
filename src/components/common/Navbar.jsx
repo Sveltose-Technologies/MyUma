@@ -129,7 +129,7 @@ export default function Navbar() {
                         <li>
                           <button
                             className="dropdown-item py-2 border-bottom"
-                            // onClick={() => handleNavigation("/reviews")}
+                            onClick={() => handleNavigation("/reviews")}
                           >
                             <i className="bi bi-star me-2"></i> Reviews
                           </button>

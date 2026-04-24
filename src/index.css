@@ -205,3 +205,10 @@
   }
 }
 /* Browse Listings  */
+
+.text-warning {
+    color: #ffc107 !important; /* Gold/Yellow color */
+}
+.text-light {
+    color: #dee2e6 !important; /* Light grey for empty stars */
+}
