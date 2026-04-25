@@ -13,6 +13,7 @@ import Blog from "../pages/Blog";
 import BlogDetail from "../pages/BlogDetail";
 import ProfileUpdate from "../pages/profile";
 import BrowseListings from "../pages/BrowseListings";
+import BrowseDetails from "../pages/BrowseDetails"
 import AboutUs from "../pages/AboutUs";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
 import TermsConditions from "../pages/TermsConditions";
@@ -22,7 +23,7 @@ import Listing from "../pages/Listing";
 import ListingDetails from "../pages/ListingDetails"; // FIXED: Added 's' to match your file
 // Note: Agar aapke paas Listings.jsx (plural) file nahi hai,
 // toh aap niche route mein Listing (singular) use karein.
-
+import Messages from "../pages/Messages";
 // Layout
 import DashboardLayout from "../components/layout/DashboardLayout";
 import Reviews from "../pages/Reviews";
@@ -44,6 +45,7 @@ const AppRoutes = () => {
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsConditions />} />
           <Route path="/browse" element={<BrowseListings />} />
+          <Route path="/browse/:slug" element={<BrowseDetails />} />
 
           {/* Detail Page Route (Slug base) */}
           <Route path="/listing/:slug" element={<ListingDetails />} />
@@ -53,8 +55,7 @@ const AppRoutes = () => {
             <Route path="/listing" element={<Listing />} />
             <Route path="/profile" element={<ProfileUpdate />} />
             <Route path="/reviews" element={<Reviews />} />
-      
-            <Route path="/messages" element={<div>Messages Page</div>} />
+            <Route path="/messages" element={<Messages />} />{" "}
             <Route path="/bookmarks" element={<div>Bookmarks Page</div>} />
           </Route>
         </Routes>

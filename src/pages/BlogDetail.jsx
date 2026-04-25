@@ -95,7 +95,7 @@ const BlogDetail = () => {
               </Link>
             </nav>
             <h1
-              className="fw-bolder display-4 mb-3"
+              className="fw-bolder display-6 mb-3"
               style={{ color: "#1a2b49" }}>
               {detailsBlog.title}
             </h1>

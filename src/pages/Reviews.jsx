@@ -70,10 +70,10 @@ const Reviews = () => {
                     <td className="px-4 py-3 text-muted">{index + 1}</td>
                     <td className="px-4 py-3 fw-semibold text-dark">
                       {/* If backend sends name use item.userId.name, else showing ID for now */}
-                      {item.userId?.name || "rituraj"}
+                      {item.userId?.name || "not found"}
                     </td>
                     <td className="px-4 py-3 text-dark">
-                      {item.itemId?.title || "Test"}
+                      {item.itemId?.title || "not found"}
                     </td>
                     <td
                       className="px-4 py-3 text-muted"

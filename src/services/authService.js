@@ -102,8 +102,11 @@ export const createListingAPI = async (formData) => {
     throw error;
   }
 };
-// listing post api
-
+// Add this to your authService.js if not already there
+export const getAllListingsApi = async () => {
+  const response = await API.get("/newListing/get-all");
+  return response.data;
+};
 // About us api
 
 export const getAboutUsAPI = async () => {
@@ -231,3 +234,4 @@ export const deleteRatingAPI = async (id) => {
     throw error;
   }
 };
+
