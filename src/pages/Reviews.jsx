@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { getRatingsAPI } from "../services/authService";
 
@@ -9,7 +10,6 @@ const Reviews = () => {
     try {
       setLoading(true);
       const response = await getRatingsAPI();
-      // Accessing response.data based on your JSON structure
       if (response?.status && response?.data) {
         setRatings(response.data);
       }
@@ -24,17 +24,12 @@ const Reviews = () => {
     fetchRatings();
   }, []);
 
-  // Helper to render stars based on rating number
   const renderStars = (rating) => {
     return [...Array(5)].map((_, i) => (
       <i
         key={i}
         className={`bi bi-star-fill ${i < rating ? "text-warning" : "text-light"}`}
-        style={{
-          fontSize: "14px",
-          marginRight: "2px",
-          color: i < rating ? "#ffc107" : "#e4e4e4",
-        }}></i>
+        style={{ fontSize: "14px", marginRight: "2px" }}></i>
     ));
   };
 
@@ -47,15 +42,9 @@ const Reviews = () => {
           <table className="table table-hover align-middle mb-0">
             <thead className="bg-light">
               <tr>
-                <th
-                  className="px-4 py-3 text-secondary fw-bold"
-                  style={{ width: "80px" }}>
-                  S.No
-                </th>
-                <th className="px-4 py-3 text-secondary fw-bold">User Name</th>
-                <th className="px-4 py-3 text-secondary fw-bold">
-                  Service Title
-                </th>
+                <th className="px-4 py-3 text-secondary fw-bold">S.No</th>
+                <th className="px-4 py-3 text-secondary fw-bold">User ID</th>
+                <th className="px-4 py-3 text-secondary fw-bold">Service ID</th>
                 <th className="px-4 py-3 text-secondary fw-bold">Review</th>
                 <th className="px-4 py-3 text-secondary fw-bold">Rating</th>
                 <th className="px-4 py-3 text-secondary fw-bold">
@@ -68,16 +57,24 @@ const Reviews = () => {
                 ratings.map((item, index) => (
                   <tr key={item._id}>
                     <td className="px-4 py-3 text-muted">{index + 1}</td>
-                    <td className="px-4 py-3 fw-semibold text-dark">
-                      {/* If backend sends name use item.userId.name, else showing ID for now */}
-                      {item.userId?.name || "not found"}
+
+                    {/* Displaying raw User ID since name is not available */}
+                    <td
+                      className="px-4 py-3 text-dark font-monospace"
+                      style={{ fontSize: "12px" }}>
+                      {item.userId || "N/A"}
                     </td>
-                    <td className="px-4 py-3 text-dark">
-                      {item.itemId?.title || "not found"}
+
+                    {/* Displaying raw Item ID since Title is not available */}
+                    <td
+                      className="px-4 py-3 text-dark font-monospace"
+                      style={{ fontSize: "12px" }}>
+                      {item.itemId || "N/A"}
                     </td>
+
                     <td
                       className="px-4 py-3 text-muted"
-                      style={{ maxWidth: "300px" }}>
+                      style={{ maxWidth: "250px" }}>
                       {item.comment}
                     </td>
                     <td className="px-4 py-3">{renderStars(item.rating)}</td>

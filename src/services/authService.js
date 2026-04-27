@@ -235,3 +235,14 @@ export const deleteRatingAPI = async (id) => {
   }
 };
 
+// ✅ GET ALL CONVERSATIONS (Contact List)
+export const getChatListAPI = async () => {
+  const response = await API.get("/chat/conversations");
+  return response.data;
+};
+
+// ✅ GET MESSAGE HISTORY WITH A SPECIFIC USER
+export const getChatHistoryAPI = async (receiverId) => {
+  const response = await API.get(`/chat/history/${receiverId}`);
+  return response.data;
+};

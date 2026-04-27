@@ -153,6 +153,165 @@
 // };
 
 // export default Messages;
+
+
+//use Socket io 
+
+
+// import React, { useState, useEffect, useRef } from "react";
+// import { socket } from "../services/socket";
+// import { getChatListAPI, getChatHistoryAPI } from "../services/authService";
+
+// const Messages = () => {
+//   const [contacts, setContacts] = useState([]);
+//   const [messages, setMessages] = useState([]);
+//   const [selectedUser, setSelectedUser] = useState(null);
+//   const [text, setText] = useState("");
+//   const scrollRef = useRef(null);
+
+//   // Get current logged-in user ID (assuming it's in localStorage)
+//   const currentUser = JSON.parse(localStorage.getItem("user"));
+
+//   useEffect(() => {
+//     // 1. Connect Socket
+//     socket.connect();
+    
+//     // Join a room with my own ID to receive private messages
+//     if (currentUser?._id) {
+//       socket.emit("join", currentUser._id);
+//     }
+
+//     // 2. Fetch Chat List (Sidebar)
+//     loadChatList();
+
+//     // 3. Listen for incoming messages
+//     socket.on("receive_message", (newMessage) => {
+//       // If the message is from the user I'm currently chatting with, add to screen
+//       setMessages((prev) => [...prev, newMessage]);
+//       loadChatList(); // Refresh sidebar to show latest msg
+//     });
+
+//     return () => {
+//       socket.off("receive_message");
+//       socket.disconnect();
+//     };
+//   }, []);
+
+//   // Scroll to bottom when messages change
+//   useEffect(() => {
+//     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+//   }, [messages]);
+
+//   const loadChatList = async () => {
+//     const data = await getChatListAPI();
+//     if (data.success) setContacts(data.conversations);
+//   };
+
+//   const selectChat = async (user) => {
+//     setSelectedUser(user);
+//     const data = await getChatHistoryAPI(user._id);
+//     if (data.success) setMessages(data.history);
+//   };
+
+//   const handleSendMessage = (e) => {
+//     e.preventDefault();
+//     if (!text.trim() || !selectedUser) return;
+
+//     const messageData = {
+//       senderId: currentUser._id,
+//       receiverId: selectedUser._id,
+//       message: text,
+//       time: new Date().toISOString(),
+//     };
+
+//     // Emit via Socket (Real-time)
+//     socket.emit("send_message", messageData);
+
+//     // Update UI instantly
+//     setMessages((prev) => [...prev, messageData]);
+//     setText("");
+//   };
+
+//   return (
+//     <div className="container-fluid p-0">
+//       <div className="card border-0 shadow-sm d-flex flex-row overflow-hidden" style={{ height: "85vh" }}>
+        
+//         {/* --- SIDEBAR: CONTACTS --- */}
+//         <div className="col-lg-4 col-md-5 border-end d-flex flex-column bg-white">
+//           <div className="p-3 border-bottom">
+//             <h5 className="fw-800 text-navy mb-3">CHATS</h5>
+//             <input type="text" className="form-control rounded-pill" placeholder="Search..." />
+//           </div>
+//           <div className="overflow-auto flex-grow-1">
+//             {contacts.map((contact) => (
+//               <div
+//                 key={contact._id}
+//                 onClick={() => selectChat(contact)}
+//                 className={`p-3 d-flex align-items-center border-bottom cursor-pointer ${selectedUser?._id === contact._id ? "bg-light" : ""}`}
+//               >
+//                 <div className="rounded-circle bg-navy text-white d-flex align-items-center justify-content-center me-3" style={{ width: "45px", height: "45px" }}>
+//                   {contact.name.charAt(0)}
+//                 </div>
+//                 <div className="flex-grow-1">
+//                   <h6 className="mb-0 fw-bold">{contact.name}</h6>
+//                   <p className="small text-muted mb-0">{contact.lastMsg}</p>
+//                 </div>
+//               </div>
+//             ))}
+//           </div>
+//         </div>
+
+//         {/* --- CHAT WINDOW --- */}
+//         <div className="col-lg-8 col-md-7 d-flex flex-column bg-light">
+//           {selectedUser ? (
+//             <>
+//               <div className="p-3 bg-navy text-white d-flex align-items-center">
+//                 <div className="rounded-circle bg-tan text-navy fw-bold d-flex align-items-center justify-content-center me-3" style={{ width: "40px", height: "40px" }}>
+//                   {selectedUser.name.charAt(0)}
+//                 </div>
+//                 <h6 className="mb-0">{selectedUser.name}</h6>
+//               </div>
+
+//               <div className="flex-grow-1 overflow-auto p-4 d-flex flex-column gap-3 bg-white">
+//                 {messages.map((msg, index) => (
+//                   <div key={index} className={`d-flex flex-column ${msg.senderId === currentUser._id ? "align-items-end" : "align-items-start"}`}>
+//                     <div className={`p-3 rounded-4 ${msg.senderId === currentUser._id ? "bg-navy text-white" : "bg-light border"}`} style={{ maxWidth: "75%" }}>
+//                       <p className="mb-0">{msg.message}</p>
+//                     </div>
+//                     <small className="text-muted mt-1">{new Date(msg.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+//                   </div>
+//                 ))}
+//                 <div ref={scrollRef} />
+//               </div>
+
+//               <div className="p-3 bg-white border-top">
+//                 <form className="d-flex gap-2" onSubmit={handleSendMessage}>
+//                   <input
+//                     type="text"
+//                     value={text}
+//                     onChange={(e) => setText(e.target.value)}
+//                     className="form-control rounded-pill"
+//                     placeholder="Type a message..."
+//                   />
+//                   <button type="submit" className="btn btn-primary rounded-circle">
+//                     <i className="bi bi-send-fill"></i>
+//                   </button>
+//                 </form>
+//               </div>
+//             </>
+//           ) : (
+//             <div className="d-flex align-items-center justify-content-center h-100">
+//               <p className="text-muted">Select a contact to start chatting</p>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Messages;
+
 import React from 'react'
 
 function Messages() {

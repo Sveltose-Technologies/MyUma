@@ -55,7 +55,7 @@ const AppRoutes = () => {
             <Route path="/listing" element={<Listing />} />
             <Route path="/profile" element={<ProfileUpdate />} />
             <Route path="/reviews" element={<Reviews />} />
-            <Route path="/messages" element={<Messages />} />{" "}
+            <Route path="/messages" element={<Messages />} />
             <Route path="/bookmarks" element={<div>Bookmarks Page</div>} />
           </Route>
         </Routes>
