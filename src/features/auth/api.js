@@ -60,7 +60,7 @@ export const getBannerAPI = async () => {
 };
 // end Bannner API
 
-// get profile
+         
 
 export const getProfileAPI = async (id) => {
   const response = await API.get(`/auth/get-by-id/${id}`); // Adjust URL to your backend
