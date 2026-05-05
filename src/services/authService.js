@@ -267,3 +267,16 @@ export const sendContactAPI = async (contactData) => {
     throw error;
   }
 };
+
+
+// Testimonial GET API
+export const getTestimonialsAPI = async () => {
+  try {
+    const response = await API.get("/testimonial/get-all");
+    // Returns the array of testimonials
+    return response.data; 
+  } catch (error) {
+    console.error("Error fetching testimonials:", error);
+    throw error;
+  }
+};

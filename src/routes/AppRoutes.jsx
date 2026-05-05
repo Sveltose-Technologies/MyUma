@@ -29,6 +29,7 @@ import DashboardLayout from "../components/layout/DashboardLayout";
 import Reviews from "../pages/Reviews";
 import ListingReviews from "../pages/ListingReviews";
 import ContactUs from "../pages/ContactUs";
+import TestimonialPage from "../pages/TestimonialPage";
 
 const AppRoutes = () => {
   return (
@@ -49,6 +50,8 @@ const AppRoutes = () => {
           <Route path="/browse" element={<BrowseListings />} />
           <Route path="/browse/:slug" element={<BrowseDetails />} />
             <Route path="/reviews/:slug" element={<ListingReviews />} />
+            <Route path="/testimonials" element={<TestimonialPage />} />;
+            
           {/* Detail Page Route (Slug base) */}
           <Route path="/listing/:slug" element={<ListingDetails />} />
           <Route path="/contact" element={<ContactUs />} />

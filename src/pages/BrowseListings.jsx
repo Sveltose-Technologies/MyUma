@@ -638,8 +638,7 @@ const BrowseListings = () => {
                       className="small fw-800 text-primary text-decoration-underline"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // navigate(`/reviews/${slugify(item.title)}`, { state: { listingId: item._id } });
-                         navigate(`#`, { state: { listingId: item._id } });
+                        navigate(`/reviews/${slugify(item.title)}`, { state: { listingId: item._id } });
                       }}
                     >
                       View Reviews
