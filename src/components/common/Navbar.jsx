@@ -93,6 +93,14 @@ export default function Navbar() {
                   Blog
                 </button>
               </li>
+               <li className="nav-item">
+                <button
+                  onClick={() => handleNavigation("/contact")}
+                  className="nav-link-uma bg-transparent border-0"
+                >
+                  Contact us
+                </button>
+              </li>
             </ul>
 
             <div className="d-flex flex-column flex-lg-row align-items-center gap-2 mt-4 mt-lg-0">

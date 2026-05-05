@@ -4,21 +4,17 @@ import API from "./apiClient";
 const IMAGE_BASE_URL = "https://nrislaw.rxchartsquare.com/";
 
 // Common Image URL Helper
+// ✅ Updated Image Helper (Placeholder fixed)
 export const getImgURL = (imagePath) => {
   if (!imagePath) {
-    return "https://via.placeholder.com/300x200?text=No+Image";
+    return "https://placehold.co/400x300?text=No+Image"; 
   }
-
-  if (imagePath.startsWith("http")) {
-    return imagePath;
-  }
-
+  if (imagePath.startsWith("http")) return imagePath;
   const cleanPath = imagePath.startsWith("/") ? imagePath.slice(1) : imagePath;
-
   return `${IMAGE_BASE_URL}${cleanPath}`;
 };
-// ✅ LOGIN
-export const loginAPI = async (credentials) => {
+
+export const loginApi = async (credentials) => {
   const response = await API.post("/auth/login", credentials);
   return response.data;
 };
@@ -78,13 +74,26 @@ export const updateProfileAPI = async (id, data) => {
 export const getCategoriesAPI = async () => {
   try {
     const response = await API.get("/category/get-all"); // Adjust to your actual endpoint
+        console.log("Category",response.data);
+
     return response.data; // This returns the whole object { success, categories, etc. }
+    
   } catch (error) {
     console.error("Error in getCategoriesAPI:", error);
     throw error;
   }
 };
-// get all category
+export const getSubCategoriesAPI = async () => {
+  try {
+    const response = await API.get("/subcategory/get-all");
+            console.log("Subcategory",response.data);
+
+    return response.data; // Returns { success, subcategories, etc. }
+  } catch (error) {
+    console.error("Error in getSubCategoriesAPI:", error);
+    throw error;
+  }
+};
 
 // listing post api
 // Function to create a new listing
@@ -245,4 +254,16 @@ export const getChatListAPI = async () => {
 export const getChatHistoryAPI = async (receiverId) => {
   const response = await API.get(`/chat/history/${receiverId}`);
   return response.data;
+};
+
+
+// ✅ SEND CONTACT MESSAGE
+export const sendContactAPI = async (contactData) => {
+  try {
+    const response = await API.post("/contactus/send", contactData);
+    return response.data;
+  } catch (error) {
+    console.error("Error sending contact message:", error);
+    throw error;
+  }
 };
