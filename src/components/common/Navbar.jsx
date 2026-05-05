@@ -145,7 +145,7 @@ export default function Navbar() {
                         <li>
                           <button
                             className="dropdown-item py-2 border-bottom"
-                            // onClick={() => handleNavigation("/messages")}
+                            onClick={() => handleNavigation("/messages")}
                           >
                             <i className="bi bi-chat-left-text me-2"></i>{" "}
                             Message
