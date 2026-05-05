@@ -27,6 +27,8 @@ import Messages from "../pages/Messages";
 // Layout
 import DashboardLayout from "../components/layout/DashboardLayout";
 import Reviews from "../pages/Reviews";
+import ListingReviews from "../pages/ListingReviews";
+import ContactUs from "../pages/ContactUs";
 
 const AppRoutes = () => {
   return (
@@ -46,10 +48,10 @@ const AppRoutes = () => {
           <Route path="/terms" element={<TermsConditions />} />
           <Route path="/browse" element={<BrowseListings />} />
           <Route path="/browse/:slug" element={<BrowseDetails />} />
-
+            <Route path="/reviews/:slug" element={<ListingReviews />} />
           {/* Detail Page Route (Slug base) */}
           <Route path="/listing/:slug" element={<ListingDetails />} />
-
+          <Route path="/contact" element={<ContactUs />} />
           {/* Dashboard Routes (Sidebar wale) */}
           <Route element={<DashboardLayout />}>
             <Route path="/listing" element={<Listing />} />
