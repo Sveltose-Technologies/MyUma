@@ -30,6 +30,7 @@ import Reviews from "../pages/Reviews";
 import ListingReviews from "../pages/ListingReviews";
 import ContactUs from "../pages/ContactUs";
 import TestimonialPage from "../pages/TestimonialPage";
+import MyBookings from "../pages/MyBookings";
 
 const AppRoutes = () => {
   return (
@@ -49,9 +50,8 @@ const AppRoutes = () => {
           <Route path="/terms" element={<TermsConditions />} />
           <Route path="/browse" element={<BrowseListings />} />
           <Route path="/browse/:slug" element={<BrowseDetails />} />
-            <Route path="/reviews/:slug" element={<ListingReviews />} />
-            <Route path="/testimonials" element={<TestimonialPage />} />;
-            
+          <Route path="/reviews/:slug" element={<ListingReviews />} />
+          <Route path="/testimonials" element={<TestimonialPage />} />;
           {/* Detail Page Route (Slug base) */}
           <Route path="/listing/:slug" element={<ListingDetails />} />
           <Route path="/contact" element={<ContactUs />} />
@@ -61,7 +61,7 @@ const AppRoutes = () => {
             <Route path="/profile" element={<ProfileUpdate />} />
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/messages" element={<Messages />} />
-            <Route path="/bookmarks" element={<div>Bookmarks Page</div>} />
+            <Route path="/bookmark" element={<MyBookings />} />
           </Route>
         </Routes>
       </div>

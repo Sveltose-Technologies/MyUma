@@ -280,3 +280,62 @@ export const getTestimonialsAPI = async () => {
     throw error;
   }
 };
+
+
+// ==========================================
+// REVIEW API METHODS
+// ==========================================
+
+export const addReviewAPI = async (data) => {
+  try {
+    const response = await API.post("/review/add", data);
+    return response.data;
+  } catch (error) {
+    console.error("Error in addReviewAPI:", error);
+    throw error;
+  }
+};
+
+export const getReviewsAPI = async () => {
+  try {
+    const response = await API.get("/review/get-all");
+    return response.data;
+  } catch (error) {
+    console.error("Error in getReviewsAPI:", error);
+    throw error;
+  }
+};
+
+// ==========================================
+// BOOK NOW API METHODS
+// ==========================================
+
+export const createBookingAPI = async (data) => {
+  try {
+    const response = await API.post("/booknow/add", data);
+    return response.data;
+  } catch (error) {
+    console.error("Error in createBookingAPI:", error);
+    throw error;
+  }
+};
+
+export const getAllBookingsAPI = async () => {
+  try {
+    const response = await API.get("/booknow/get-all");
+    return response.data;
+  } catch (error) {
+    console.error("Error in getAllBookingsAPI:", error);
+    throw error;
+  }
+};
+
+export const deleteBookingAPI = async (id) => {
+  try {
+    const response = await API.delete(`/booknow/delete/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in deleteBookingAPI:", error);
+    throw error;
+  }
+};
