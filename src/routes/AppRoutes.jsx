@@ -61,7 +61,7 @@ const AppRoutes = () => {
             <Route path="/profile" element={<ProfileUpdate />} />
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/messages" element={<Messages />} />
-            <Route path="/bookmark" element={<MyBookings />} />
+            <Route path="#" element={<MyBookings />} />
           </Route>
         </Routes>
       </div>
