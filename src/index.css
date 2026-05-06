@@ -1,11 +1,32 @@
-/* --- 1. CORE VARIABLES & THEME --- */
+/* --- 0. GLOBAL RESET (Critical to remove white gap) --- */
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100%;
+  overflow-x: hidden;
+  background-color: #f8f9fa; /* Matches bg-light */
+}
+
+/* Remove margin-collapse gaps between Navbar and Content */
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure Navbar is flush to the top */
+.navbar.sticky-top {
+  top: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+/* --- Keep your existing variables below --- */
 :root {
   --navy: #002147;
   --tan: #de9f57;
   --white: #ffffff;
   --transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
-
 /* --- 2. THE UNIFIED BUTTON (Use this everywhere) --- */
 
 /* Navy Solid Variation */
