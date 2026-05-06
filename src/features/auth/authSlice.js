@@ -1,7 +1,16 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { loginAPI, registerAPI, verifyOtpAPI } from "./api";
+import {
+  loginAPI,
+  registerAPI,
+  verifyOtpAPI,
+} from "../../services/authService";
 
-// ✅ LOGIN
+// Load initial state from local storage to persist session on refresh
+const savedToken = localStorage.getItem("token");
+const savedUser = localStorage.getItem("user")
+  ? JSON.parse(localStorage.getItem("user"))
+  : null;
+
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (data, thunkAPI) => {
@@ -15,7 +24,6 @@ export const loginUser = createAsyncThunk(
   },
 );
 
-// ✅ REGISTER (SEND OTP)
 export const registerUser = createAsyncThunk(
   "auth/signup",
   async (data, thunkAPI) => {
@@ -29,7 +37,6 @@ export const registerUser = createAsyncThunk(
   },
 );
 
-// ✅ VERIFY OTP
 export const verifyOtp = createAsyncThunk(
   "auth/verifyOtp",
   async (data, thunkAPI) => {
@@ -46,66 +53,62 @@ export const verifyOtp = createAsyncThunk(
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: null,
-    token: null,
+    user: savedUser,
+    token: savedToken,
+    isAuthenticated: !!savedToken,
     isLoading: false,
     error: null,
-    otpEmail: null, // store email for OTP
+    otpEmail: null,
   },
   reducers: {
     logout: (state) => {
       state.user = null;
       state.token = null;
-      localStorage.removeItem("token");
+      state.isAuthenticated = false;
+      localStorage.clear();
+      sessionStorage.clear();
     },
   },
   extraReducers: (builder) => {
     builder
       // LOGIN
-      .addCase(loginUser.pending, (state) => {
-        state.isLoading = true;
-      })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        state.user = action.payload.auth || action.payload.user;
+        state.token = action.payload.token || action.payload.auth?.token;
 
-        localStorage.setItem("token", action.payload.token);
+        localStorage.setItem("token", state.token);
+        localStorage.setItem("user", JSON.stringify(state.user));
+        // Save userId separately for easy access
+        const id = state.user?._id || state.user?.id;
+        if (id) localStorage.setItem("userId", id);
       })
-      .addCase(loginUser.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-      })
-
-      // REGISTER
-      .addCase(registerUser.pending, (state) => {
-        state.isLoading = true;
-      })
-      .addCase(registerUser.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.otpEmail = action.meta.arg.email; // store email for OTP
-      })
-      .addCase(registerUser.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-      })
-
-      // VERIFY OTP
-      .addCase(verifyOtp.pending, (state) => {
-        state.isLoading = true;
-      })
+      // OTP VERIFICATION (Used for registration)
       .addCase(verifyOtp.fulfilled, (state, action) => {
         state.isLoading = false;
-
+        state.isAuthenticated = true;
         state.user = action.payload.user;
         state.token = action.payload.token;
 
         localStorage.setItem("token", action.payload.token);
+        localStorage.setItem("user", JSON.stringify(action.payload.user));
+        const id = action.payload.user?._id || action.payload.user?.id;
+        if (id) localStorage.setItem("userId", id);
       })
-      .addCase(verifyOtp.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-      });
+      .addMatcher(
+        (action) => action.type.endsWith("/pending"),
+        (state) => {
+          state.isLoading = true;
+        },
+      )
+      .addMatcher(
+        (action) => action.type.endsWith("/rejected"),
+        (state, action) => {
+          state.isLoading = false;
+          state.error = action.payload;
+        },
+      );
   },
 });
 

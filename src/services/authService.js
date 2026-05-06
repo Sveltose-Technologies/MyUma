@@ -1,48 +1,50 @@
-//src/services/authService 
 import API from "./apiClient";
-// Base URL for Images
+
 const IMAGE_BASE_URL = "https://nrislaw.rxchartsquare.com/";
 
-// Common Image URL Helper
-// ✅ Updated Image Helper (Placeholder fixed)
 export const getImgURL = (imagePath) => {
-  if (!imagePath) {
-    return "https://placehold.co/400x300?text=No+Image"; 
-  }
+  if (!imagePath) return "https://placehold.co/400x300?text=No+Image";
   if (imagePath.startsWith("http")) return imagePath;
   const cleanPath = imagePath.startsWith("/") ? imagePath.slice(1) : imagePath;
   return `${IMAGE_BASE_URL}${cleanPath}`;
 };
 
-export const loginApi = async (credentials) => {
+// --- Auth APIs ---
+export const loginAPI = async (credentials) => {
   const response = await API.post("/auth/login", credentials);
   return response.data;
 };
 
-// ✅ REGISTER (SEND OTP)
 export const registerAPI = async (userData) => {
   const response = await API.post("/auth/signup", userData);
   return response.data;
 };
 
-// ✅ VERIFY OTP
 export const verifyOtpAPI = async (data) => {
   const response = await API.post("/auth/verify-otp", data);
   return response.data;
 };
 
-// forget password
 export const forgotPasswordAPI = async (data) => {
   const response = await API.post("/auth/forgot-password", data);
   return response.data;
 };
 
-// reset password Forget Password
 export const resetPasswordAPI = async (data) => {
   const response = await API.put("/auth/reset-password", data);
   return response.data;
 };
 
+// --- Blog & Comments ---
+export const getBlogDetailsApi = async (id) => {
+  const response = await API.get(`/blog/get-by-id/${id}`);
+  return response.data;
+};
+
+export const sendCommentAPI = async (data) => {
+  const response = await API.post("/comment/send", data);
+  return response.data;
+};
 // Bannner API
 export const getBannerAPI = async () => {
   try {
@@ -74,10 +76,9 @@ export const updateProfileAPI = async (id, data) => {
 export const getCategoriesAPI = async () => {
   try {
     const response = await API.get("/category/get-all"); // Adjust to your actual endpoint
-        console.log("Category",response.data);
+    console.log("Category", response.data);
 
     return response.data; // This returns the whole object { success, categories, etc. }
-    
   } catch (error) {
     console.error("Error in getCategoriesAPI:", error);
     throw error;
@@ -86,7 +87,7 @@ export const getCategoriesAPI = async () => {
 export const getSubCategoriesAPI = async () => {
   try {
     const response = await API.get("/subcategory/get-all");
-            console.log("Subcategory",response.data);
+    console.log("Subcategory", response.data);
 
     return response.data; // Returns { success, subcategories, etc. }
   } catch (error) {
@@ -191,18 +192,6 @@ export const getBLogsApi = async () => {
   }
 };
 
-// blogDetails
-export const getBlogDetailsApi = async (id) => {
-  try {
-    const reponse = await API.get(`/blog/get-by-id/${id}`);
-    console.log();
-    
-    return reponse?.data;
-  } catch (error) {
-    console.error("Error in Blog Details", error);
-    throw error;
-  }
-};
 
 
 // ==========================================
@@ -256,7 +245,6 @@ export const getChatHistoryAPI = async (receiverId) => {
   return response.data;
 };
 
-
 // ✅ SEND CONTACT MESSAGE
 export const sendContactAPI = async (contactData) => {
   try {
@@ -268,19 +256,17 @@ export const sendContactAPI = async (contactData) => {
   }
 };
 
-
 // Testimonial GET API
 export const getTestimonialsAPI = async () => {
   try {
     const response = await API.get("/testimonial/get-all");
     // Returns the array of testimonials
-    return response.data; 
+    return response.data;
   } catch (error) {
     console.error("Error fetching testimonials:", error);
     throw error;
   }
 };
-
 
 // ==========================================
 // REVIEW API METHODS
@@ -336,6 +322,24 @@ export const deleteBookingAPI = async (id) => {
     return response.data;
   } catch (error) {
     console.error("Error in deleteBookingAPI:", error);
+    throw error;
+  }
+};
+
+// ==========================================
+// COMMENT API METHODS
+// ==========================================
+
+// Add Comment
+
+
+// Get All Comments (Optional: Use this if you want to display them below the blog)
+export const getAllCommentsAPI = async () => {
+  try {
+    const response = await API.get("/comment/get-all");
+    return response.data;
+  } catch (error) {
+    console.error("Error in getAllCommentsAPI:", error);
     throw error;
   }
 };

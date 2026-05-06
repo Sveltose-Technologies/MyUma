@@ -1,12 +1,21 @@
+//
 import React, { useEffect, useState } from "react";
-import { useParams, Link, useLocation } from "react-router-dom";
-import { getBlogDetailsApi, getImgURL } from "../features/auth/api";
+import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { getBlogDetailsApi, getImgURL } from "../services/authService";
+import { sendCommentAPI } from "../services/authService";
 
 const BlogDetail = () => {
   const { slug } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((state) => state.auth);
+
   const [detailsBlog, setDetailsBlog] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [commentText, setCommentText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const blogId = location.state?.blogId;
 
@@ -21,6 +30,38 @@ const BlogDetail = () => {
       console.error("Error fetching blog details:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePostComment = async () => {
+    // 1. Mandatory Auth Check
+    if (!isAuthenticated) {
+      toast.warn("Please login as a guest to post a comment");
+      navigate("/login");
+      return; // Stop execution if not logged in
+    }
+
+    if (!commentText.trim()) {
+      toast.error("Please enter a comment");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const payload = {
+        blogId: detailsBlog._id,
+        comment: commentText,
+      };
+
+      const response = await sendCommentAPI(payload);
+      if (response) {
+        toast.success("Comment posted successfully!");
+        setCommentText("");
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to post comment");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -46,44 +87,25 @@ const BlogDetail = () => {
 
   const displayDate = new Date(detailsBlog.createdAt).toLocaleDateString(
     "en-US",
-    { month: "short", day: "2-digit", year: "numeric" },
+    {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    },
   );
 
   return (
     <div className="bg-white min-vh-100 py-5">
-      {/* IMPROVED CSS: Text is Left-Aligned, Box is Centered */}
       <style>
         {`
-          .blog-detail-content {
-            width: 100%;
-            text-align: left !important; /* Text starts from left */
-          }
-          
-          .blog-detail-content * {
-            text-align: left !important;
-            max-width: 100% !important;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            white-space: normal;
-          }
-
-          /* This ensures paragraphs take full width so they don't float right */
-          .blog-detail-content p {
-            width: 100% !important;
-            margin-bottom: 1.5rem;
-            display: block;
-          }
-
-          .blog-detail-content img {
-            max-width: 100%;
-            height: auto;
-            margin: 10px 0;
-          }
+          .blog-detail-content { width: 100%; text-align: left !important; }
+          .blog-detail-content * { text-align: left !important; max-width: 100% !important; word-wrap: break-word; }
+          .blog-detail-content p { width: 100% !important; margin-bottom: 1.5rem; display: block; }
+          .blog-detail-content img { max-width: 100%; height: auto; margin: 10px 0; }
         `}
       </style>
 
       <div className="container px-4">
-        {/* Navigation & Title */}
         <div className="row justify-content-center text-center mb-5">
           <div className="col-12 col-lg-8">
             <nav className="mb-4">
@@ -109,7 +131,6 @@ const BlogDetail = () => {
           </div>
         </div>
 
-        {/* Featured Image */}
         <div className="row justify-content-center mb-5">
           <div className="col-12 col-md-10">
             <div className="ratio ratio-21x9 shadow-sm rounded-4 overflow-hidden">
@@ -122,7 +143,6 @@ const BlogDetail = () => {
           </div>
         </div>
 
-        {/* 2. DESCRIPTION SECTION - LEFT ALIGNED WITHIN CENTERED COLUMN */}
         <div className="row justify-content-center">
           <div className="col-12 col-md-10 col-lg-8">
             <article className="text-secondary fs-5 lh-lg mb-5">
@@ -130,8 +150,6 @@ const BlogDetail = () => {
                 className="blog-detail-content"
                 dangerouslySetInnerHTML={{ __html: detailsBlog.description }}
               />
-
-              {/* Decorative Line Centered */}
               <div className="d-flex justify-content-center my-5">
                 <div
                   style={{
@@ -152,10 +170,34 @@ const BlogDetail = () => {
                 <textarea
                   className="form-control border-0 mb-3 rounded-4 p-3 shadow-none"
                   rows="5"
-                  placeholder="Share your thoughts..."></textarea>
-                <button className="btn btn-dark w-100 rounded-pill py-3 fw-bold">
-                  POST COMMENT
+                  placeholder={
+                    isAuthenticated
+                      ? "Share your thoughts..."
+                      : "Please login to write a comment"
+                  }
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  disabled={submitting || !isAuthenticated}></textarea>
+
+                <button
+                  className="btn btn-dark w-100 rounded-pill py-3 fw-bold"
+                  onClick={handlePostComment}
+                  disabled={submitting}>
+                  {submitting ? (
+                    <span className="spinner-border spinner-border-sm me-2"></span>
+                  ) : isAuthenticated ? (
+                    "POST COMMENT"
+                  ) : (
+                    "LOGIN TO POST"
+                  )}
                 </button>
+
+                {!isAuthenticated && (
+                  <p className="text-center mt-3 small text-muted">
+                    Note: You must be logged in as a guest to share your
+                    response.
+                  </p>
+                )}
               </div>
             </div>
           </div>
