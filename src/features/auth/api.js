@@ -76,15 +76,7 @@ export const updateProfileAPI = async (id, data) => {
 
 //get all category
 
-export const getCategoriesAPI = async () => {
-  try {
-    const response = await API.get("/category/get-all"); // Adjust to your actual endpoint
-    return response.data; // This returns the whole object { success, categories, etc. }
-  } catch (error) {
-    console.error("Error in getCategoriesAPI:", error);
-    throw error;
-  }
-};
+
 // get all category
 
 // listing post api
@@ -182,4 +174,13 @@ export const getBlogDetailsApi = async (id) => {
     console.error("Error in Blog Details", error);
     throw error;
   }
+};
+
+
+// 12. SUB-CATEGORY APIS
+export const getAllSubCategoriesApi = async () => {
+  const response = await api.get("/subcategory/get-all"); // Changed API to api
+  console.log("subcategory",response);
+  
+  return response.data;
 };

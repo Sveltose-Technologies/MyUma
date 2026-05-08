@@ -1,4 +1,3 @@
-
 //blog cards
 // import React, { useEffect, useState } from "react";
 // import { Link } from "react-router-dom";
@@ -154,12 +153,9 @@
 // };
 
 // export default FeaturedListings;
-
-
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Navigation, Heart } from "lucide-react"; // Star ko remove kar diya kyunki ab zaroorat nahi
+import { Navigation, Heart, Layers } from "lucide-react";
 import { getAllListingsApi, getImgURL } from "../services/authService";
 
 const FeaturedListings = () => {
@@ -167,7 +163,6 @@ const FeaturedListings = () => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Check if user is logged in
   const isLoggedIn = !!localStorage.getItem("token");
 
   const slugify = (text) =>
@@ -179,22 +174,27 @@ const FeaturedListings = () => {
       .replace(/^-+|-+$/g, "");
 
   useEffect(() => {
+    let isMounted = true; // Cleanup flag to prevent state updates on unmounted component
     const fetchData = async () => {
       try {
         const res = await getAllListingsApi();
-        // Top 9 listings for carousel
-        setListings(res?.listings?.slice(0, 9) || []);
+        if (isMounted) {
+          setListings(res?.listings?.slice(0, 9) || []);
+        }
       } catch (err) {
         console.error("Error fetching listings:", err);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
     fetchData();
-  }, []);
+    return () => {
+      isMounted = false;
+    }; // Cleanup
+  }, []); // [] ensures it only runs once on mount
 
   const handleBookmark = (e, item) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     if (!isLoggedIn) {
       alert("Please login to bookmark this listing.");
     } else {
@@ -217,61 +217,66 @@ const FeaturedListings = () => {
   return (
     <section className="py-5 bg-light">
       <div className="container">
-        {/* Section Header */}
         <div className="text-center mb-5">
-          <h6 className="fw-bold text-uppercase mb-2" style={{ color: "#c49a6c", letterSpacing: "3px" }}>
+          <h6
+            className="fw-bold text-uppercase mb-2"
+            style={{ color: "#c49a6c", letterSpacing: "3px" }}>
             Handpicked
           </h6>
-          <h2 className="display-6 fw-800 text-navy text-uppercase ls-1">Featured Listings</h2>
-          <div className="mx-auto bg-navy mt-2" style={{ height: '3px', width: '60px' }}></div>
+          <h2 className="display-6 fw-800 text-navy text-uppercase ls-1">
+            Featured Listings
+          </h2>
+          <div
+            className="mx-auto bg-navy mt-2"
+            style={{ height: "3px", width: "60px" }}></div>
         </div>
 
-        {/* Dynamic Carousel */}
-        <div 
-          id="featuredCarousel" 
-          className="carousel slide" 
+        <div
+          id="featuredCarousel"
+          className="carousel slide"
           data-bs-ride="carousel"
-          data-bs-interval="3000"
-        >
+          data-bs-interval="3000">
           <div className="carousel-inner">
             {slides.map((chunk, index) => (
-              <div className={`carousel-item ${index === 0 ? "active" : ""}`} key={index}>
+              <div
+                className={`carousel-item ${index === 0 ? "active" : ""}`}
+                key={index}>
                 <div className="row g-4 px-2">
                   {chunk.map((item) => (
                     <div key={item._id} className="col-12 col-md-4">
-                      <div 
+                      <div
                         className="card h-100 border-0 shadow-sm overflow-hidden listing-card rounded-4 bg-white"
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => navigate(`/browse/${slugify(item.title)}`)}
-                      >
-                        {/* Image Container */}
+                        style={{ cursor: "pointer" }}
+                        onClick={() =>
+                          navigate(`/browse/${slugify(item.title)}`)
+                        }>
                         <div className="ratio ratio-4x3 position-relative">
                           <img
                             src={getImgURL(item.images?.[0])}
                             alt={item.title}
                             className="object-fit-cover w-100 h-100"
-                            onError={(e) => { e.target.src = "https://via.placeholder.com/400x300?text=No+Image"; }}
+                            onError={(e) => {
+                              e.target.src =
+                                "https://placehold.co/400x300?text=No+Image";
+                            }}
                           />
 
-                          {/* OVERLAY: Price (Left) and Heart (Right) */}
-                          <div 
-                            className="position-absolute top-0 start-0 w-100 d-flex justify-content-between align-items-start p-3" 
-                            style={{ zIndex: 10 }}
-                          >
+                          <div
+                            className="position-absolute top-0 start-0 w-100 d-flex justify-content-between align-items-start p-3"
+                            style={{ zIndex: 10 }}>
                             <span className="badge bg-white text-navy shadow-sm fw-800 px-3 py-2 rounded-3 border-0">
-                              ${item.items?.[0]?.price?.toLocaleString() || 0}
+                              ₹{item.items?.[0]?.price?.toLocaleString() || 0}
                             </span>
 
-                            <button 
+                            <button
                               className="btn btn-white rounded-circle shadow-sm p-0 d-flex align-items-center justify-content-center"
-                              style={{ 
-                                backgroundColor: 'white', 
-                                border: 'none',
-                                width: '36px',
-                                height: '36px'
+                              style={{
+                                backgroundColor: "white",
+                                border: "none",
+                                width: "36px",
+                                height: "36px",
                               }}
-                              onClick={(e) => handleBookmark(e, item)}
-                            >
+                              onClick={(e) => handleBookmark(e, item)}>
                               <Heart size={18} color="#ff4d4d" fill="white" />
                             </button>
                           </div>
@@ -279,18 +284,31 @@ const FeaturedListings = () => {
 
                         <div className="card-body p-4 d-flex flex-column">
                           <div className="d-flex justify-content-between align-items-center mb-2">
-                            <small className="text-tan fw-800 text-uppercase ls-1">
-                              {item.categoryId?.name}
-                            </small>
-                            
-                            {/* REPLACED RATING WITH VIEW REVIEWS LINK */}
-                            <span 
+                            {/* ADDED SUBCATEGORY HERE */}
+                            <div className="d-flex flex-column">
+                              <small
+                                className="text-tan fw-800 text-uppercase ls-1"
+                                style={{ fontSize: "10px" }}>
+                                {item.categoryId?.name}
+                              </small>
+                              {item.subCategoryId?.subcategoryName && (
+                                <small
+                                  className="text-navy fw-bold"
+                                  style={{ fontSize: "11px" }}>
+                                  <Layers size={10} className="me-1" />
+                                  {item.subCategoryId.subcategoryName}
+                                </small>
+                              )}
+                            </div>
+
+                            <span
                               className="small fw-800 text-primary text-decoration-underline"
                               onClick={(e) => {
-                                e.stopPropagation(); 
-                                navigate(`/reviews/${slugify(item.title)}`, { state: { listingId: item._id } });
-                              }}
-                            >
+                                e.stopPropagation();
+                                navigate(`/reviews/${slugify(item.title)}`, {
+                                  state: { listingId: item._id },
+                                });
+                              }}>
                               View Reviews
                             </span>
                           </div>
@@ -306,10 +324,12 @@ const FeaturedListings = () => {
 
                           <div className="d-flex justify-content-end mt-auto">
                             <button
-                              className="bg-white border rounded px-3 py-2 hover-bg-light"
+                              className="bg-white border rounded px-3 py-2"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                window.open(`https://www.google.com/maps/search/${encodeURIComponent(item.address)}`);
+                                window.open(
+                                  `https://www.google.com/maps/search/${encodeURIComponent(item.address)}`,
+                                );
                               }}>
                               <Navigation size={18} />
                             </button>
@@ -323,7 +343,6 @@ const FeaturedListings = () => {
             ))}
           </div>
 
-          {/* Carousel Indicators */}
           <div className="carousel-indicators position-relative mt-4">
             {slides.map((_, index) => (
               <button
@@ -332,9 +351,12 @@ const FeaturedListings = () => {
                 data-bs-target="#featuredCarousel"
                 data-bs-slide-to={index}
                 className={`bg-navy ${index === 0 ? "active" : ""}`}
-                aria-current={index === 0 ? "true" : "false"}
-                style={{ width: '10px', height: '10px', borderRadius: '50%', margin: '0 5px' }}
-              ></button>
+                style={{
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  margin: "0 5px",
+                }}></button>
             ))}
           </div>
         </div>

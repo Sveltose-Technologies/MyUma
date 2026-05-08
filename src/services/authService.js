@@ -73,17 +73,6 @@ export const updateProfileAPI = async (id, data) => {
 
 //get all category
 
-export const getCategoriesAPI = async () => {
-  try {
-    const response = await API.get("/category/get-all"); // Adjust to your actual endpoint
-    console.log("Category", response.data);
-
-    return response.data; // This returns the whole object { success, categories, etc. }
-  } catch (error) {
-    console.error("Error in getCategoriesAPI:", error);
-    throw error;
-  }
-};
 export const getSubCategoriesAPI = async () => {
   try {
     const response = await API.get("/subcategory/get-all");
@@ -98,20 +87,7 @@ export const getSubCategoriesAPI = async () => {
 
 // listing post api
 // Function to create a new listing
-export const createListingAPI = async (formData) => {
-  try {
-    const response = await API.post("/newListing/add", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
 
-    return response.data;
-  } catch (error) {
-    console.error("Error in createListingAPI:", error);
-    throw error;
-  }
-};
 // Add this to your authService.js if not already there
 export const getAllListingsApi = async () => {
   const response = await API.get("/newListing/get-all");
@@ -162,7 +138,6 @@ export const getFooterAPI = async () => {
     throw error;
   }
 };
-
 
 //src/services/authService
 // Blog
@@ -362,3 +337,39 @@ export const getAllCommentsAPI = async () => {
   }
 };
 
+// ... other imports
+
+// CORRECT: uses uppercase 'API'
+export const getAllSubCategoriesApi = async () => {
+  try {
+    const response = await API.get("/subcategory/get-all");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching subcategories:", error);
+    throw error;
+  }
+};
+export const createListingAPI = async (formData) => {
+  try {
+    const response = await API.post("/newListing/add", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error in createListingAPI:", error);
+    throw error;
+  }
+};
+
+export const getCategoriesAPI = async () => {
+  try {
+    const response = await API.get("/category/get-all"); // Adjust to your actual endpoint
+    return response.data; // This returns the whole object { success, categories, etc. }
+  } catch (error) {
+    console.error("Error in getCategoriesAPI:", error);
+    throw error;
+  }
+};
