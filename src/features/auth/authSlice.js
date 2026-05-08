@@ -5,11 +5,22 @@ import {
   verifyOtpAPI,
 } from "../../services/authService";
 
-// Load initial state from local storage to persist session on refresh
+// Helper function to safely parse JSON from localStorage
+const safeParse = (key) => {
+  const item = localStorage.getItem(key);
+  if (!item || item === "undefined") return null;
+  try {
+    const parsed = JSON.parse(item);
+    // Ensure we don't return the "OTP verified" message as a user object
+    if (parsed && parsed.message && !parsed.id && !parsed._id) return null;
+    return parsed;
+  } catch (e) {
+    return null;
+  }
+};
+
 const savedToken = localStorage.getItem("token");
-const savedUser = localStorage.getItem("user")
-  ? JSON.parse(localStorage.getItem("user"))
-  : null;
+const savedUser = safeParse("user");
 
 export const loginUser = createAsyncThunk(
   "auth/login",
@@ -44,7 +55,7 @@ export const verifyOtp = createAsyncThunk(
       return await verifyOtpAPI(data);
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "OTP Verification Failed",
+        error.response?.data?.message || "Verification Failed",
       );
     }
   },
@@ -54,11 +65,10 @@ const authSlice = createSlice({
   name: "auth",
   initialState: {
     user: savedUser,
-    token: savedToken,
-    isAuthenticated: !!savedToken,
+    token: savedToken && savedToken !== "undefined" ? savedToken : null,
+    isAuthenticated: !!(savedToken && savedToken !== "undefined" && savedUser),
     isLoading: false,
-    error: null,
-    otpEmail: null,
+    otpEmail: sessionStorage.getItem("otpEmail") || null,
   },
   reducers: {
     logout: (state) => {
@@ -68,33 +78,64 @@ const authSlice = createSlice({
       localStorage.clear();
       sessionStorage.clear();
     },
+    // Updates status after Stripe Webhook confirms payment
+    setPaymentSuccess: (state) => {
+      if (state.user) {
+        state.user.status = "active";
+        localStorage.setItem("user", JSON.stringify(state.user));
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
-      // LOGIN
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
-        state.user = action.payload.auth || action.payload.user;
-        state.token = action.payload.token || action.payload.auth?.token;
+        const userData =
+          action.payload.user || action.payload.auth || action.payload.data;
+        const tokenData = action.payload.token || (userData && userData.token);
 
-        localStorage.setItem("token", state.token);
-        localStorage.setItem("user", JSON.stringify(state.user));
-        // Save userId separately for easy access
-        const id = state.user?._id || state.user?.id;
-        if (id) localStorage.setItem("userId", id);
+        state.user = userData;
+        state.token = tokenData;
+
+        if (tokenData) localStorage.setItem("token", tokenData);
+        if (userData) localStorage.setItem("user", JSON.stringify(userData));
       })
-      // OTP VERIFICATION (Used for registration)
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const email =
+          action.meta.arg instanceof FormData
+            ? action.meta.arg.get("email")
+            : action.meta.arg.email;
+        state.otpEmail = email;
+        sessionStorage.setItem("otpEmail", email);
+      })
       .addCase(verifyOtp.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.isAuthenticated = true;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
 
-        localStorage.setItem("token", action.payload.token);
-        localStorage.setItem("user", JSON.stringify(action.payload.user));
-        const id = action.payload.user?._id || action.payload.user?.id;
-        if (id) localStorage.setItem("userId", id);
+        // Check if payload contains the actual user profile
+        const userData =
+          action.payload.user ||
+          action.payload.data ||
+          (action.payload.id ? action.payload : null);
+        const tokenData = action.payload.token || (userData && userData.token);
+
+        // ONLY update state and localStorage if we received a valid user ID or Email
+        if (userData && (userData.id || userData._id || userData.email)) {
+          state.isAuthenticated = true;
+          state.user = userData;
+          state.token = tokenData;
+
+          if (tokenData) localStorage.setItem("token", tokenData);
+          localStorage.setItem("user", JSON.stringify(userData));
+          sessionStorage.removeItem("otpEmail");
+        } else {
+          // If response is just {"message": "..."}, we don't save it as a user.
+          // The component will handle the redirection.
+          console.warn(
+            "OTP Verified: No user data in response. Redirecting to login might be needed.",
+          );
+        }
       })
       .addMatcher(
         (action) => action.type.endsWith("/pending"),
@@ -104,13 +145,12 @@ const authSlice = createSlice({
       )
       .addMatcher(
         (action) => action.type.endsWith("/rejected"),
-        (state, action) => {
+        (state) => {
           state.isLoading = false;
-          state.error = action.payload;
         },
       );
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, setPaymentSuccess } = authSlice.actions;
 export default authSlice.reducer;

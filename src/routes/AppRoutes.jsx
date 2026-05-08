@@ -1,5 +1,12 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
+import { useSelector } from "react-redux";
 
 // Common Components
 import Navbar from "../components/common/Navbar";
@@ -9,28 +16,41 @@ import Footer from "../components/common/Footer";
 import Home from "../pages/Home";
 import Login from "../features/auth/Login";
 import Pricing from "../pages/Pricing";
+import PaymentSuccess from "../pages/PaymentSuccess"; // Naya page banayein
 import Blog from "../pages/Blog";
 import BlogDetail from "../pages/BlogDetail";
 import ProfileUpdate from "../pages/profile";
 import BrowseListings from "../pages/BrowseListings";
-import BrowseDetails from "../pages/BrowseDetails"
+import BrowseDetails from "../pages/BrowseDetails";
 import AboutUs from "../pages/AboutUs";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
 import TermsConditions from "../pages/TermsConditions";
-
-// --- LISTING IMPORTS (Aapke file names ke hisaab se) ---
 import Listing from "../pages/Listing";
-import ListingDetails from "../pages/ListingDetails"; // FIXED: Added 's' to match your file
-// Note: Agar aapke paas Listings.jsx (plural) file nahi hai,
-// toh aap niche route mein Listing (singular) use karein.
+import ListingDetails from "../pages/ListingDetails";
 import Messages from "../pages/Messages";
-// Layout
 import DashboardLayout from "../components/layout/DashboardLayout";
 import Reviews from "../pages/Reviews";
 import ListingReviews from "../pages/ListingReviews";
 import ContactUs from "../pages/ContactUs";
 import TestimonialPage from "../pages/TestimonialPage";
 import MyBookings from "../pages/MyBookings";
+
+// --- Route Protection Logic ---
+const ProtectedRoute = () => {
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Agar user logged in hai par payment nahi ki (status 'deactive' hai)
+  // Note: Aap apne backend ke according 'status' ya 'isPaid' field check karein
+  if (user && user.status === "deactive") {
+    return <Navigate to="/pricing" replace />;
+  }
+
+  return <Outlet />;
+};
 
 const AppRoutes = () => {
   return (
@@ -39,29 +59,34 @@ const AppRoutes = () => {
 
       <div style={{ minHeight: "80vh" }}>
         <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
+          {/* Public Routes - Sab dekh sakte hain */}
           <Route path="/login" element={<Login />} />
           <Route path="/pricing" element={<Pricing />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:slug" element={<BlogDetail />} />
           <Route path="/about" element={<AboutUs />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsConditions />} />
-          <Route path="/browse" element={<BrowseListings />} />
-          <Route path="/browse/:slug" element={<BrowseDetails />} />
-          <Route path="/reviews/:slug" element={<ListingReviews />} />
-          <Route path="/testimonials" element={<TestimonialPage />} />;
-          {/* Detail Page Route (Slug base) */}
-          <Route path="/listing/:slug" element={<ListingDetails />} />
           <Route path="/contact" element={<ContactUs />} />
-          {/* Dashboard Routes (Sidebar wale) */}
-          <Route element={<DashboardLayout />}>
-            <Route path="/listing" element={<Listing />} />
-            <Route path="/profile" element={<ProfileUpdate />} />
-            <Route path="/reviews" element={<Reviews />} />
-            <Route path="/messages" element={<Messages />} />
-            <Route path="#" element={<MyBookings />} />
+
+          {/* Protected Routes - Sirf Payment ke baad hi dikhenge */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogDetail />} />
+            <Route path="/browse" element={<BrowseListings />} />
+            <Route path="/browse/:slug" element={<BrowseDetails />} />
+            <Route path="/reviews/:slug" element={<ListingReviews />} />
+            <Route path="/testimonials" element={<TestimonialPage />} />
+            <Route path="/listing/:slug" element={<ListingDetails />} />
+
+            {/* Dashboard Nested Routes */}
+            <Route element={<DashboardLayout />}>
+              <Route path="/listing" element={<Listing />} />
+              <Route path="/profile" element={<ProfileUpdate />} />
+              <Route path="/reviews" element={<Reviews />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/bookings" element={<MyBookings />} />
+            </Route>
           </Route>
         </Routes>
       </div>

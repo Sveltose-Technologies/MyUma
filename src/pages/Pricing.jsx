@@ -1,81 +1,88 @@
-import { useEffect, useState } from "react";
-import { getPlansAPI } from "../features/auth/api";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { getPlansAPI, checkoutAPI } from "../services/authService";
 
 const Pricing = () => {
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
+  const [loadingPlan, setLoadingPlan] = useState(null);
   const accent = "#de9f57";
-  // const plans = [
-  //   {
-  //     name: "Business Premium",
-  //     price: "19.99",
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
 
-  //     features: [
-  //       "One listing per location",
-  //       "No Expiration",
-  //       "24/7 Support",
-  //       "Analytics Dashboard",
-  //     ],
-  //     accent: "#002147", // Navy
-  //   },
-  //   {
-  //     name: "Marketplace",
-  //     price: "0.00",
-
-  //     isFeatured: true,
-  //     features: [
-  //       "Free listing for 60 days",
-  //       "Featured in search",
-  //       "24/7 Support",
-  //       "Community Access",
-  //     ],
-  //     accent: "#de9f57", // Tan
-  //   },
-  //   {
-  //     name: "Enterprise",
-  //     price: "49.99",
-
-  //     features: [
-  //       "Unlimited listings",
-  //       "Featured on homepage",
-  //       "Priority Support",
-  //       "Verified Badge",
-  //     ],
-  //     accent: "#002147", // Navy
-  //   },
-  // ];
-
-  const getPlanes = async () => {
-    try {
-      const plansResponse = await getPlansAPI();
-
-      setPlans(plansResponse?.data[0]?.Plan || []);
-    } catch (error) {
-      console.error("Error fetching plans:", error);
-    }
-  };
   useEffect(() => {
+    const getPlanes = async () => {
+      try {
+        const res = await getPlansAPI();
+        setPlans(res?.data[0]?.Plan || []);
+      } catch (error) {
+        console.error("Error fetching plans:", error);
+      }
+    };
     getPlanes();
   }, []);
 
+ const handleGetStarted = async (plan) => {
+   const rawUser = localStorage.getItem("user");
+   const token = localStorage.getItem("token");
+
+   if (!rawUser || !token) {
+     toast.error("Please login to proceed to payment.");
+     navigate("/login");
+     return;
+   }
+
+   const parsedUser = JSON.parse(rawUser);
+
+   // CRITICAL FIX: Check if parsedUser actually has the ID and Email
+   // and not just the "OTP verified" message
+   const userId = parsedUser.id || parsedUser._id;
+   const email = parsedUser.email;
+
+   if (!userId || !email) {
+     console.error("User Object is invalid:", parsedUser);
+     toast.error("User session invalid. Please log in again.");
+     navigate("/login");
+     return;
+   }
+
+   try {
+     setLoadingPlan(plan.name);
+     const payload = {
+       amount: Number(plan.price),
+       userId: userId,
+       email: email,
+     };
+
+     const response = await checkoutAPI(payload);
+     if (response?.url) {
+       window.location.href = response.url;
+     } else {
+       toast.error("Payment Gateway Error");
+     }
+   } catch (err) {
+     toast.error(err.response?.data?.message || "Checkout failed");
+   } finally {
+     setLoadingPlan(null);
+   }
+ };
+
   return (
     <div className="bg-light min-vh-100 pb-5">
-      {/* Premium Header */}
-      <div className="bg-navy pt-5 pb-5 mb-5 text-center position-relative">
+      <div
+        className="bg-navy pt-5 pb-5 mb-5 text-center position-relative"
+        style={{ backgroundColor: "#002147" }}>
         <div className="container py-2">
-          <h6 className="text-tan fw-bold text-uppercase ls-2 mb-3">
+          <h6
+            className="text-tan fw-bold text-uppercase ls-2 mb-3"
+            style={{ color: "#de9f57" }}>
             Flexible Plans
           </h6>
           <h1 className="display-4 fw-bold text-white mb-3">
             Choose Your Business Impact
           </h1>
-          <p className="text-white-50 mx-auto" style={{ maxWidth: "600px" }}>
-            Join the MyUma premium directory and connect with a dedicated
-            community. No hidden fees, just growth.
-          </p>
         </div>
-        {/* Decorative background curve */}
         <div
           className="position-absolute bottom-0 start-0 end-0 bg-light"
           style={{
@@ -90,25 +97,11 @@ const Pricing = () => {
         <div className="row g-4 justify-content-center">
           {plans.map((plan, idx) => (
             <div key={idx} className="col-12 col-md-6 col-lg-4">
-              <div
-                className={`card h-100 border-0 shadow-lg rounded-5 overflow-hidden ${plan.isFeatured ? "scale-up" : ""}`}>
-                {/* Visual Header Strip */}
+              <div className="card h-100 border-0 shadow-lg rounded-5 overflow-hidden">
                 <div
-                  style={{
-                    height: "10px",
-                    backgroundColor: plan.accent,
-                  }}></div>
-
-                <div className="card-body p-1 p-xl-5">
-                  <div className="d-flex justify-content-between align-items-center mb-4">
-                    <span
-                      className={`badge rounded-pill px-3 py-2 ${plan.isFeatured ? "bg-tan text-navy" : "bg-light text-navy border"}`}>
-                      {plan.label}
-                    </span>
-                  </div>
-
+                  style={{ height: "10px", backgroundColor: "#002147" }}></div>
+                <div className="card-body p-4 p-xl-5">
                   <h3 className="fw-bold text-navy mb-1">{plan.name}</h3>
-
                   <div className="d-flex align-items-end my-4">
                     <h2 className="display-5 fw-bold text-navy mb-0">
                       ${plan.price}
@@ -117,20 +110,13 @@ const Pricing = () => {
                       / lifetime
                     </span>
                   </div>
-
-                  <hr className="my-4 opacity-10" />
-
                   <ul className="list-unstyled mb-5">
-                    {plan.features.map((feature, i) => (
+                    {plan.features?.map((feature, i) => (
                       <li
                         key={i}
                         className="mb-3 d-flex align-items-start small text-muted">
                         <span className="me-3 mt-1">
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 20 20"
-                            fill="none">
+                          <svg width="18" height="18" viewBox="0 0 20 20">
                             <circle
                               cx="10"
                               cy="10"
@@ -142,8 +128,7 @@ const Pricing = () => {
                               d="M14 7L8.5 12.5L6 10"
                               stroke={accent}
                               strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+                              fill="none"
                             />
                           </svg>
                         </span>
@@ -151,35 +136,19 @@ const Pricing = () => {
                       </li>
                     ))}
                   </ul>
-
-                  <div className="mt-auto">
-                    <button
-                      onClick={() => navigate("/")}
-                      className={`uma-btn-navy w-100 ${
-                        plan.isFeatured
-                          ? "bg-navy text-white"
-                          : "bg-navy text-white"
-                      }`}>
-                      Get Started Now
-                    </button>
-                    <p className="text-center text-muted small mt-3 mb-0">
-                      Cancel or switch anytime
-                    </p>
-                  </div>
+                  <button
+                    onClick={() => handleGetStarted(plan)}
+                    className="btn w-100 text-white py-3 rounded-pill fw-bold"
+                    style={{ backgroundColor: "#002147" }}
+                    disabled={loadingPlan === plan.name}>
+                    {loadingPlan === plan.name
+                      ? "Connecting..."
+                      : "Get Started Now"}
+                  </button>
                 </div>
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Trust Footer */}
-        <div className="text-center mt-5 pt-4">
-          <p className="text-muted small">
-            Need a custom solution for your agency?
-            <a href="#" className="text-tan fw-bold text-decoration-none ms-1">
-              Contact Support
-            </a>
-          </p>
         </div>
       </div>
     </div>

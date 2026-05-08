@@ -163,16 +163,7 @@ export const getFooterAPI = async () => {
   }
 };
 
-// plans api
-export const getPlansAPI = async () => {
-  try {
-    const response = await API.get("/pricing/get-all"); // Adjust to your actual endpoint
-    return response.data; // This returns the whole object { success, plans, etc. }
-  } catch (error) {
-    console.error("Error in getPlansAPI:", error);
-    throw error;
-  }
-};
+
 //src/services/authService
 // Blog
 export const getBLogsApi = async () => {
@@ -191,8 +182,6 @@ export const getBLogsApi = async () => {
     throw error;
   }
 };
-
-
 
 // ==========================================
 // RATING / REVIEWS API METHODS
@@ -326,12 +315,41 @@ export const deleteBookingAPI = async (id) => {
   }
 };
 
+export const checkoutAPI = async (data) => {
+  try {
+    console.log("checkout request data:", data);
+
+    const response = await API.post("/payment/checkout", data);
+
+    console.log("checkout full response:", response);
+    console.log("checkout response data:", response.data);
+
+    return response.data;
+  } catch (error) {
+    console.log("checkout API error:", error);
+    throw error;
+  }
+};
+
+export const getPlansAPI = async () => {
+  try {
+    const response = await API.get("/pricing/get-all");
+
+    console.log("plans full response:", response);
+    console.log("plans response data:", response.data);
+
+    return response.data;
+  } catch (error) {
+    console.log("get plans API error:", error);
+    throw error;
+  }
+};
+
 // ==========================================
 // COMMENT API METHODS
 // ==========================================
 
 // Add Comment
-
 
 // Get All Comments (Optional: Use this if you want to display them below the blog)
 export const getAllCommentsAPI = async () => {
@@ -343,3 +361,4 @@ export const getAllCommentsAPI = async () => {
     throw error;
   }
 };
+

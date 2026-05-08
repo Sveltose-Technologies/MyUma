@@ -1,23 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser, registerUser, verifyOtp } from "./authSlice";
+import { loginUser, registerUser, verifyOtp, logout } from "./authSlice";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { setToken, setUser } from "../../utils/storage";
-// FIXED IMPORT PATH BELOW
 import {
   forgotPasswordAPI,
   resetPasswordAPI,
   verifyOtpAPI,
+  getImgURL, // Imported your image helper
 } from "../../services/authService";
 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { otpEmail } = useSelector((state) => state.auth);
+  const { otpEmail, isLoading } = useSelector((state) => state.auth);
 
+  // --- Session Management (24 Hours) ---
   const SESSION_DURATION = 24 * 60 * 60 * 1000;
-
   const startSession = () => {
     const expiryTime = Date.now() + SESSION_DURATION;
     localStorage.setItem("sessionExpiry", expiryTime.toString());
@@ -26,112 +25,136 @@ const Login = () => {
   useEffect(() => {
     const expiry = localStorage.getItem("sessionExpiry");
     if (expiry && Date.now() > parseInt(expiry)) {
-      localStorage.clear();
-      sessionStorage.clear();
+      dispatch(logout());
       toast.warn("Session expired. Please login again.");
     }
-  }, []);
+  }, [dispatch]);
 
-  const [mode, setMode] = useState("login");
+  // --- UI States ---
   const [isLoginTab, setIsLoginTab] = useState(true);
   const [showOtp, setShowOtp] = useState(false);
   const [otp, setOtp] = useState("");
-  const [showModal, setShowModal] = useState(false);
+  const [mode, setMode] = useState("auth");
+  const [showResetModal, setShowResetModal] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [imagePreview, setImagePreview] = useState(null);
 
-  const [changePasswordData, setChangePasswordData] = useState({
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-
-  const [role, setRole] = useState("guest");
   const [loginData, setLoginData] = useState({ email: "", password: "" });
+
   const [registerData, setRegisterData] = useState({
     fullName: "",
     email: "",
     password: "",
     address: "",
+    country: "",
+    city: "",
+    contactNo: "",
+    role: "user",
+    status: "deactive", // Defaulted to deactive
+    profileImage: null,
   });
 
-  const handleCloseModal = () => setShowModal(false);
+  const [changePasswordData, setChangePasswordData] = useState({
+    password: "",
+    confirmPassword: "",
+  });
 
-  const themeStyles = {
-    primaryBg: "#001f3f",
-    accentColor: "#f39c12",
-    cardRadius: "16px",
+  // Handle Image Selection
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setRegisterData({ ...registerData, profileImage: file });
+      setImagePreview(URL.createObjectURL(file)); // Create local preview
+    }
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     const res = await dispatch(loginUser(loginData));
     if (res.meta.requestStatus === "fulfilled") {
-      setUser(res?.payload?.auth);
-      setToken(res?.payload?.auth?.token);
       startSession();
       toast.success("Login Successful");
       navigate("/");
     } else {
-      toast.error(res.payload || "Login Failed ❌");
+      toast.error(res.payload || "Login Failed");
     }
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    const res = await dispatch(
-      registerUser({
-        ...registerData,
-        role: role === "owner" ? "admin" : "user",
-      }),
-    );
+    const formData = new FormData();
+    formData.append("fullName", registerData.fullName);
+    formData.append("email", registerData.email);
+    formData.append("password", registerData.password);
+    formData.append("address", registerData.address);
+    formData.append("country", registerData.country);
+    formData.append("city", registerData.city);
+    formData.append("contactNo", registerData.contactNo);
+    formData.append("role", registerData.role);
+    formData.append("status", registerData.status);
+    if (registerData.profileImage) {
+      formData.append("profileImage", registerData.profileImage);
+    }
+
+    const res = await dispatch(registerUser(formData));
     if (res.meta.requestStatus === "fulfilled") {
-      toast.success("OTP sent 📩");
+      toast.success("OTP sent to your email");
       setShowOtp(true);
+      setMode("auth");
     } else {
-      toast.error(res.payload || "Signup Failed ❌");
+      toast.error(res.payload || "Signup Failed");
     }
   };
 
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    if (mode === "otp-forgot") {
-      try {
-        const res = await verifyOtpAPI({ email: resetEmail, otp: otp });
-        if (res?.message === "OTP verified successfully") {
-          toast.success("OTP verified ✅");
-          setShowOtp(false);
-          setShowModal(true);
-          return;
-        }
-      } catch (err) {
-        toast.error("OTP Failed ❌");
-      }
+    const emailToVerify = mode === "forgot" ? resetEmail : otpEmail;
+
+    if (!emailToVerify) {
+      toast.error("Session expired. Please try again.");
+      setShowOtp(false);
       return;
     }
 
-    const res = await dispatch(verifyOtp({ email: otpEmail, otp: otp }));
-    if (res.meta.requestStatus === "fulfilled") {
-      startSession();
-      toast.success("Signup Successful ✅");
-      navigate("/pricing");
+    if (mode === "forgot") {
+      try {
+        const res = await verifyOtpAPI({ email: emailToVerify, otp });
+        if (res?.message === "OTP verified successfully") {
+          toast.success("OTP Verified");
+          setShowOtp(false);
+          setShowResetModal(true);
+        }
+      } catch (err) {
+        toast.error("Invalid OTP");
+      }
     } else {
-      toast.error(res.payload || "Invalid OTP ❌");
+      const res = await dispatch(verifyOtp({ email: emailToVerify, otp }));
+      if (res.meta.requestStatus === "fulfilled") {
+        startSession();
+        toast.success("Registration Successful!");
+        navigate("/pricing");
+      } else {
+        toast.error(res.payload || "Invalid OTP");
+      }
     }
   };
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
-    await forgotPasswordAPI({ email: resetEmail });
-    setShowOtp(true);
-    setMode("otp-forgot");
-    toast.info(`Reset OTP sent to ${resetEmail}`);
+    try {
+      await forgotPasswordAPI({ email: resetEmail });
+      setMode("forgot");
+      setShowOtp(true);
+      toast.info("Reset OTP sent to " + resetEmail);
+    } catch (err) {
+      toast.error("User not found");
+    }
   };
 
-  const handleChangePassword = async (e) => {
+  const handleResetPassword = async (e) => {
     e.preventDefault();
     if (changePasswordData.password !== changePasswordData.confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
+      return toast.error("Passwords do not match");
     }
     try {
       const res = await resetPasswordAPI({
@@ -140,100 +163,33 @@ const Login = () => {
         confirmPassword: changePasswordData.confirmPassword,
       });
       if (res?.message === "Password reset successful") {
-        toast.success("Password reset successful ✅");
-        handleCloseModal();
-        setShowOtp(false);
-        setMode("login");
+        toast.success("Password reset successfully");
+        setShowResetModal(false);
         setIsLoginTab(true);
-        navigate("/login");
       }
     } catch (err) {
-      toast.error("Reset failed ❌");
+      toast.error("Reset Failed");
     }
   };
 
   return (
-    <div className="bg-light min-vh-100 d-flex align-items-center">
+    <div className="bg-light min-vh-100 d-flex align-items-center py-5">
       <div className="container">
         <div className="row justify-content-center">
-          <div className="col-md-5">
+          <div className="col-md-8 col-lg-6">
             <div
               className="card border-0 shadow-lg p-4"
-              style={{ borderRadius: themeStyles.cardRadius }}>
+              style={{ borderRadius: "16px" }}>
               <h2
                 className="fw-bold text-center mb-4"
-                style={{ color: themeStyles.primaryBg }}>
+                style={{ color: "#001f3f" }}>
                 MyUma
               </h2>
-
-              {showModal && (
-                <div className="modal fade show d-block" tabIndex="-1">
-                  <div className="modal-dialog modal-dialog-centered">
-                    <div className="modal-content rounded-4">
-                      <div className="modal-header">
-                        <h5 className="modal-title">Change Password</h5>
-                        <button
-                          type="button"
-                          className="btn-close"
-                          onClick={handleCloseModal}></button>
-                      </div>
-                      <form onSubmit={handleChangePassword}>
-                        <div className="modal-body">
-                          <input
-                            type="email"
-                            className="form-control mb-3"
-                            value={resetEmail}
-                            readOnly
-                          />
-                          <input
-                            type="password"
-                            placeholder="New Password"
-                            name="password"
-                            className="form-control mb-3"
-                            onChange={(e) =>
-                              setChangePasswordData({
-                                ...changePasswordData,
-                                password: e.target.value,
-                              })
-                            }
-                          />
-                          <input
-                            type="password"
-                            placeholder="Confirm Password"
-                            name="confirmPassword"
-                            className="form-control mb-3"
-                            onChange={(e) =>
-                              setChangePasswordData({
-                                ...changePasswordData,
-                                confirmPassword: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-                        <div className="modal-footer">
-                          <button
-                            type="button"
-                            className="btn btn-secondary"
-                            onClick={handleCloseModal}>
-                            Cancel
-                          </button>
-                          <button
-                            type="submit"
-                            className="btn text-white"
-                            style={{ backgroundColor: themeStyles.primaryBg }}>
-                            Update Password
-                          </button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {showOtp ? (
                 <form onSubmit={handleVerifyOtp}>
                   <p className="text-center text-muted mb-4">
-                    Verification code sent to your email.
+                    Enter verification code
                   </p>
                   <input
                     type="text"
@@ -241,11 +197,13 @@ const Login = () => {
                     placeholder="Enter OTP"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
+                    required
                   />
                   <button
                     className="btn btn-lg w-100 text-white"
-                    style={{ backgroundColor: themeStyles.primaryBg }}>
-                    Verify Account
+                    style={{ backgroundColor: "#001f3f" }}
+                    disabled={isLoading}>
+                    {isLoading ? "Verifying..." : "Verify Account"}
                   </button>
                 </form>
               ) : (
@@ -282,7 +240,7 @@ const Login = () => {
                           }
                         />
                       </div>
-                      <div className="mb-2">
+                      <div className="mb-3">
                         <label className="small fw-bold text-muted mb-1">
                           Password
                         </label>
@@ -303,48 +261,86 @@ const Login = () => {
                         <button
                           type="button"
                           className="btn btn-link p-0 text-decoration-none small fw-bold"
-                          style={{
-                            color: themeStyles.accentColor,
-                            fontSize: "0.85rem",
-                          }}
+                          style={{ color: "#f39c12" }}
                           data-bs-toggle="modal"
-                          data-bs-target="#forgotPasswordModal">
+                          data-bs-target="#forgotModal">
                           Forgot Password?
                         </button>
                       </div>
                       <button
                         className="btn btn-lg w-100 text-white shadow-sm border-0"
-                        style={{ backgroundColor: themeStyles.primaryBg }}>
+                        style={{ backgroundColor: "#001f3f" }}>
                         Sign In
                       </button>
                     </form>
                   ) : (
                     <form onSubmit={handleRegister}>
                       <div className="mb-3">
-                        <label className="small fw-bold text-muted mb-2 d-block">
+                        <label className="small fw-bold text-muted mb-2 d-block text-center">
                           Register As
                         </label>
-                        <div className="d-flex gap-2">
+                        <div className="d-flex gap-2 justify-content-center mb-4">
                           <button
                             type="button"
-                            className={`btn btn-sm flex-fill border ${role === "owner" ? "btn-dark" : "btn-outline-secondary"}`}
-                            onClick={() => setRole("owner")}>
+                            className={`btn btn-sm px-4 border ${registerData.role === "owner" ? "btn-dark" : "btn-outline-secondary"}`}
+                            onClick={() =>
+                              setRegisterData({
+                                ...registerData,
+                                role: "owner",
+                              })
+                            }>
                             Owner
                           </button>
                           <button
                             type="button"
-                            className={`btn btn-sm flex-fill border ${role === "guest" ? "btn-dark" : "btn-outline-secondary"}`}
-                            onClick={() => setRole("guest")}>
+                            className={`btn btn-sm px-4 border ${registerData.role === "user" ? "btn-dark" : "btn-outline-secondary"}`}
+                            onClick={() =>
+                              setRegisterData({ ...registerData, role: "user" })
+                            }>
                             Guest
                           </button>
                         </div>
                       </div>
+
+                      {/* Profile Image Section using getImgURL */}
+                      <div className="text-center mb-4">
+                        <div className="position-relative d-inline-block">
+                          <img
+                            src={imagePreview ? imagePreview : getImgURL(null)}
+                            alt="Profile Preview"
+                            className="rounded-circle border shadow-sm"
+                            style={{
+                              width: "100px",
+                              height: "100px",
+                              objectFit: "cover",
+                            }}
+                          />
+                          <label
+                            htmlFor="profileUpload"
+                            className="btn btn-sm btn-dark position-absolute bottom-0 end-0 rounded-circle d-flex align-items-center justify-content-center"
+                            style={{ width: "32px", height: "32px" }}>
+                            <i className="bi bi-camera"></i>
+                            <input
+                              type="file"
+                              id="profileUpload"
+                              hidden
+                              accept="image/*"
+                              onChange={handleImageChange}
+                            />
+                          </label>
+                        </div>
+                        <p className="small text-muted mt-2">
+                          Upload Profile Picture
+                        </p>
+                      </div>
+
                       <div className="row g-2 mb-2">
-                        <div className="col-12">
+                        <div className="col-md-6">
                           <input
                             type="text"
-                            className="form-control"
+                            className="form-control shadow-sm"
                             placeholder="Full Name"
+                            required
                             onChange={(e) =>
                               setRegisterData({
                                 ...registerData,
@@ -353,11 +349,12 @@ const Login = () => {
                             }
                           />
                         </div>
-                        <div className="col-12">
+                        <div className="col-md-6">
                           <input
                             type="email"
-                            className="form-control"
-                            placeholder="Email"
+                            className="form-control shadow-sm"
+                            placeholder="Email Address"
+                            required
                             onChange={(e) =>
                               setRegisterData({
                                 ...registerData,
@@ -367,21 +364,75 @@ const Login = () => {
                           />
                         </div>
                       </div>
-                      <input
-                        type="password"
-                        className="form-control mb-2"
-                        placeholder="Password"
-                        onChange={(e) =>
-                          setRegisterData({
-                            ...registerData,
-                            password: e.target.value,
-                          })
-                        }
-                      />
+
+                      <div className="row g-2 mb-2">
+                        <div className="col-md-6">
+                          <input
+                            type="text"
+                            className="form-control shadow-sm"
+                            placeholder="Contact Number"
+                            required
+                            onChange={(e) =>
+                              setRegisterData({
+                                ...registerData,
+                                contactNo: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <input
+                            type="text"
+                            className="form-control shadow-sm"
+                            placeholder="City"
+                            required
+                            onChange={(e) =>
+                              setRegisterData({
+                                ...registerData,
+                                city: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      <div className="row g-2 mb-2">
+                        <div className="col-md-6">
+                          <input
+                            type="text"
+                            className="form-control shadow-sm"
+                            placeholder="Country"
+                            required
+                            onChange={(e) =>
+                              setRegisterData({
+                                ...registerData,
+                                country: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <input
+                            type="password"
+                            title="password"
+                            className="form-control shadow-sm"
+                            placeholder="Password"
+                            required
+                            onChange={(e) =>
+                              setRegisterData({
+                                ...registerData,
+                                password: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+
                       <textarea
-                        className="form-control mb-4"
-                        placeholder="Address"
+                        className="form-control shadow-sm mb-4"
+                        placeholder="Complete Address"
                         rows="2"
+                        required
                         onChange={(e) =>
                           setRegisterData({
                             ...registerData,
@@ -390,8 +441,8 @@ const Login = () => {
                         }
                       />
                       <button
-                        className="btn btn-lg w-100 text-white fw-bold"
-                        style={{ backgroundColor: themeStyles.primaryBg }}>
+                        className="btn btn-lg w-100 text-white fw-bold shadow-sm border-0"
+                        style={{ backgroundColor: "#001f3f" }}>
                         Create Account
                       </button>
                     </form>
@@ -403,50 +454,86 @@ const Login = () => {
         </div>
       </div>
 
-      <div
-        className="modal fade"
-        id="forgotPasswordModal"
-        tabIndex="-1"
-        aria-hidden="true">
+      {/* Forgot Password Modal */}
+      <div className="modal fade" id="forgotModal" tabIndex="-1">
         <div className="modal-dialog modal-dialog-centered">
           <div
             className="modal-content border-0 shadow"
-            style={{ borderRadius: themeStyles.cardRadius }}>
-            <div className="modal-header border-0 pb-0">
+            style={{ borderRadius: "16px" }}>
+            <div className="modal-body p-4 text-center">
+              <h4 className="fw-bold mb-3">Forgot Password</h4>
+              <input
+                type="email"
+                className="form-control mb-3"
+                placeholder="Enter Registered Email"
+                onChange={(e) => setResetEmail(e.target.value)}
+              />
               <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"></button>
-            </div>
-            <div className="modal-body p-4 pt-0 text-center">
-              <div className="display-6 mb-2">🔑</div>
-              <h4 className="fw-bold">Forgot Password?</h4>
-              <p className="text-muted small">
-                Enter your email for a reset OTP.
-              </p>
-              <form onSubmit={handleForgotPassword}>
-                <div className="mb-3">
-                  <input
-                    type="email"
-                    className="form-control py-2"
-                    placeholder="name@example.com"
-                    value={resetEmail}
-                    required
-                    onChange={(e) => setResetEmail(e.target.value)}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="btn w-100 text-white fw-bold py-2 shadow-sm"
-                  style={{ backgroundColor: themeStyles.primaryBg }}
-                  data-bs-dismiss="modal">
-                  Send
-                </button>
-              </form>
+                className="btn w-100 text-white"
+                style={{ backgroundColor: "#001f3f" }}
+                onClick={handleForgotPassword}
+                data-bs-dismiss="modal">
+                Send Reset Code
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Reset Modal */}
+      {showResetModal && (
+        <div
+          className="modal fade show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1060 }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 shadow">
+              <div className="modal-header border-0 pb-0">
+                <h5 className="modal-title fw-bold">Set New Password</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowResetModal(false)}></button>
+              </div>
+              <form onSubmit={handleResetPassword}>
+                <div className="modal-body">
+                  <input
+                    type="password"
+                    placeholder="New Password"
+                    className="form-control mb-3"
+                    required
+                    onChange={(e) =>
+                      setChangePasswordData({
+                        ...changePasswordData,
+                        password: e.target.value,
+                      })
+                    }
+                  />
+                  <input
+                    type="password"
+                    placeholder="Confirm Password"
+                    className="form-control mb-3"
+                    required
+                    onChange={(e) =>
+                      setChangePasswordData({
+                        ...changePasswordData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div className="modal-footer border-0">
+                  <button
+                    type="submit"
+                    className="btn text-white w-100"
+                    style={{ backgroundColor: "#001f3f" }}>
+                    Update Password
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
