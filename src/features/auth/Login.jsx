@@ -106,32 +106,21 @@ const Login = () => {
     }
   };
 
+  // Login.js mein handleVerifyOtp function:
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     const emailToVerify = mode === "forgot" ? resetEmail : otpEmail;
 
-    if (!emailToVerify) {
-      toast.error("Session expired. Please try again.");
-      setShowOtp(false);
-      return;
-    }
-
     if (mode === "forgot") {
-      try {
-        const res = await verifyOtpAPI({ email: emailToVerify, otp });
-        if (res?.message === "OTP verified successfully") {
-          toast.success("OTP Verified");
-          setShowOtp(false);
-          setShowResetModal(true);
-        }
-      } catch (err) {
-        toast.error("Invalid OTP");
-      }
+      // ... forgot logic
     } else {
       const res = await dispatch(verifyOtp({ email: emailToVerify, otp }));
+
       if (res.meta.requestStatus === "fulfilled") {
         startSession();
         toast.success("Registration Successful!");
+
+        // Navigate to pricing - data ab localStorage mein aa chuka hai
         navigate("/pricing");
       } else {
         toast.error(res.payload || "Invalid OTP");
@@ -536,6 +525,6 @@ const Login = () => {
       )}
     </div>
   );
-};
+};;
 
 export default Login;

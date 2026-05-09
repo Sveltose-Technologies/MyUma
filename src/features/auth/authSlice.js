@@ -5,22 +5,16 @@ import {
   verifyOtpAPI,
 } from "../../services/authService";
 
-// Helper function to safely parse JSON from localStorage
 const safeParse = (key) => {
   const item = localStorage.getItem(key);
   if (!item || item === "undefined") return null;
   try {
     const parsed = JSON.parse(item);
-    // Ensure we don't return the "OTP verified" message as a user object
-    if (parsed && parsed.message && !parsed.id && !parsed._id) return null;
-    return parsed;
+    return parsed && (parsed.id || parsed._id) ? parsed : null;
   } catch (e) {
     return null;
   }
 };
-
-const savedToken = localStorage.getItem("token");
-const savedUser = safeParse("user");
 
 export const loginUser = createAsyncThunk(
   "auth/login",
@@ -64,9 +58,9 @@ export const verifyOtp = createAsyncThunk(
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: savedUser,
-    token: savedToken && savedToken !== "undefined" ? savedToken : null,
-    isAuthenticated: !!(savedToken && savedToken !== "undefined" && savedUser),
+    user: safeParse("user"),
+    token: localStorage.getItem("token") || null,
+    isAuthenticated: !!(localStorage.getItem("token") && safeParse("user")),
     isLoading: false,
     otpEmail: sessionStorage.getItem("otpEmail") || null,
   },
@@ -78,7 +72,7 @@ const authSlice = createSlice({
       localStorage.clear();
       sessionStorage.clear();
     },
-    // Updates status after Stripe Webhook confirms payment
+    // YE WAPAS ADD KIYA HAI ERROR FIX KARNE KE LIYE
     setPaymentSuccess: (state) => {
       if (state.user) {
         state.user.status = "active";
@@ -88,21 +82,19 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(loginUser.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isAuthenticated = true;
-        const userData =
-          action.payload.user || action.payload.auth || action.payload.data;
-        const tokenData = action.payload.token || (userData && userData.token);
-
-        state.user = userData;
-        state.token = tokenData;
-
-        if (tokenData) localStorage.setItem("token", tokenData);
-        if (userData) localStorage.setItem("user", JSON.stringify(userData));
-      })
+      // REGISTER: Signup ke waqt hi data save karein (important for Pricing flow)
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
+        const userData = action.payload.auth;
+        const tokenData = action.payload.auth?.token;
+
+        if (userData && userData.id) {
+          state.user = userData;
+          state.token = tokenData;
+          localStorage.setItem("user", JSON.stringify(userData));
+          localStorage.setItem("token", tokenData);
+        }
+
         const email =
           action.meta.arg instanceof FormData
             ? action.meta.arg.get("email")
@@ -110,31 +102,30 @@ const authSlice = createSlice({
         state.otpEmail = email;
         sessionStorage.setItem("otpEmail", email);
       })
+
+      // VERIFY OTP: Yahan authenticate true karein
       .addCase(verifyOtp.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.isAuthenticated = true;
 
-        // Check if payload contains the actual user profile
-        const userData =
-          action.payload.user ||
-          action.payload.data ||
-          (action.payload.id ? action.payload : null);
-        const tokenData = action.payload.token || (userData && userData.token);
+        const userData = action.payload.auth || state.user;
+        if (userData) {
+          state.user = userData;
+          localStorage.setItem("user", JSON.stringify(userData));
+        }
+        sessionStorage.removeItem("otpEmail");
+      })
 
-        // ONLY update state and localStorage if we received a valid user ID or Email
-        if (userData && (userData.id || userData._id || userData.email)) {
-          state.isAuthenticated = true;
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const userData = action.payload.auth || action.payload.user;
+        const tokenData = userData?.token || action.payload.token;
+        if (userData) {
           state.user = userData;
           state.token = tokenData;
-
-          if (tokenData) localStorage.setItem("token", tokenData);
+          state.isAuthenticated = true;
+          localStorage.setItem("token", tokenData);
           localStorage.setItem("user", JSON.stringify(userData));
-          sessionStorage.removeItem("otpEmail");
-        } else {
-          // If response is just {"message": "..."}, we don't save it as a user.
-          // The component will handle the redirection.
-          console.warn(
-            "OTP Verified: No user data in response. Redirecting to login might be needed.",
-          );
         }
       })
       .addMatcher(
@@ -152,5 +143,6 @@ const authSlice = createSlice({
   },
 });
 
+// Yahan setPaymentSuccess ko export karna zaroori hai
 export const { logout, setPaymentSuccess } = authSlice.actions;
 export default authSlice.reducer;

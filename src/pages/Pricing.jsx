@@ -24,50 +24,39 @@ const Pricing = () => {
   }, []);
 
  const handleGetStarted = async (plan) => {
-   const rawUser = localStorage.getItem("user");
-   const token = localStorage.getItem("token");
+   // Direct localStorage se uthayein taaki koi confusion na ho
+   const savedUser = JSON.parse(localStorage.getItem("user"));
+   const savedToken = localStorage.getItem("token");
 
-   if (!rawUser || !token) {
-     toast.error("Please login to proceed to payment.");
+   console.log("User in Pricing:", savedUser); // Debugging ke liye
+
+   if (!savedUser || !savedToken) {
+     toast.error("Please login to proceed.");
      navigate("/login");
      return;
    }
 
-   const parsedUser = JSON.parse(rawUser);
-
-   // CRITICAL FIX: Check if parsedUser actually has the ID and Email
-   // and not just the "OTP verified" message
-   const userId = parsedUser.id || parsedUser._id;
-   const email = parsedUser.email;
-
-   if (!userId || !email) {
-     console.error("User Object is invalid:", parsedUser);
-     toast.error("User session invalid. Please log in again.");
-     navigate("/login");
-     return;
-   }
+   // Aapke JSON mein "id" hai, toh wahi use karein
+   const userId = savedUser.id || savedUser._id;
+   const email = savedUser.email;
 
    try {
      setLoadingPlan(plan.name);
-     const payload = {
+     const response = await checkoutAPI({
        amount: Number(plan.price),
        userId: userId,
        email: email,
-     };
+     });
 
-     const response = await checkoutAPI(payload);
      if (response?.url) {
-       window.location.href = response.url;
-     } else {
-       toast.error("Payment Gateway Error");
+       window.location.href = response.url; // Stripe open hoga
      }
    } catch (err) {
-     toast.error(err.response?.data?.message || "Checkout failed");
+     toast.error("Checkout failed");
    } finally {
      setLoadingPlan(null);
    }
  };
-
   return (
     <div className="bg-light min-vh-100 pb-5">
       <div
@@ -153,6 +142,6 @@ const Pricing = () => {
       </div>
     </div>
   );
-};
+};;
 
 export default Pricing;
