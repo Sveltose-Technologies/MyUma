@@ -15,7 +15,7 @@ const Sidebar = () => {
     { name: "My Listing", icon: "bi-file-earmark-text", path: "/listing" },
     { name: "Messages", icon: "bi-chat-left-text", path: "/messages" },
     { name: "Reviews", icon: "bi-star", path: "/reviews" },
-    { name: "Bookmarks", icon: "bi-bookmark", path: "/#" },
+    { name: "Bookmarks", icon: "bi-bookmark", path: "/bookmarks" },
     { name: "My Profile", icon: "bi-person", path: "/profile" },
   ];
 

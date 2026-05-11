@@ -85,7 +85,7 @@ const AppRoutes = () => {
               <Route path="/profile" element={<ProfileUpdate />} />
               <Route path="/reviews" element={<Reviews />} />
               <Route path="/messages" element={<Messages />} />
-              <Route path="/bookings" element={<MyBookings />} />
+              <Route path="/bookmarks" element={<MyBookings />} />
             </Route>
           </Route>
         </Routes>

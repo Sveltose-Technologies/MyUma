@@ -729,7 +729,7 @@ const BrowseDetails = () => {
       const response = await createBookingAPI(payload);
       if (response.status || response.success) {
         toast.success("Success! Visit scheduled.");
-        navigate("/my-bookings");
+        navigate("/bookmarks");
       }
     } catch (error) {
       toast.error("Failed to schedule visit.");

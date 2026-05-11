@@ -17,8 +17,8 @@ export const loginAPI = async (credentials) => {
 
 export const registerAPI = async (userData) => {
   const response = await API.post("/auth/signup", userData);
-  console.log("register",response.data);
-  
+  console.log("register", response.data);
+
   return response.data;
 };
 
@@ -372,6 +372,18 @@ export const getCategoriesAPI = async () => {
     return response.data; // This returns the whole object { success, categories, etc. }
   } catch (error) {
     console.error("Error in getCategoriesAPI:", error);
+    throw error;
+  }
+};
+
+// --- Logo APIs ---
+export const getLogoAPI = async () => {
+  try {
+    const response = await API.get("/logo/get-all");
+    // Based on your snippet, the data is in response.data
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching logo:", error);
     throw error;
   }
 };
