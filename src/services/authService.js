@@ -387,3 +387,13 @@ export const getLogoAPI = async () => {
     throw error;
   }
 };
+
+export const getAllUsersAPI = async () => {
+  const response = await API.get("/auth/get-all-users");
+  return response.data; // This returns { message, count, users: [...] }
+};
+
+export const getAllOwnersAPI = async () => {
+  const response = await API.get("/auth/get-all-owner");
+  return response.data; // This returns { message, count, owners: [...] }
+};

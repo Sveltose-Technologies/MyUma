@@ -1,148 +1,246 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { socket } from "../services/socket";
+import {
+  getAllOwnersAPI,
+  getAllUsersAPI,
+  getImgURL,
+} from "../services/authService";
 
 const Messages = () => {
-  const contacts = [
-    {
-      id: 1,
-      name: "John Doe",
-      lastMsg: "Is it available?",
-      time: "2m ago",
-      active: true,
-      unread: 2,
-    },
-    {
-      id: 2,
-      name: "Sarah Smith",
-      lastMsg: "Sent the docs.",
-      time: "1h ago",
-      active: false,
-      unread: 0,
-    },
-  ];
+  const [contacts, setContacts] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [text, setText] = useState("");
+  const scrollRef = useRef(null);
+
+  // Get current user from localStorage (Login code puts it there)
+  const currentUser = JSON.parse(localStorage.getItem("user"));
+
+  useEffect(() => {
+    socket.connect();
+
+    if (currentUser?._id) {
+      // Register with role for the backend logic
+      socket.emit("register", {
+        userId: currentUser._id,
+        role: currentUser.role,
+      });
+    }
+
+    // Listen for real-time messages
+    socket.on("receiveMessage", (data) => {
+      // Add message to screen if it's from the person we are chatting with
+      setMessages((prev) => [
+        ...prev,
+        {
+          senderId: data.senderId,
+          message: data.message,
+          time: new Date(),
+        },
+      ]);
+    });
+
+    // Fetch the list of people to talk to
+    fetchContactList();
+
+    return () => {
+      socket.off("receiveMessage");
+      socket.disconnect();
+    };
+  }, []);
+
+  // Always scroll to latest message
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const fetchContactList = async () => {
+    try {
+      let res;
+      if (currentUser.role === "owner") {
+        // If I am an Owner, show me all Users (Guests)
+        res = await getAllUsersAPI();
+        setContacts(res.users || res.data || []);
+      } else {
+        // If I am a User/Guest, show me all Owners
+        res = await getAllOwnersAPI();
+        setContacts(res.owners || res.data || []);
+      }
+    } catch (err) {
+      console.error("Error fetching contacts", err);
+    }
+  };
+
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!text.trim() || !selectedUser) return;
+
+    const payload = {
+      senderId: currentUser._id,
+      receiverId: selectedUser._id,
+      message: text,
+    };
+
+    // Send via Socket
+    socket.emit("sendMessage", payload);
+
+    // Show on my screen
+    setMessages((prev) => [...prev, { ...payload, time: new Date() }]);
+    setText("");
+  };
 
   return (
     <div className="container-fluid p-0">
-   
       <div
         className="card border-0 shadow-sm d-flex flex-row overflow-hidden"
         style={{ height: "85vh", borderRadius: "0" }}>
-        {/* --- LEFT SIDEBAR --- */}
+        {/* --- SIDEBAR: Target Audience --- */}
         <div className="col-lg-4 col-md-5 border-end d-flex flex-column bg-white">
-          <div className="p-3 border-bottom bg-white sticky-top">
-            <h5 className="fw-800 text-navy mb-3 ls-1">CHATS</h5>
-            <div className="input-group bg-light rounded-pill px-3 border border-gold">
-              <span className="input-group-text bg-transparent border-0 text-muted">
-                <i className="bi bi-search"></i>
-              </span>
-              <input
-                type="text"
-                className="form-control bg-transparent border-0 shadow-none py-2"
-                placeholder="Search..."
-              />
-            </div>
+          <div className="p-3 border-bottom bg-navy text-white">
+            <h5 className="mb-0 fw-bold">
+              {currentUser.role === "owner" ? "My Users" : "Available Owners"}
+            </h5>
+            <small className="opacity-75">
+              Logged in as {currentUser.fullName}
+            </small>
           </div>
 
           <div className="overflow-auto flex-grow-1">
-            {contacts.map((contact) => (
-              <div
-                key={contact.id}
-                className={`p-3 d-flex align-items-center border-bottom transition-hover cursor-pointer ${contact.active ? "bg-light border-gold-top" : ""}`}>
-                <div className="uma-cart me-3">
-                  <div
-                    className="rounded-circle bg-navy text-white d-flex align-items-center justify-content-center fw-bold"
-                    style={{ width: "45px", height: "45px" }}>
-                    {contact.name.charAt(0)}
-                  </div>
-                  {contact.unread > 0 && (
-                    <span className="uma-badge-tan">{contact.unread}</span>
-                  )}
-                </div>
-                <div className="flex-grow-1 overflow-hidden">
-                  <div className="d-flex justify-content-between">
-                    <h6 className="mb-0 fw-800 text-navy text-truncate">
-                      {contact.name}
-                    </h6>
-                    <small className="text-muted small">{contact.time}</small>
-                  </div>
-                  <p className="small text-muted mb-0 text-truncate">
-                    {contact.lastMsg}
-                  </p>
-                </div>
+            {contacts.length === 0 ? (
+              <div className="p-5 text-center text-muted">
+                <i className="bi bi-people fs-1 d-block mb-2"></i>
+                No {currentUser.role === "owner" ? "users" : "owners"} found.
               </div>
-            ))}
+            ) : (
+              contacts.map((contact) => (
+                <div
+                  key={contact._id}
+                  onClick={() => {
+                    setSelectedUser(contact);
+                    setMessages([]); // Resetting for fresh session as no History API exists
+                  }}
+                  className={`p-3 d-flex align-items-center border-bottom cursor-pointer transition-all ${selectedUser?._id === contact._id ? "bg-light border-start border-4 border-navy" : ""}`}>
+                  <img
+                    src={getImgURL(contact.profileImage)}
+                    alt="profile"
+                    className="rounded-circle me-3 border"
+                    style={{
+                      width: "45px",
+                      height: "45px",
+                      objectFit: "cover",
+                    }}
+                  />
+                  <div className="flex-grow-1">
+                    <h6 className="mb-0 fw-bold text-navy">
+                      {contact.fullName}
+                    </h6>
+                    <small className="text-muted">
+                      {contact.city}, {contact.country}
+                    </small>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
-        {/* --- RIGHT SIDE: CHAT WINDOW --- */}
+        {/* --- CHAT AREA --- */}
         <div className="col-lg-8 col-md-7 d-flex flex-column bg-light">
-          {/* Header */}
-          <div className="p-3 bg-navy text-white d-flex align-items-center justify-content-between shadow-sm">
-            <div className="d-flex align-items-center">
-              <div
-                className="rounded-circle bg-tan text-navy fw-800 d-flex align-items-center justify-content-center me-3"
-                style={{ width: "40px", height: "40px" }}>
-                JD
-              </div>
-              <h6 className="mb-0 fw-800 ls-1">John Doe</h6>
-            </div>
-         
-          </div>
-
-          {/* Chat Body - This section scrolls */}
-          <div className="flex-grow-1 overflow-auto p-4 d-flex flex-column gap-3 bg-white">
-            <div className="d-flex flex-column align-items-start">
-              <div
-                className="p-3 rounded-4 shadow-sm border border-gold"
-                style={{ maxWidth: "75%", backgroundColor: "#f8f9fa" }}>
-                <p className="mb-0 text-navy">
-                  Hello! Please send over the location details.
-                </p>
-              </div>
-              <small className="text-muted mt-1 ms-2">10:35 AM</small>
-            </div>
-
-            <div className="d-flex flex-column align-items-end">
-              <div
-                className="bg-navy text-white p-3 rounded-4 shadow-sm"
-                style={{ maxWidth: "75%" }}>
-                <p className="mb-0">Sure thing! Sending it now.</p>
-              </div>
-              <small className="text-muted mt-1 me-2">10:36 AM</small>
-            </div>
-          </div>
-
-          {/* FOOTER: This is what was missing */}
-          <div className="p-3 bg-white border-top shadow-lg">
-            <form className="d-flex align-items-center gap-2">
-              <button
-                type="button"
-                className="btn btn-light rounded-circle border">
-                <i className="bi bi-paperclip text-navy"></i>
-              </button>
-
-              <div className="flex-grow-1">
-                <input
-                  type="text"
-                  className="form-control border-0 bg-light py-2 px-3 rounded-pill shadow-none border border-gold"
-                  placeholder="Type a message..."
-                  required
+          {selectedUser ? (
+            <>
+              {/* Header */}
+              <div className="p-3 bg-white border-bottom d-flex align-items-center shadow-sm">
+                <img
+                  src={getImgURL(selectedUser.profileImage)}
+                  alt="active-chat"
+                  className="rounded-circle me-3"
+                  style={{ width: "40px", height: "40px", objectFit: "cover" }}
                 />
+                <div>
+                  <h6 className="mb-0 fw-bold">{selectedUser.fullName}</h6>
+                  <small className="text-success text-capitalize">
+                    {selectedUser.role} • Online
+                  </small>
+                </div>
               </div>
 
-              {/* Sent Icon inside your Navy Button Class */}
-              <button
-                type="submit"
-                className="uma-btn-navy d-flex align-items-center justify-content-center"
+              {/* Messages List */}
+              <div
+                className="flex-grow-1 overflow-auto p-4 d-flex flex-column gap-3 bg-white"
                 style={{
-                  width: "45px",
-                  height: "45px",
-                  borderRadius: "50%",
-                  padding: "0",
+                  backgroundImage:
+                    "url('https://www.transparenttextures.com/patterns/cubes.png')",
                 }}>
-                <i className="bi bi-send-fill fs-5"></i>
-              </button>
-            </form>
-          </div>
+                {messages.map((msg, index) => {
+                  const isMe = msg.senderId === currentUser._id;
+                  return (
+                    <div
+                      key={index}
+                      className={`d-flex flex-column ${isMe ? "align-items-end" : "align-items-start"}`}>
+                      <div
+                        className={`p-3 rounded-4 shadow-sm ${isMe ? "bg-navy text-white" : "bg-light border border-gold"}`}
+                        style={{
+                          maxWidth: "70%",
+                          borderRadius: isMe
+                            ? "20px 20px 0 20px"
+                            : "20px 20px 20px 0",
+                        }}>
+                        <p className="mb-0">{msg.message}</p>
+                      </div>
+                      <small
+                        className="text-muted mt-1 mx-2"
+                        style={{ fontSize: "10px" }}>
+                        {new Date(msg.time).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </small>
+                    </div>
+                  );
+                })}
+                <div ref={scrollRef} />
+              </div>
+
+              {/* Input Area */}
+              <div className="p-3 bg-white border-top shadow-lg">
+                <form
+                  className="d-flex align-items-center gap-2"
+                  onSubmit={handleSendMessage}>
+                  <input
+                    type="text"
+                    className="form-control border-0 bg-light py-2 px-3 rounded-pill shadow-none border border-gold"
+                    placeholder={`Message ${selectedUser.fullName}...`}
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="btn btn-navy d-flex align-items-center justify-content-center p-0"
+                    style={{
+                      width: "45px",
+                      height: "45px",
+                      borderRadius: "50%",
+                      backgroundColor: "#001f3f",
+                      color: "white",
+                    }}>
+                    <i className="bi bi-send-fill"></i>
+                  </button>
+                </form>
+              </div>
+            </>
+          ) : (
+            <div className="h-100 d-flex flex-column align-items-center justify-content-center text-muted text-center p-5">
+              <div className="bg-white p-5 rounded-circle shadow-sm mb-4">
+                <i className="bi bi-chat-right-dots-fill fs-1 text-navy"></i>
+              </div>
+              <h4 className="fw-bold text-navy">Your Messages</h4>
+              <p>
+                Select a {currentUser.role === "owner" ? "Guest" : "Owner"} from
+                the list to start a conversation.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -150,161 +248,3 @@ const Messages = () => {
 };
 
 export default Messages;
-
-
-//use Socket io 
-
-
-// import React, { useState, useEffect, useRef } from "react";
-// import { socket } from "../services/socket";
-// import { getChatListAPI, getChatHistoryAPI } from "../services/authService";
-
-// const Messages = () => {
-//   const [contacts, setContacts] = useState([]);
-//   const [messages, setMessages] = useState([]);
-//   const [selectedUser, setSelectedUser] = useState(null);
-//   const [text, setText] = useState("");
-//   const scrollRef = useRef(null);
-
-//   // Get current logged-in user ID (assuming it's in localStorage)
-//   const currentUser = JSON.parse(localStorage.getItem("user"));
-
-//   useEffect(() => {
-//     // 1. Connect Socket
-//     socket.connect();
-    
-//     // Join a room with my own ID to receive private messages
-//     if (currentUser?._id) {
-//       socket.emit("join", currentUser._id);
-//     }
-
-//     // 2. Fetch Chat List (Sidebar)
-//     loadChatList();
-
-//     // 3. Listen for incoming messages
-//     socket.on("receive_message", (newMessage) => {
-//       // If the message is from the user I'm currently chatting with, add to screen
-//       setMessages((prev) => [...prev, newMessage]);
-//       loadChatList(); // Refresh sidebar to show latest msg
-//     });
-
-//     return () => {
-//       socket.off("receive_message");
-//       socket.disconnect();
-//     };
-//   }, []);
-
-//   // Scroll to bottom when messages change
-//   useEffect(() => {
-//     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-//   }, [messages]);
-
-//   const loadChatList = async () => {
-//     const data = await getChatListAPI();
-//     if (data.success) setContacts(data.conversations);
-//   };
-
-//   const selectChat = async (user) => {
-//     setSelectedUser(user);
-//     const data = await getChatHistoryAPI(user._id);
-//     if (data.success) setMessages(data.history);
-//   };
-
-//   const handleSendMessage = (e) => {
-//     e.preventDefault();
-//     if (!text.trim() || !selectedUser) return;
-
-//     const messageData = {
-//       senderId: currentUser._id,
-//       receiverId: selectedUser._id,
-//       message: text,
-//       time: new Date().toISOString(),
-//     };
-
-//     // Emit via Socket (Real-time)
-//     socket.emit("send_message", messageData);
-
-//     // Update UI instantly
-//     setMessages((prev) => [...prev, messageData]);
-//     setText("");
-//   };
-
-//   return (
-//     <div className="container-fluid p-0">
-//       <div className="card border-0 shadow-sm d-flex flex-row overflow-hidden" style={{ height: "85vh" }}>
-        
-//         {/* --- SIDEBAR: CONTACTS --- */}
-//         <div className="col-lg-4 col-md-5 border-end d-flex flex-column bg-white">
-//           <div className="p-3 border-bottom">
-//             <h5 className="fw-800 text-navy mb-3">CHATS</h5>
-//             <input type="text" className="form-control rounded-pill" placeholder="Search..." />
-//           </div>
-//           <div className="overflow-auto flex-grow-1">
-//             {contacts.map((contact) => (
-//               <div
-//                 key={contact._id}
-//                 onClick={() => selectChat(contact)}
-//                 className={`p-3 d-flex align-items-center border-bottom cursor-pointer ${selectedUser?._id === contact._id ? "bg-light" : ""}`}
-//               >
-//                 <div className="rounded-circle bg-navy text-white d-flex align-items-center justify-content-center me-3" style={{ width: "45px", height: "45px" }}>
-//                   {contact.name.charAt(0)}
-//                 </div>
-//                 <div className="flex-grow-1">
-//                   <h6 className="mb-0 fw-bold">{contact.name}</h6>
-//                   <p className="small text-muted mb-0">{contact.lastMsg}</p>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-
-//         {/* --- CHAT WINDOW --- */}
-//         <div className="col-lg-8 col-md-7 d-flex flex-column bg-light">
-//           {selectedUser ? (
-//             <>
-//               <div className="p-3 bg-navy text-white d-flex align-items-center">
-//                 <div className="rounded-circle bg-tan text-navy fw-bold d-flex align-items-center justify-content-center me-3" style={{ width: "40px", height: "40px" }}>
-//                   {selectedUser.name.charAt(0)}
-//                 </div>
-//                 <h6 className="mb-0">{selectedUser.name}</h6>
-//               </div>
-
-//               <div className="flex-grow-1 overflow-auto p-4 d-flex flex-column gap-3 bg-white">
-//                 {messages.map((msg, index) => (
-//                   <div key={index} className={`d-flex flex-column ${msg.senderId === currentUser._id ? "align-items-end" : "align-items-start"}`}>
-//                     <div className={`p-3 rounded-4 ${msg.senderId === currentUser._id ? "bg-navy text-white" : "bg-light border"}`} style={{ maxWidth: "75%" }}>
-//                       <p className="mb-0">{msg.message}</p>
-//                     </div>
-//                     <small className="text-muted mt-1">{new Date(msg.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
-//                   </div>
-//                 ))}
-//                 <div ref={scrollRef} />
-//               </div>
-
-//               <div className="p-3 bg-white border-top">
-//                 <form className="d-flex gap-2" onSubmit={handleSendMessage}>
-//                   <input
-//                     type="text"
-//                     value={text}
-//                     onChange={(e) => setText(e.target.value)}
-//                     className="form-control rounded-pill"
-//                     placeholder="Type a message..."
-//                   />
-//                   <button type="submit" className="btn btn-primary rounded-circle">
-//                     <i className="bi bi-send-fill"></i>
-//                   </button>
-//                 </form>
-//               </div>
-//             </>
-//           ) : (
-//             <div className="d-flex align-items-center justify-content-center h-100">
-//               <p className="text-muted">Select a contact to start chatting</p>
-//             </div>
-//           )}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Messages;
