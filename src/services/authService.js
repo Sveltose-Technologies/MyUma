@@ -397,3 +397,18 @@ export const getAllOwnersAPI = async () => {
   const response = await API.get("/auth/get-all-owner");
   return response.data; // This returns { message, count, owners: [...] }
 };
+// Add to services/authService.js
+export const addFavoriteAPI = async (data) => {
+  const response = await API.post("/favorite/add", data);
+  return response.data;
+};
+
+export const deleteFavoriteAPI = async (id) => {
+  const response = await API.delete(`/favorite/delete/${id}`);
+  return response.data;
+};
+
+export const getFavoritesByUserAPI = async (userId) => {
+  const response = await API.get(`/favorite/get-by-user/${userId}`);
+  return response.data;
+};
