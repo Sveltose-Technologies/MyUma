@@ -547,7 +547,7 @@ export default function Navbar() {
                         <button
                           className="dropdown-item py-2 border-bottom"
                           onClick={() => handleNavigation("/bookmarks")}>
-                          <i className="bi bi-bookmark me-2"></i> Bookmarks
+                          Bookmarks
                         </button>
                       </li>
                       <li>

@@ -953,14 +953,268 @@
 // };
 
 // export default BrowseListings;
+
+// import React, { useState, useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
+// import { Search, MapPin, Heart, Navigation } from "lucide-react";
+// import { getAllListingsApi, getImgURL } from "../services/authService";
+
+// const BrowseListings = () => {
+//   const navigate = useNavigate();
+//   const [listings, setListings] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [searchQuery, setSearchQuery] = useState("");
+//   const [filter, setFilter] = useState({
+//     category: "All",
+//     minPrice: "",
+//     maxPrice: "",
+//   });
+//   const [appliedSearch, setAppliedSearch] = useState("");
+//   const [appliedFilter, setAppliedFilter] = useState(filter);
+
+//   const isLoggedIn = !!localStorage.getItem("token");
+
+//   const slugify = (text) =>
+//     text
+//       .toLowerCase()
+//       .trim()
+//       .replace(/[^\w\s-]/g, "")
+//       .replace(/[\s_-]+/g, "-")
+//       .replace(/^-+|-+$/g, "");
+
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       try {
+//         const res = await getAllListingsApi();
+//         setListings(res?.listings || []);
+//       } catch (err) {
+//         console.error("Error fetching listings:", err);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+//     fetchData();
+//   }, []);
+
+//   const handleApplyFilters = () => {
+//     setAppliedSearch(searchQuery.trim());
+//     setAppliedFilter(filter);
+//   };
+
+//   const handleBookmark = (e, item) => {
+//     e.stopPropagation();
+//     if (!isLoggedIn) {
+//       alert("Please login to bookmark this listing.");
+//     } else {
+//       alert(`${item.title} added to your favorites!`);
+//     }
+//   };
+
+//   const filteredListings = listings.filter((item) => {
+//     const titleMatch = item.title
+//       .toLowerCase()
+//       .includes(appliedSearch.toLowerCase());
+//     const categoryMatch =
+//       appliedFilter.category === "All" ||
+//       item.categoryId?.name === appliedFilter.category;
+//     const price = item.items?.[0]?.price || 0;
+//     const minMatch =
+//       appliedFilter.minPrice === "" || price >= Number(appliedFilter.minPrice);
+//     const maxMatch =
+//       appliedFilter.maxPrice === "" || price <= Number(appliedFilter.maxPrice);
+//     return titleMatch && categoryMatch && minMatch && maxMatch;
+//   });
+
+//   if (loading)
+//     return (
+//       <div className="min-vh-100 d-flex align-items-center justify-content-center text-navy fw-800 ls-1">
+//         LOADING LISTINGS...
+//       </div>
+//     );
+
+//   return (
+//     <div className="min-vh-100 bg-light py-5">
+//       <div className="container">
+//         {/* Filters Box */}
+//         <div className="card border-0 shadow-sm p-4 mb-5 rounded-4">
+//           <div className="row g-3 align-items-end">
+//             <div className="col-12 col-md-5">
+//               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
+//                 Search
+//               </label>
+//               <div className="input-group bg-light rounded shadow-none border">
+//                 <span className="input-group-text bg-transparent border-0">
+//                   <Search size={18} />
+//                 </span>
+//                 <input
+//                   type="text"
+//                   className="form-control border-0 bg-transparent shadow-none"
+//                   placeholder="Search listings..."
+//                   value={searchQuery}
+//                   onChange={(e) => setSearchQuery(e.target.value)}
+//                 />
+//               </div>
+//             </div>
+//             <div className="col-6 col-md-3">
+//               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
+//                 Category
+//               </label>
+//               <select
+//                 className="form-select border shadow-none"
+//                 value={filter.category}
+//                 onChange={(e) =>
+//                   setFilter({ ...filter, category: e.target.value })
+//                 }>
+//                 <option>All</option>
+//                 {[...new Set(listings.map((l) => l.categoryId?.name))]
+//                   .filter(Boolean)
+//                   .map((cat) => (
+//                     <option key={cat} value={cat}>
+//                       {cat}
+//                     </option>
+//                   ))}
+//               </select>
+//             </div>
+//             <div className="col-3 col-md-2">
+//               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
+//                 Min
+//               </label>
+//               <input
+//                 type="text"
+//                 className="form-control border shadow-none"
+//                 value={filter.minPrice}
+//                 onChange={(e) =>
+//                   setFilter({ ...filter, minPrice: e.target.value })
+//                 }
+//               />
+//             </div>
+//             <div className="col-3 col-md-2">
+//               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
+//                 Max
+//               </label>
+//               <input
+//                 type="text"
+//                 className="form-control border shadow-none"
+//                 value={filter.maxPrice}
+//                 onChange={(e) =>
+//                   setFilter({ ...filter, maxPrice: e.target.value })
+//                 }
+//               />
+//             </div>
+//             <div className="col-12 text-end pt-2">
+//               <button
+//                 className="uma-btn-navy uma-btn px-5"
+//                 onClick={handleApplyFilters}>
+//                 APPLY FILTERS
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Listings Grid */}
+//         <div className="row g-4">
+//           {filteredListings.map((item) => (
+//             <div key={item._id} className="col-12 col-md-6 col-lg-4">
+//               <div
+//                 className="card h-100 border-0 shadow-sm overflow-hidden listing-card rounded-4 bg-white"
+//                 style={{ cursor: "pointer" }}
+//                 onClick={() => navigate(`/browse/${slugify(item.title)}`)}>
+//                 <div className="ratio ratio-4x3 position-relative">
+//                   <img
+//                     src={getImgURL(item.images?.[0])}
+//                     alt={item.title}
+//                     className="object-fit-cover w-100 h-100"
+//                   />
+//                   <div
+//                     className="position-absolute top-0 start-0 w-100 d-flex justify-content-between align-items-start p-3"
+//                     style={{ zIndex: 10 }}>
+//                     <span className="badge bg-white text-navy shadow-sm fw-800 px-3 py-2 rounded-3">
+//                       ₹{item.items?.[0]?.price?.toLocaleString() || 0}
+//                     </span>
+//                     <button
+//                       className="btn btn-white rounded-circle shadow-sm p-0 d-flex align-items-center justify-content-center"
+//                       style={{
+//                         backgroundColor: "white",
+//                         width: "38px",
+//                         height: "38px",
+//                         border: "none",
+//                       }}
+//                       onClick={(e) => handleBookmark(e, item)}>
+//                       <Heart size={20} color="#ff4d4d" fill="white" />
+//                     </button>
+//                   </div>
+//                 </div>
+
+//                 <div className="card-body p-4 d-flex flex-column">
+//                   {/* UPDATED: CATEGORY & SUBCATEGORY LABEL */}
+//                   <div className="d-flex justify-content-between align-items-center mb-2">
+//                     <small className="text-tan fw-800 text-uppercase ls-1">
+//                       {item.categoryId?.name}
+//  <br/>
+
+//                       {item.subCategoryId?.subcategoryName}
+
+//                     </small>
+//                     <span
+//                       className="small fw-800 text-primary text-decoration-underline"
+//                       onClick={(e) => {
+//                         e.stopPropagation();
+//                         navigate(`/reviews/${slugify(item.title)}`, {
+//                           state: { listingId: item._id, title: item.title },
+//                         });
+//                       }}>
+//                       View Reviews
+//                     </span>
+//                   </div>
+
+//                   <h5 className="fw-800 text-navy mb-2 text-truncate ls-1">
+//                     {item.title}
+//                   </h5>
+//                   <p className="text-muted small mb-4">
+//                     <MapPin size={14} className="text-danger me-1" />
+//                     {item.address}
+//                   </p>
+
+//                   <div className="d-flex justify-content-end mt-auto">
+//                     <button
+//                       className="bg-white border rounded px-3 py-2"
+//                       onClick={(e) => {
+//                         e.stopPropagation();
+//                         window.open(
+//                           `https://www.google.com/maps/search/${encodeURIComponent(item.address)}`,
+//                         );
+//                       }}>
+//                       <Navigation size={18} />
+//                     </button>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           ))}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default BrowseListings;
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, MapPin, Heart, Navigation } from "lucide-react";
-import { getAllListingsApi, getImgURL } from "../services/authService";
+import {
+  getAllListingsApi,
+  getImgURL,
+  addFavoriteAPI,
+  deleteFavoriteAPI,
+  getFavoritesByUserAPI,
+} from "../services/authService";
+import { getUser } from "../utils/storage";
 
 const BrowseListings = () => {
   const navigate = useNavigate();
   const [listings, setListings] = useState([]);
+  const [favorites, setFavorites] = useState([]); // Store user's favorite records
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState({
@@ -971,6 +1225,7 @@ const BrowseListings = () => {
   const [appliedSearch, setAppliedSearch] = useState("");
   const [appliedFilter, setAppliedFilter] = useState(filter);
 
+  const currentUser = getUser();
   const isLoggedIn = !!localStorage.getItem("token");
 
   const slugify = (text) =>
@@ -984,8 +1239,18 @@ const BrowseListings = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch all listings
         const res = await getAllListingsApi();
         setListings(res?.listings || []);
+
+        // Fetch user favorites if logged in
+        if (isLoggedIn && currentUser) {
+          const userId = currentUser._id || currentUser.id;
+          const favRes = await getFavoritesByUserAPI(userId);
+          if (favRes.success) {
+            setFavorites(favRes.data);
+          }
+        }
       } catch (err) {
         console.error("Error fetching listings:", err);
       } finally {
@@ -993,19 +1258,40 @@ const BrowseListings = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [isLoggedIn]);
 
   const handleApplyFilters = () => {
     setAppliedSearch(searchQuery.trim());
     setAppliedFilter(filter);
   };
 
-  const handleBookmark = (e, item) => {
+  const handleBookmark = async (e, item) => {
     e.stopPropagation();
     if (!isLoggedIn) {
       alert("Please login to bookmark this listing.");
-    } else {
-      alert(`${item.title} added to your favorites!`);
+      return;
+    }
+
+    const existingFav = favorites.find((fav) => fav.itemId === item._id);
+
+    try {
+      if (existingFav) {
+        // REMOVE from favorites
+        await deleteFavoriteAPI(existingFav._id);
+        setFavorites(favorites.filter((fav) => fav._id !== existingFav._id));
+      } else {
+        // ADD to favorites
+        const payload = {
+          userId: currentUser._id || currentUser.id,
+          itemId: item._id,
+        };
+        const res = await addFavoriteAPI(payload);
+        if (res.success) {
+          setFavorites([...favorites, res.data]);
+        }
+      }
+    } catch (error) {
+      console.error("Favorite action failed:", error);
     }
   };
 
@@ -1112,84 +1398,96 @@ const BrowseListings = () => {
 
         {/* Listings Grid */}
         <div className="row g-4">
-          {filteredListings.map((item) => (
-            <div key={item._id} className="col-12 col-md-6 col-lg-4">
-              <div
-                className="card h-100 border-0 shadow-sm overflow-hidden listing-card rounded-4 bg-white"
-                style={{ cursor: "pointer" }}
-                onClick={() => navigate(`/browse/${slugify(item.title)}`)}>
-                <div className="ratio ratio-4x3 position-relative">
-                  <img
-                    src={getImgURL(item.images?.[0])}
-                    alt={item.title}
-                    className="object-fit-cover w-100 h-100"
-                  />
-                  <div
-                    className="position-absolute top-0 start-0 w-100 d-flex justify-content-between align-items-start p-3"
-                    style={{ zIndex: 10 }}>
-                    <span className="badge bg-white text-navy shadow-sm fw-800 px-3 py-2 rounded-3">
-                      ₹{item.items?.[0]?.price?.toLocaleString() || 0}
-                    </span>
-                    <button
-                      className="btn btn-white rounded-circle shadow-sm p-0 d-flex align-items-center justify-content-center"
-                      style={{
-                        backgroundColor: "white",
-                        width: "38px",
-                        height: "38px",
-                        border: "none",
+          {filteredListings.map((item) => {
+            // Check if this item is favorited
+            const isFavorited = favorites.some(
+              (fav) => fav.itemId === item._id,
+            );
+
+            return (
+              <div key={item._id} className="col-12 col-md-6 col-lg-4">
+                <div
+                  className="card h-100 border-0 shadow-sm overflow-hidden listing-card rounded-4 bg-white"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => navigate(`/browse/${slugify(item.title)}`)}>
+                  <div className="ratio ratio-4x3 position-relative">
+                    <img
+                      src={getImgURL(item.images?.[0])}
+                      alt={item.title}
+                      className="object-fit-cover w-100 h-100"
+                      onError={(e) => {
+                        e.target.src =
+                          "https://placehold.co/400x300?text=No+Image";
                       }}
-                      onClick={(e) => handleBookmark(e, item)}>
-                      <Heart size={20} color="#ff4d4d" fill="white" />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="card-body p-4 d-flex flex-column">
-                  {/* UPDATED: CATEGORY & SUBCATEGORY LABEL */}
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <small className="text-tan fw-800 text-uppercase ls-1">
-                      {item.categoryId?.name}
- <br/>
-
-                      {item.subCategoryId?.subcategoryName}
-               
-                    </small>
-                    <span
-                      className="small fw-800 text-primary text-decoration-underline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/reviews/${slugify(item.title)}`, {
-                          state: { listingId: item._id, title: item.title },
-                        });
-                      }}>
-                      View Reviews
-                    </span>
+                    />
+                    <div
+                      className="position-absolute top-0 start-0 w-100 d-flex justify-content-between align-items-start p-3"
+                      style={{ zIndex: 10 }}>
+                      <span className="badge bg-white text-navy shadow-sm fw-800 px-3 py-2 rounded-3">
+                        ₹{item.items?.[0]?.price?.toLocaleString() || 0}
+                      </span>
+                      <button
+                        className="btn btn-white rounded-circle shadow-sm p-0 d-flex align-items-center justify-content-center"
+                        style={{
+                          backgroundColor: "white",
+                          width: "38px",
+                          height: "38px",
+                          border: "none",
+                        }}
+                        onClick={(e) => handleBookmark(e, item)}>
+                        <Heart
+                          size={20}
+                          color="#ff4d4d"
+                          fill={isFavorited ? "#ff4d4d" : "white"}
+                        />
+                      </button>
+                    </div>
                   </div>
 
-                  <h5 className="fw-800 text-navy mb-2 text-truncate ls-1">
-                    {item.title}
-                  </h5>
-                  <p className="text-muted small mb-4">
-                    <MapPin size={14} className="text-danger me-1" />
-                    {item.address}
-                  </p>
+                  <div className="card-body p-4 d-flex flex-column">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <small className="text-tan fw-800 text-uppercase ls-1">
+                        {item.categoryId?.name}
+                        <br />
+                        {item.subCategoryId?.subcategoryName}
+                      </small>
+                      <span
+                        className="small fw-800 text-primary text-decoration-underline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/reviews/${slugify(item.title)}`, {
+                            state: { listingId: item._id, title: item.title },
+                          });
+                        }}>
+                        View Reviews
+                      </span>
+                    </div>
 
-                  <div className="d-flex justify-content-end mt-auto">
-                    <button
-                      className="bg-white border rounded px-3 py-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.open(
-                          `https://www.google.com/maps/search/${encodeURIComponent(item.address)}`,
-                        );
-                      }}>
-                      <Navigation size={18} />
-                    </button>
+                    <h5 className="fw-800 text-navy mb-2 text-truncate ls-1">
+                      {item.title}
+                    </h5>
+                    <p className="text-muted small mb-4">
+                      <MapPin size={14} className="text-danger me-1" />
+                      {item.address}
+                    </p>
+
+                    <div className="d-flex justify-content-end mt-auto">
+                      <button
+                        className="bg-white border rounded px-3 py-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(
+                            `https://www.google.com/maps/search/${encodeURIComponent(item.address)}`,
+                          );
+                        }}>
+                        <Navigation size={18} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
