@@ -183,7 +183,7 @@ const Messages = () => {
               <div
                 className={`flex-grow-1 py-2 text-center cursor-pointer fw-bold small ${activeTab === "admins" ? "bg-white border-bottom border-3 border-primary text-primary" : "text-muted"}`}
                 onClick={() => setActiveTab("admins")}>
-                ADMIN / SUPPORT
+                ADMIN
               </div>
             </div>
           )}

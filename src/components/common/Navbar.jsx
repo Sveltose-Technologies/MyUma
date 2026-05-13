@@ -404,6 +404,7 @@ export default function Navbar() {
 
   // Initialize state as an empty string
   const [logoUrl, setLogoUrl] = useState("");
+const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const fetchLogo = async () => {
@@ -443,13 +444,17 @@ export default function Navbar() {
         <Link
           className="navbar-brand d-flex align-items-center text-decoration-none"
           to="/">
-          {logoUrl ? (
+          {/* Agar logoUrl hai aur image mein koi error nahi aaya tabhi img dikhao */}
+          {logoUrl && !imageError ? (
             <img
               src={logoUrl}
               alt="Logo"
+              // Agar image path galat ho ya image na mile toh ye trigger hoga
+              onError={() => setImageError(true)}
               style={{ maxHeight: "50px", width: "auto", objectFit: "contain" }}
             />
           ) : (
+            // Logo na hone par ya Error hone par ye text dikhega
             <span className="brand-text text-white fs-3 fw-bold">
               My<span className="text-tan">Uma</span>
             </span>
