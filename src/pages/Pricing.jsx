@@ -24,11 +24,10 @@ const Pricing = () => {
   }, []);
 
  const handleGetStarted = async (plan) => {
-   // Direct localStorage se uthayein taaki koi confusion na ho
    const savedUser = JSON.parse(localStorage.getItem("user"));
    const savedToken = localStorage.getItem("token");
 
-   console.log("User in Pricing:", savedUser); // Debugging ke liye
+   console.log("User in Pricing:", savedUser);
 
    if (!savedUser || !savedToken) {
      toast.error("Please login to proceed.");
@@ -36,7 +35,6 @@ const Pricing = () => {
      return;
    }
 
-   // Aapke JSON mein "id" hai, toh wahi use karein
    const userId = savedUser.id || savedUser._id;
    const email = savedUser.email;
 
@@ -49,7 +47,7 @@ const Pricing = () => {
      });
 
      if (response?.url) {
-       window.location.href = response.url; // Stripe open hoga
+       window.location.href = response.url; 
      }
    } catch (err) {
      toast.error("Checkout failed");

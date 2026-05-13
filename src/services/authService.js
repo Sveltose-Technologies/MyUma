@@ -12,6 +12,8 @@ export const getImgURL = (imagePath) => {
 // --- Auth APIs ---
 export const loginAPI = async (credentials) => {
   const response = await API.post("/auth/login", credentials);
+  console.log("login", response);
+
   return response.data;
 };
 
@@ -197,18 +199,6 @@ export const deleteRatingAPI = async (id) => {
     console.error("Error in deleteRatingAPI:", error);
     throw error;
   }
-};
-
-// ✅ GET ALL CONVERSATIONS (Contact List)
-export const getChatListAPI = async () => {
-  const response = await API.get("/chat/conversations");
-  return response.data;
-};
-
-// ✅ GET MESSAGE HISTORY WITH A SPECIFIC USER
-export const getChatHistoryAPI = async (receiverId) => {
-  const response = await API.get(`/chat/history/${receiverId}`);
-  return response.data;
 };
 
 // ✅ SEND CONTACT MESSAGE
@@ -411,4 +401,29 @@ export const deleteFavoriteAPI = async (id) => {
 export const getFavoritesByUserAPI = async (userId) => {
   const response = await API.get(`/favorite/get-by-user/${userId}`);
   return response.data;
+};
+
+// Add these to your existing authService.js
+export const sendMessageAPI = async (data) => {
+  const response = await API.post("/chat/send", data);
+  console.log("sendMessageApi called", response);
+  return response.data;
+};
+
+export const getChatHistoryAPI = async (userId, ownerId) => {
+  // Use the specific endpoint you provided
+  const response = await API.get(
+    `/chat/get-by-user-owner/${userId}/${ownerId}`,
+  );
+  return response.data; // Expected { data: [...] }
+};
+export const deleteChatMessageAPI = async (id) => {
+  const response = await API.delete(`/chat/delete/${id}`);
+  return response.data;
+};
+
+// Add this to your authService.js
+export const getAllAuthsAPI = async () => {
+  const response = await API.get("/auth/get-all");
+  return response.data; // Usually returns { data: [...] } or { auths: [...] }
 };

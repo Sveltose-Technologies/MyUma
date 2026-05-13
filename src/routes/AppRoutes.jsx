@@ -86,6 +86,7 @@ const AppRoutes = () => {
               <Route path="/reviews" element={<Reviews />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/bookmarks" element={<MyBookings />} />
+              <Route path="/messages" element={<Messages />} />
             </Route>
           </Route>
         </Routes>
