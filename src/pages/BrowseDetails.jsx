@@ -935,7 +935,7 @@ const BrowseDetails = () => {
                     Starting From
                   </span>
                   <h2 className="display-6 fw-800 text-navy">
-                    ₹{listing.items?.[0]?.price?.toLocaleString() || 0}
+                    ${listing.items?.[0]?.price?.toLocaleString() || 0}
                   </h2>
                 </div>
                 <div className="d-grid gap-3">

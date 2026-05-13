@@ -586,7 +586,7 @@ const ListingDetails = () => {
               <div className="mb-4">
                 <small className="text-muted d-block mb-1">Starting from</small>
                 <h2 className="fw-bold text-dark">
-                  ₹{listing.price.toLocaleString()}{" "}
+                  ${listing.price.toLocaleString()}{" "}
                   <small className="fs-6 text-muted fw-normal">/ month</small>
                 </h2>
               </div>
