@@ -402,28 +402,39 @@ export const getFavoritesByUserAPI = async (userId) => {
   const response = await API.get(`/favorite/get-by-user/${userId}`);
   return response.data;
 };
+// --- Updated Chat APIs in authService.js ---
 
-// Add these to your existing authService.js
 export const sendMessageAPI = async (data) => {
   const response = await API.post("/chat/send", data);
-  console.log("sendMessageApi called", response);
   return response.data;
 };
 
+// 1. History for User <-> Owner
 export const getChatHistoryAPI = async (userId, ownerId) => {
-  // Use the specific endpoint you provided
-  const response = await API.get(
-    `/chat/get-by-user-owner/${userId}/${ownerId}`,
-  );
-  return response.data; // Expected { data: [...] }
+  const response = await API.get(`/chat/get-by-user-owner/${userId}/${ownerId}`);
+  return response.data; 
 };
+
+// 2. History for Admin <-> Owner (New Endpoint)
+export const getChatAdminOwnerHistoryAPI = async (adminId, ownerId) => {
+  const response = await API.get(`/chat/get-by-admin-owner/${adminId}/${ownerId}`);
+  return response.data;
+};
+
+// 3. General history for Admin (New Endpoint)
+export const getChatByAdminAPI = async (adminId) => {
+  const response = await API.get(`/chat/get-by-admin/${adminId}`);
+  return response.data;
+};
+
 export const deleteChatMessageAPI = async (id) => {
   const response = await API.delete(`/chat/delete/${id}`);
   return response.data;
 };
 
-// Add this to your authService.js
+// --- Auth List APIs ---
 export const getAllAuthsAPI = async () => {
   const response = await API.get("/auth/get-all");
-  return response.data; // Usually returns { data: [...] } or { auths: [...] }
+  return response.data;
 };
+

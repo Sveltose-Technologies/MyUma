@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   getAllOwnersAPI,
   getAllUsersAPI,
-  getAllAuthsAPI, // <--- Use this to find Admins
+  getAllAuthsAPI,
   getChatHistoryAPI,
+  getChatAdminOwnerHistoryAPI, // New
   sendMessageAPI,
   deleteChatMessageAPI,
   getImgURL,
@@ -33,20 +34,17 @@ const Messages = () => {
 
   const detectRoleAndLoad = async () => {
     try {
-      // Parallel API calls
       const [ownerRes, userRes, allRes] = await Promise.all([
         getAllOwnersAPI(),
         getAllUsersAPI(),
         getAllAuthsAPI(),
       ]);
 
-      // Extract lists using provided API keys
       const ownerList =
         ownerRes.auths || ownerRes.owners || ownerRes.data || [];
       const userList = userRes.auths || userRes.users || userRes.data || [];
       const masterList = allRes.auths || allRes.data || allRes.users || [];
 
-      // Logic to find current user role
       const amIOwner = ownerList.some((o) => o._id === currentId);
       const amIAdmin = masterList.some(
         (a) => a._id === currentId && a.role === "admin",
@@ -59,14 +57,11 @@ const Messages = () => {
       } else if (amIOwner) {
         setUserRole("owner");
         setClients(userList);
-        // Filter admins from the master list
-        const filteredAdmins = masterList.filter((u) => u.role === "admin");
-        setAdmins(filteredAdmins);
+        setAdmins(masterList.filter((u) => u.role === "admin"));
       } else {
         setUserRole("user");
         setOwners(ownerList);
-        const filteredAdmins = masterList.filter((u) => u.role === "admin");
-        setAdmins(filteredAdmins);
+        setAdmins(masterList.filter((u) => u.role === "admin"));
       }
     } catch (err) {
       console.error("Error loading contacts", err);
@@ -85,16 +80,32 @@ const Messages = () => {
   const fetchChatHistory = async () => {
     if (!selectedUser) return;
     try {
-      let userId, ownerId;
-      // Pairing for chat history
+      let res;
+
+      // LOGIC: Select API based on roles
       if (userRole === "owner") {
-        ownerId = currentId;
-        userId = selectedUser._id;
+        const ownerId = currentId;
+        const otherId = selectedUser._id;
+
+        if (selectedUser.role === "admin") {
+          // Use Admin-Owner Endpoint
+          res = await getChatAdminOwnerHistoryAPI(otherId, ownerId);
+        } else {
+          // Use User-Owner Endpoint
+          res = await getChatHistoryAPI(otherId, ownerId);
+        }
+      } else if (userRole === "admin") {
+        const adminId = currentId;
+        const ownerId = selectedUser._id;
+        // Use Admin-Owner Endpoint
+        res = await getChatAdminOwnerHistoryAPI(adminId, ownerId);
       } else {
-        userId = currentId;
-        ownerId = selectedUser._id;
+        // Logged in as regular User
+        const userId = currentId;
+        const ownerId = selectedUser._id;
+        res = await getChatHistoryAPI(userId, ownerId);
       }
-      const res = await getChatHistoryAPI(userId, ownerId);
+
       setMessages(res.data || []);
     } catch (err) {
       console.error("History fetch error", err);
@@ -161,42 +172,34 @@ const Messages = () => {
             </small>
           </div>
 
-          {/* TAB LOGIC */}
+          {/* TABS FOR OWNER / USER */}
           {(userRole === "owner" || userRole === "user") && (
             <div className="d-flex bg-light border-bottom">
               <div
                 className={`flex-grow-1 py-2 text-center cursor-pointer fw-bold small ${activeTab === "users" ? "bg-white border-bottom border-3 border-primary text-primary" : "text-muted"}`}
-                onClick={() => setActiveTab("users")}
-                style={{ cursor: "pointer" }}>
+                onClick={() => setActiveTab("users")}>
                 {userRole === "owner" ? "MY CLIENTS" : "PROPERTY OWNERS"}
               </div>
               <div
                 className={`flex-grow-1 py-2 text-center cursor-pointer fw-bold small ${activeTab === "admins" ? "bg-white border-bottom border-3 border-primary text-primary" : "text-muted"}`}
-                onClick={() => setActiveTab("admins")}
-                style={{ cursor: "pointer" }}>
-                ADMIN 
+                onClick={() => setActiveTab("admins")}>
+                ADMIN / SUPPORT
               </div>
             </div>
           )}
 
           <div className="overflow-auto flex-grow-1">
             {activeTab === "users" ? (
-              (userRole === "owner" ? clients : owners).length > 0 ? (
-                (userRole === "owner" ? clients : owners).map((u) => (
-                  <ContactItem
-                    key={u._id}
-                    user={u}
-                    selectedUser={selectedUser}
-                    setSelectedUser={setSelectedUser}
-                    setMessages={setMessages}
-                    badge={getBadge(u.role)}
-                  />
-                ))
-              ) : (
-                <div className="p-4 text-center text-muted small">
-                  No clients found.
-                </div>
-              )
+              (userRole === "owner" ? clients : owners).map((u) => (
+                <ContactItem
+                  key={u._id}
+                  user={u}
+                  selectedUser={selectedUser}
+                  setSelectedUser={setSelectedUser}
+                  setMessages={setMessages}
+                  badge={getBadge(u.role)}
+                />
+              ))
             ) : admins.length > 0 ? (
               admins.map((u) => (
                 <ContactItem
@@ -210,7 +213,7 @@ const Messages = () => {
               ))
             ) : (
               <div className="p-4 text-center text-muted small">
-                No Admin support available.
+                No Admin support found.
               </div>
             )}
           </div>
@@ -245,7 +248,7 @@ const Messages = () => {
                 }}>
                 {messages.length === 0 ? (
                   <div className="text-center my-auto text-muted">
-                    No messages found.
+                    No messages found. Start a conversation.
                   </div>
                 ) : (
                   messages.map((msg, i) => {
@@ -300,7 +303,7 @@ const Messages = () => {
                     className="form-control rounded-pill px-4 shadow-none"
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    placeholder="Type message..."
+                    placeholder="Type a message..."
                     required
                   />
                   <button
@@ -319,12 +322,13 @@ const Messages = () => {
             </>
           ) : (
             <div className="m-auto text-center text-muted">
+              <i className="bi bi-chat-left-text fs-1 d-block mb-2"></i>
               Select a contact to start chatting
             </div>
           )}
         </div>
       </div>
-      <style>{`.msg-container:hover .delete-icon { opacity: 1 !important; }`}</style>
+      <style>{`.msg-container:hover .delete-icon { opacity: 1 !important; transition: 0.2s; } .cursor-pointer { cursor: pointer; }`}</style>
     </div>
   );
 };
@@ -341,8 +345,7 @@ const ContactItem = ({
       setSelectedUser(user);
       setMessages([]);
     }}
-    className={`p-3 d-flex align-items-center border-bottom cursor-pointer ${selectedUser?._id === user._id ? "bg-light border-start border-4 border-primary" : ""}`}
-    style={{ cursor: "pointer" }}>
+    className={`p-3 d-flex align-items-center border-bottom cursor-pointer ${selectedUser?._id === user._id ? "bg-light border-start border-4 border-primary" : ""}`}>
     <img
       src={getImgURL(user.profileImage)}
       className="rounded-circle me-3 border"
