@@ -1,14 +1,27 @@
 import API from "./apiClient";
 
-const IMAGE_BASE_URL = "https://nrislaw.rxchartsquare.com/";
+// services/authService.js
+
+const IMAGE_BASE_URL = "https://nrislaw.rxchartsquare.com"; // Domain without trailing slash
 
 export const getImgURL = (imagePath) => {
-  if (!imagePath) return "https://placehold.co/400x300?text=No+Image";
-  if (imagePath.startsWith("http")) return imagePath;
-  const cleanPath = imagePath.startsWith("/") ? imagePath.slice(1) : imagePath;
-  return `${IMAGE_BASE_URL}${cleanPath}`;
-};
+  // 1. Check if path is null or empty
+  if (!imagePath || imagePath.trim() === "") {
+    return "https://placehold.co/400x300?text=No+Image";
+  }
 
+  // 2. IMPORTANT: .trim() removes that extra space at the end (".png " -> ".png")
+  const cleanPath = imagePath.trim();
+
+  // 3. If it's already a full URL, return it
+  if (cleanPath.startsWith("http")) return cleanPath;
+
+  // 4. Ensure path starts with a "/"
+  const formattedPath = cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`;
+
+  // 5. Final URL: https://nrislaw.rxchartsquare.com/uploads/...
+  return `${IMAGE_BASE_URL}${formattedPath}`;
+};
 // --- Auth APIs ---
 export const loginAPI = async (credentials) => {
   const response = await API.post("/auth/login", credentials);

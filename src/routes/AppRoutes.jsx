@@ -16,7 +16,7 @@ import Footer from "../components/common/Footer";
 import Home from "../pages/Home";
 import Login from "../features/auth/Login";
 import Pricing from "../pages/Pricing";
-import PaymentSuccess from "../pages/PaymentSuccess"; // Naya page banayein
+import PaymentSuccess from "../pages/PaymentSuccess";
 import Blog from "../pages/Blog";
 import BlogDetail from "../pages/BlogDetail";
 import ProfileUpdate from "../pages/profile";
@@ -43,8 +43,7 @@ const ProtectedRoute = () => {
     return <Navigate to="/login" replace />;
   }
 
-  // Agar user logged in hai par payment nahi ki (status 'deactive' hai)
-  // Note: Aap apne backend ke according 'status' ya 'isPaid' field check karein
+  // Agar user deactive hai toh use pricing par bhejo
   if (user && user.status === "deactive") {
     return <Navigate to="/pricing" replace />;
   }
@@ -59,7 +58,8 @@ const AppRoutes = () => {
 
       <div style={{ minHeight: "80vh" }}>
         <Routes>
-          {/* Public Routes - Sab dekh sakte hain */}
+          {/* --- PUBLIC ROUTES (Har koi dekh sakta hai) --- */}
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/about" element={<AboutUs />} />
@@ -67,16 +67,15 @@ const AppRoutes = () => {
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsConditions />} />
           <Route path="/contact" element={<ContactUs />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogDetail />} />
+          <Route path="/testimonials" element={<TestimonialPage />} />
 
-          {/* Protected Routes - Sirf Payment ke baad hi dikhenge */}
+          {/* --- PROTECTED ROUTES (Sirf Login aur Payment ke baad) --- */}
           <Route element={<ProtectedRoute />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:slug" element={<BlogDetail />} />
             <Route path="/browse" element={<BrowseListings />} />
             <Route path="/browse/:slug" element={<BrowseDetails />} />
             <Route path="/reviews/:slug" element={<ListingReviews />} />
-            <Route path="/testimonials" element={<TestimonialPage />} />
             <Route path="/listing/:slug" element={<ListingDetails />} />
 
             {/* Dashboard Nested Routes */}
@@ -86,7 +85,6 @@ const AppRoutes = () => {
               <Route path="/reviews" element={<Reviews />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/bookmarks" element={<MyBookings />} />
-              <Route path="/messages" element={<Messages />} />
             </Route>
           </Route>
         </Routes>
