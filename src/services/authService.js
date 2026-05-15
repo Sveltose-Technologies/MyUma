@@ -1,25 +1,25 @@
 import API from "./apiClient";
 
-// services/authService.js
-
-const IMAGE_BASE_URL = "https://nrislaw.rxchartsquare.com"; // Domain without trailing slash
+const IMAGE_BASE_URL = "https://nrislaw.rxchartsquare.com"; // Removed the trailing slash here for cleaner joining
 
 export const getImgURL = (imagePath) => {
-  // 1. Check if path is null or empty
+  // 1. Handle empty or null paths
   if (!imagePath || imagePath.trim() === "") {
     return "https://placehold.co/400x300?text=No+Image";
   }
 
-  // 2. IMPORTANT: .trim() removes that extra space at the end (".png " -> ".png")
+  // 2. CRITICAL: Remove the extra space at the end of the string (e.g., ".png " -> ".png")
   const cleanPath = imagePath.trim();
 
-  // 3. If it's already a full URL, return it
-  if (cleanPath.startsWith("http")) return cleanPath;
+  // 3. If it's already a full URL, return as is
+  if (cleanPath.startsWith("http")) {
+    return cleanPath;
+  }
 
-  // 4. Ensure path starts with a "/"
+  // 4. Ensure path starts with a single "/"
   const formattedPath = cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`;
 
-  // 5. Final URL: https://nrislaw.rxchartsquare.com/uploads/...
+  // 5. Combine: https://nrislaw.rxchartsquare.com + /uploads/...
   return `${IMAGE_BASE_URL}${formattedPath}`;
 };
 // --- Auth APIs ---

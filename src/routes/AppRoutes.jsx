@@ -34,6 +34,8 @@ import ListingReviews from "../pages/ListingReviews";
 import ContactUs from "../pages/ContactUs";
 import TestimonialPage from "../pages/TestimonialPage";
 import MyBookings from "../pages/MyBookings";
+import HomeSearchBar from "../pages/HomeSearchBar";
+
 
 // --- Route Protection Logic ---
 const ProtectedRoute = () => {
@@ -70,6 +72,7 @@ const AppRoutes = () => {
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogDetail />} />
           <Route path="/testimonials" element={<TestimonialPage />} />
+          <Route path="/home-search" element={<HomeSearchBar />} />
 
           {/* --- PROTECTED ROUTES (Sirf Login aur Payment ke baad) --- */}
           <Route element={<ProtectedRoute />}>
