@@ -366,10 +366,10 @@
 // };
 
 // export default FeaturedListings;
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navigation, Heart, Layers } from "lucide-react";
+import { toast } from "react-toastify"; // Added for feedback
 import {
   getAllListingsApi,
   getImgURL,
@@ -377,12 +377,12 @@ import {
   deleteFavoriteAPI,
   getFavoritesByUserAPI,
 } from "../services/authService";
-import { getUser } from "../utils/storage"; // Assuming you have this helper
+import { getUser } from "../utils/storage";
 
 const FeaturedListings = () => {
   const navigate = useNavigate();
   const [listings, setListings] = useState([]);
-  const [favorites, setFavorites] = useState([]); // Store user's favorite objects
+  const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const currentUser = getUser();
@@ -396,45 +396,52 @@ const FeaturedListings = () => {
       .replace(/[\s_-]+/g, "-")
       .replace(/^-+|-+$/g, "");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await getAllListingsApi();
-        setListings(res?.listings?.slice(0, 9) || []);
+  const fetchData = async () => {
+    try {
+      const res = await getAllListingsApi();
+      // Pehle 9 listings carousel ke liye
+      setListings(res?.listings?.slice(0, 9) || []);
 
-        // If logged in, fetch user's favorites to highlight the hearts
-        if (isLoggedIn && currentUser) {
-          const favRes = await getFavoritesByUserAPI(
-            currentUser._id || currentUser.id,
-          );
-          if (favRes.success) {
-            setFavorites(favRes.data);
-          }
+      // Agar user logged in hai, toh uske favorites fetch karein
+      if (isLoggedIn && currentUser) {
+        const userId = currentUser._id || currentUser.id;
+        const favRes = await getFavoritesByUserAPI(userId);
+        if (favRes.success) {
+          setFavorites(favRes.data);
         }
-      } catch (err) {
-        console.error("Error fetching data:", err);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (err) {
+      console.error("Error fetching data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [isLoggedIn]);
 
   const handleBookmark = async (e, item) => {
     e.stopPropagation();
     if (!isLoggedIn) {
-      alert("Please login to bookmark this listing.");
+      toast.warn("Please login to bookmark this listing.");
+      navigate("/login");
       return;
     }
 
-    // Check if already favorited
-    const existingFav = favorites.find((fav) => fav.itemId === item._id);
+    // ROBUST CHECK: Matches logic in Details and Browse pages
+    const existingFav = favorites.find((fav) => {
+      const favId =
+        typeof fav.itemId === "object" ? fav.itemId._id : fav.itemId;
+      return favId?.toString() === item._id?.toString();
+    });
 
     try {
       if (existingFav) {
-        // DELETE from favorites
+        // REMOVE from favorites
         await deleteFavoriteAPI(existingFav._id);
         setFavorites(favorites.filter((fav) => fav._id !== existingFav._id));
+        toast.info("Removed from bookmarks");
       } else {
         // ADD to favorites
         const payload = {
@@ -443,12 +450,13 @@ const FeaturedListings = () => {
         };
         const res = await addFavoriteAPI(payload);
         if (res.success) {
-          // Assuming the API returns the new favorite object in 'data'
           setFavorites([...favorites, res.data]);
+          toast.success("Added to bookmarks");
         }
       }
     } catch (error) {
       console.error("Favorite action failed:", error);
+      toast.error("Failed to update bookmark");
     }
   };
 
@@ -492,10 +500,14 @@ const FeaturedListings = () => {
                 key={index}>
                 <div className="row g-4 px-2">
                   {chunk.map((item) => {
-                    // Check if this specific item is in favorites
-                    const isFavorited = favorites.some(
-                      (fav) => fav.itemId === item._id,
-                    );
+                    // Check if this specific item is favorited (Sync logic)
+                    const isFavorited = favorites.some((fav) => {
+                      const favId =
+                        typeof fav.itemId === "object"
+                          ? fav.itemId._id
+                          : fav.itemId;
+                      return favId?.toString() === item._id?.toString();
+                    });
 
                     return (
                       <div key={item._id} className="col-12 col-md-4">
@@ -510,17 +522,13 @@ const FeaturedListings = () => {
                               src={getImgURL(item.images?.[0])}
                               alt={item.title}
                               className="object-fit-cover w-100 h-100"
-                              onError={(e) => {
-                                e.target.src =
-                                  "https://placehold.co/400x300?text=No+Image";
-                              }}
                             />
 
                             <div
                               className="position-absolute top-0 start-0 w-100 d-flex justify-content-between align-items-start p-3"
                               style={{ zIndex: 10 }}>
                               <span className="badge bg-white text-navy shadow-sm fw-800 px-3 py-2 rounded-3">
-                                ₹{item.items?.[0]?.price?.toLocaleString() || 0}
+                                ${item.items?.[0]?.price?.toLocaleString() || 0}
                               </span>
 
                               <button
@@ -534,8 +542,9 @@ const FeaturedListings = () => {
                                 onClick={(e) => handleBookmark(e, item)}>
                                 <Heart
                                   size={18}
-                                  color={isFavorited ? "#ff4d4d" : "#ff4d4d"}
-                                  fill={isFavorited ? "#ff4d4d" : "none"}
+                                  color="#ff4d4d"
+                                  fill={isFavorited ? "#ff4d4d" : "none"} // Filled red if favorited
+                                  style={{ transition: "all 0.3s ease" }}
                                 />
                               </button>
                             </div>
@@ -558,7 +567,6 @@ const FeaturedListings = () => {
                                   </small>
                                 )}
                               </div>
-
                               <span
                                 className="small fw-800 text-primary text-decoration-underline"
                                 onClick={(e) => {
@@ -574,7 +582,6 @@ const FeaturedListings = () => {
                             <h5 className="fw-800 text-navy mb-2 text-truncate ls-1">
                               {item.title}
                             </h5>
-
                             <p className="text-muted small mb-4">
                               <i className="bi bi-geo-alt-fill text-danger me-1"></i>
                               {item.address}

@@ -1,1207 +1,8 @@
-// // // // import React, { useState, useEffect } from "react";
-// // // // import { useNavigate } from "react-router-dom";
-// // // // import { Search, MapPin, Star, Navigation } from "lucide-react";
-// // // // import { getAllListingsApi, getImgURL } from "../services/authService";
-
-// // // // const BrowseListings = () => {
-// // // //   const navigate = useNavigate();
-// // // //   const [listings, setListings] = useState([]);
-// // // //   const [loading, setLoading] = useState(true);
-// // // //   const [searchQuery, setSearchQuery] = useState("");
-// // // //   const [filter, setFilter] = useState({
-// // // //     category: "All",
-// // // //     minPrice: "",
-// // // //     maxPrice: "",
-// // // //   });
-// // // //   const [appliedSearch, setAppliedSearch] = useState("");
-// // // //   const [appliedFilter, setAppliedFilter] = useState(filter);
-
-// // // //   const slugify = (text) =>
-// // // //     text
-// // // //       .toLowerCase()
-// // // //       .trim()
-// // // //       .replace(/[^\w\s-]/g, "")
-// // // //       .replace(/[\s_-]+/g, "-")
-// // // //       .replace(/^-+|-+$/g, "");
-
-// // // //   useEffect(() => {
-// // // //     const fetchData = async () => {
-// // // //       try {
-// // // //         const res = await getAllListingsApi();
-// // // //         setListings(res?.listings || []);
-// // // //       } catch (err) {
-// // // //         console.error("Error fetching listings:", err);
-// // // //       } finally {
-// // // //         setLoading(false);
-// // // //       }
-// // // //     };
-// // // //     fetchData();
-// // // //   }, []);
-
-// // // //   const handleApplyFilters = () => {
-// // // //     setAppliedSearch(searchQuery.trim());
-// // // //     setAppliedFilter(filter);
-// // // //   };
-
-// // // //   const filteredListings = listings.filter((item) => {
-// // // //     const titleMatch = item.title
-// // // //       .toLowerCase()
-// // // //       .includes(appliedSearch.toLowerCase());
-// // // //     const categoryMatch =
-// // // //       appliedFilter.category === "All" ||
-// // // //       item.categoryId?.name === appliedFilter.category;
-// // // //     const price = item.items?.[0]?.price || 0;
-// // // //     const minMatch =
-// // // //       appliedFilter.minPrice === "" || price >= Number(appliedFilter.minPrice);
-// // // //     const maxMatch =
-// // // //       appliedFilter.maxPrice === "" || price <= Number(appliedFilter.maxPrice);
-// // // //     return titleMatch && categoryMatch && minMatch && maxMatch;
-// // // //   });
-
-// // // //   if (loading)
-// // // //     return (
-// // // //       <div className="min-vh-100 d-flex align-items-center justify-content-center text-navy fw-800 ls-1">
-// // // //         LOADING LISTINGS...
-// // // //       </div>
-// // // //     );
-
-// // // //   return (
-// // // //     <div className="min-vh-100 bg-light py-5">
-// // // //       <div className="container">
-// // // //         {/* Filter Section */}
-// // // //         <div className="card border-0 shadow-sm p-4 mb-5 rounded-4">
-// // // //           <div className="row g-3 align-items-end">
-// // // //             <div className="col-12 col-md-5">
-// // // //               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-// // // //                 Search
-// // // //               </label>
-// // // //               <div className="input-group bg-light rounded shadow-none border">
-// // // //                 <span className="input-group-text bg-transparent border-0">
-// // // //                   <Search size={18} />
-// // // //                 </span>
-// // // //                 <input
-// // // //                   type="text"
-// // // //                   className="form-control border-0 bg-transparent shadow-none"
-// // // //                   placeholder="What are you looking for?"
-// // // //                   value={searchQuery}
-// // // //                   onChange={(e) => setSearchQuery(e.target.value)}
-// // // //                 />
-// // // //               </div>
-// // // //             </div>
-// // // //             <div className="col-6 col-md-3">
-// // // //               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-// // // //                 Category
-// // // //               </label>
-// // // //               <select
-// // // //                 className="form-select border shadow-none"
-// // // //                 value={filter.category}
-// // // //                 onChange={(e) =>
-// // // //                   setFilter({ ...filter, category: e.target.value })
-// // // //                 }>
-// // // //                 <option>All</option>
-// // // //                 {[...new Set(listings.map((l) => l.categoryId?.name))]
-// // // //                   .filter(Boolean)
-// // // //                   .map((cat) => (
-// // // //                     <option key={cat} value={cat}>
-// // // //                       {cat}
-// // // //                     </option>
-// // // //                   ))}
-// // // //               </select>
-// // // //             </div>
-// // // //             <div className="col-3 col-md-2">
-// // // //               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-// // // //                 Min ₹
-// // // //               </label>
-// // // //               <input
-// // // //                 type="text"
-// // // //                 className="form-control border shadow-none"
-// // // //                 placeholder="Min"
-// // // //                 value={filter.minPrice}
-// // // //                 onChange={(e) =>
-// // // //                   setFilter({ ...filter, minPrice: e.target.value })
-// // // //                 }
-// // // //               />
-// // // //             </div>
-// // // //             <div className="col-3 col-md-2">
-// // // //               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-// // // //                 Max ₹
-// // // //               </label>
-// // // //               <input
-// // // //                 type="text"
-// // // //                 className="form-control border shadow-none"
-// // // //                 placeholder="Max"
-// // // //                 value={filter.maxPrice}
-// // // //                 onChange={(e) =>
-// // // //                   setFilter({ ...filter, maxPrice: e.target.value })
-// // // //                 }
-// // // //               />
-// // // //             </div>
-// // // //             <div className="col-12 text-end pt-2">
-// // // //               <button
-// // // //                 className="uma-btn-navy uma-btn px-5 w-20 w-md-auto"
-// // // //                 onClick={handleApplyFilters}>
-// // // //                 APPLY FILTERS
-// // // //               </button>
-// // // //             </div>
-// // // //           </div>
-// // // //         </div>
-
-// // // //         {/* Grid Section */}
-// // // //         <div className="row g-4">
-// // // //           {filteredListings.map((item) => (
-// // // //             <div key={item._id} className="col-12 col-md-6 col-lg-4">
-// // // //               <div className="card h-100 border-0 shadow-sm overflow-hidden listing-card rounded-4 bg-white">
-// // // //                 {/* Fixed Image Container */}
-// // // //                 <div className="ratio ratio-4x3 position-relative">
-// // // //                   <img
-// // // //                     src={getImgURL(item.images?.[0])}
-// // // //                     alt={item.title}
-// // // //                     className="object-fit-cover w-100 h-100"
-// // // //                     onError={(e) => {
-// // // //                       e.target.src =
-// // // //                         "https://via.placeholder.com/400x300?text=No+Image";
-// // // //                     }}
-// // // //                   />
-// // // //                   <div className="position-absolute top-0 end-0 m-3">
-// // // //                     <span className="badge bg-white text-navy shadow-sm fw-800 px-3 py-2 rounded-3">
-// // // //                       ₹{item.items?.[0]?.price?.toLocaleString() || 0}
-// // // //                     </span>
-// // // //                   </div>
-// // // //                 </div>
-
-// // // //                 <div className="card-body p-4 d-flex flex-column">
-// // // //                   <div className="d-flex justify-content-between align-items-center mb-2">
-// // // //                     <small className="text-tan fw-800 text-uppercase ls-1">
-// // // //                       {item.categoryId?.name}
-// // // //                     </small>
-// // // //                     <span className="small fw-800 text-navy">
-// // // //                       <i className="bi bi-star-fill text-warning me-1"></i>
-// // // //                       4.8
-// // // //                     </span>
-// // // //                   </div>
-
-// // // //                   <h5 className="fw-800 text-navy mb-2 text-truncate ls-1">
-// // // //                     {item.title}
-// // // //                   </h5>
-
-// // // //                   <p className="text-muted small mb-4">
-// // // //                     <i className="bi bi-geo-alt-fill text-danger me-1"></i>
-// // // //                     {item.address}
-// // // //                   </p>
-
-// // // //                   <div className="d-flex gap-2 mt-auto">
-// // // //                     <button
-// // // //                       onClick={() => navigate(`/browse/${slugify(item.title)}`)}
-// // // //                       className="uma-btn-navy uma-btn flex-fill py-2">
-// // // //                       View Details
-// // // //                     </button>
-// // // //                     <button
-// // // //                       className="bg-white border rounded px-3"
-// // // //                       onClick={() =>
-// // // //                         window.open(
-// // // //                           `https://www.google.com/maps/search/${encodeURIComponent(item.address)}`,
-// // // //                         )
-// // // //                       }>
-// // // //                       <Navigation size={18} />
-// // // //                     </button>
-// // // //                   </div>
-// // // //                 </div>
-// // // //               </div>
-// // // //             </div>
-// // // //           ))}
-// // // //         </div>
-// // // //       </div>
-// // // //     </div>
-// // // //   );
-// // // // };
-
-// // // // export default BrowseListings;
-// // // import React, { useState, useEffect } from "react";
-// // // import { useNavigate } from "react-router-dom";
-// // // import { Search, MapPin, Star, Navigation } from "lucide-react";
-// // // import { getAllListingsApi, getImgURL } from "../services/authService";
-
-// // // const BrowseListings = () => {
-// // //   const navigate = useNavigate();
-// // //   const [listings, setListings] = useState([]);
-// // //   const [loading, setLoading] = useState(true);
-// // //   const [searchQuery, setSearchQuery] = useState("");
-// // //   const [filter, setFilter] = useState({
-// // //     category: "All",
-// // //     minPrice: "",
-// // //     maxPrice: "",
-// // //   });
-// // //   const [appliedSearch, setAppliedSearch] = useState("");
-// // //   const [appliedFilter, setAppliedFilter] = useState(filter);
-
-// // //   const slugify = (text) =>
-// // //     text
-// // //       .toLowerCase()
-// // //       .trim()
-// // //       .replace(/[^\w\s-]/g, "")
-// // //       .replace(/[\s_-]+/g, "-")
-// // //       .replace(/^-+|-+$/g, "");
-
-// // //   useEffect(() => {
-// // //     const fetchData = async () => {
-// // //       try {
-// // //         const res = await getAllListingsApi();
-// // //         setListings(res?.listings || []);
-// // //       } catch (err) {
-// // //         console.error("Error fetching listings:", err);
-// // //       } finally {
-// // //         setLoading(false);
-// // //       }
-// // //     };
-// // //     fetchData();
-// // //   }, []);
-
-// // //   const handleApplyFilters = () => {
-// // //     setAppliedSearch(searchQuery.trim());
-// // //     setAppliedFilter(filter);
-// // //   };
-
-// // //   const filteredListings = listings.filter((item) => {
-// // //     const titleMatch = item.title
-// // //       .toLowerCase()
-// // //       .includes(appliedSearch.toLowerCase());
-// // //     const categoryMatch =
-// // //       appliedFilter.category === "All" ||
-// // //       item.categoryId?.name === appliedFilter.category;
-// // //     const price = item.items?.[0]?.price || 0;
-// // //     const minMatch =
-// // //       appliedFilter.minPrice === "" || price >= Number(appliedFilter.minPrice);
-// // //     const maxMatch =
-// // //       appliedFilter.maxPrice === "" || price <= Number(appliedFilter.maxPrice);
-// // //     return titleMatch && categoryMatch && minMatch && maxMatch;
-// // //   });
-
-// // //   if (loading)
-// // //     return (
-// // //       <div className="min-vh-100 d-flex align-items-center justify-content-center text-navy fw-800 ls-1">
-// // //         LOADING LISTINGS...
-// // //       </div>
-// // //     );
-
-// // //   return (
-// // //     <div className="min-vh-100 bg-light py-5">
-// // //       <div className="container">
-// // //         {/* Filter Section */}
-// // //         <div className="card border-0 shadow-sm p-4 mb-5 rounded-4">
-// // //           <div className="row g-3 align-items-end">
-// // //             <div className="col-12 col-md-5">
-// // //               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-// // //                 Search
-// // //               </label>
-// // //               <div className="input-group bg-light rounded shadow-none border">
-// // //                 <span className="input-group-text bg-transparent border-0">
-// // //                   <Search size={18} />
-// // //                 </span>
-// // //                 <input
-// // //                   type="text"
-// // //                   className="form-control border-0 bg-transparent shadow-none"
-// // //                   placeholder="What are you looking for?"
-// // //                   value={searchQuery}
-// // //                   onChange={(e) => setSearchQuery(e.target.value)}
-// // //                 />
-// // //               </div>
-// // //             </div>
-// // //             <div className="col-6 col-md-3">
-// // //               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-// // //                 Category
-// // //               </label>
-// // //               <select
-// // //                 className="form-select border shadow-none"
-// // //                 value={filter.category}
-// // //                 onChange={(e) =>
-// // //                   setFilter({ ...filter, category: e.target.value })
-// // //                 }>
-// // //                 <option>All</option>
-// // //                 {[...new Set(listings.map((l) => l.categoryId?.name))]
-// // //                   .filter(Boolean)
-// // //                   .map((cat) => (
-// // //                     <option key={cat} value={cat}>
-// // //                       {cat}
-// // //                     </option>
-// // //                   ))}
-// // //               </select>
-// // //             </div>
-// // //             <div className="col-3 col-md-2">
-// // //               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-// // //                 Min $
-// // //               </label>
-// // //               <input
-// // //                 type="text"
-// // //                 className="form-control border shadow-none"
-// // //                 placeholder="Min"
-// // //                 value={filter.minPrice}
-// // //                 onChange={(e) =>
-// // //                   setFilter({ ...filter, minPrice: e.target.value })
-// // //                 }
-// // //               />
-// // //             </div>
-// // //             <div className="col-3 col-md-2">
-// // //               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-// // //                 Max $
-// // //               </label>
-// // //               <input
-// // //                 type="text"
-// // //                 className="form-control border shadow-none"
-// // //                 placeholder="Max"
-// // //                 value={filter.maxPrice}
-// // //                 onChange={(e) =>
-// // //                   setFilter({ ...filter, maxPrice: e.target.value })
-// // //                 }
-// // //               />
-// // //             </div>
-// // //             <div className="col-12 text-end pt-2">
-// // //               <button
-// // //                 className="uma-btn-navy uma-btn px-5 w-20 w-md-auto"
-// // //                 onClick={handleApplyFilters}>
-// // //                 APPLY FILTERS
-// // //               </button>
-// // //             </div>
-// // //           </div>
-// // //         </div>
-
-// // //         {/* Grid Section */}
-// // //         <div className="row g-4">
-// // //           {filteredListings.map((item) => (
-// // //             <div key={item._id} className="col-12 col-md-6 col-lg-4">
-// // //               <div
-// // //                 className="card h-100 border-0 shadow-sm overflow-hidden listing-card rounded-4 bg-white"
-// // //                 style={{ cursor: 'pointer' }}
-// // //                 onClick={() => navigate(`/browse/${slugify(item.title)}`)}
-// // //               >
-// // //                 {/* Fixed Image Container */}
-// // //                 <div className="ratio ratio-4x3 position-relative">
-// // //                   <img
-// // //                     src={getImgURL(item.images?.[0])}
-// // //                     alt={item.title}
-// // //                     className="object-fit-cover w-100 h-100"
-// // //                     onError={(e) => {
-// // //                       e.target.src =
-// // //                         "https://via.placeholder.com/400x300?text=No+Image";
-// // //                     }}
-// // //                   />
-// // //                   <div className="position-absolute top-0 end-0 m-3">
-// // //                     <span className="badge bg-white text-navy shadow-sm fw-800 px-3 py-2 rounded-3">
-// // //                       ${item.items?.[0]?.price?.toLocaleString() || 0}
-// // //                     </span>
-// // //                   </div>
-// // //                 </div>
-
-// // //                 <div className="card-body p-4 d-flex flex-column">
-// // //                   <div className="d-flex justify-content-between align-items-center mb-2">
-// // //                     <small className="text-tan fw-800 text-uppercase ls-1">
-// // //                       {item.categoryId?.name}
-// // //                     </small>
-// // //                     <span className="small fw-800 text-navy">
-// // //                       <i className="bi bi-star-fill text-warning me-1"></i>
-// // //                       4.8
-// // //                     </span>
-// // //                   </div>
-
-// // //                   <h5 className="fw-800 text-navy mb-2 text-truncate ls-1">
-// // //                     {item.title}
-// // //                   </h5>
-
-// // //                   <p className="text-muted small mb-4">
-// // //                     <i className="bi bi-geo-alt-fill text-danger me-1"></i>
-// // //                     {item.address}
-// // //                   </p>
-
-// // //                   <div className="d-flex justify-content-end mt-auto">
-// // //                     <button
-// // //                       className="bg-white border rounded px-3 py-2"
-// // //                       onClick={(e) => {
-// // //                         e.stopPropagation(); // Prevents navigating to details page when clicking map
-// // //                         window.open(
-// // //                           `https://www.google.com/maps/search/${encodeURIComponent(item.address)}`,
-// // //                         );
-// // //                       }}>
-// // //                       <Navigation size={18} />
-// // //                     </button>
-// // //                   </div>
-// // //                 </div>
-// // //               </div>
-// // //             </div>
-// // //           ))}
-// // //         </div>
-// // //       </div>
-// // //     </div>
-// // //   );
-// // // };
-
-// // // export default BrowseListings;
-
-// // import React, { useState, useEffect } from "react";
-// // import { useNavigate } from "react-router-dom";
-// // import { Search, MapPin, Heart, Navigation } from "lucide-react";
-// // import { getAllListingsApi, getImgURL } from "../services/authService";
-
-// // const BrowseListings = () => {
-// //   const navigate = useNavigate();
-// //   const [listings, setListings] = useState([]);
-// //   const [loading, setLoading] = useState(true);
-// //   const [searchQuery, setSearchQuery] = useState("");
-// //   const [filter, setFilter] = useState({
-// //     category: "All",
-// //     minPrice: "",
-// //     maxPrice: "",
-// //   });
-// //   const [appliedSearch, setAppliedSearch] = useState("");
-// //   const [appliedFilter, setAppliedFilter] = useState(filter);
-
-// //   // Check if user is logged in
-// //   const isLoggedIn = !!localStorage.getItem("token");
-
-// //   const slugify = (text) =>
-// //     text
-// //       .toLowerCase()
-// //       .trim()
-// //       .replace(/[^\w\s-]/g, "")
-// //       .replace(/[\s_-]+/g, "-")
-// //       .replace(/^-+|-+$/g, "");
-
-// //   useEffect(() => {
-// //     const fetchData = async () => {
-// //       try {
-// //         const res = await getAllListingsApi();
-// //         setListings(res?.listings || []);
-// //       } catch (err) {
-// //         console.error("Error fetching listings:", err);
-// //       } finally {
-// //         setLoading(false);
-// //       }
-// //     };
-// //     fetchData();
-// //   }, []);
-
-// //   const handleApplyFilters = () => {
-// //     setAppliedSearch(searchQuery.trim());
-// //     setAppliedFilter(filter);
-// //   };
-
-// //   const handleBookmark = (e, item) => {
-// //     e.stopPropagation(); // Stops navigation to details page
-// //     if (!isLoggedIn) {
-// //       alert("Please login to bookmark this listing.");
-// //     } else {
-// //       alert(`${item.title} added to your favorites!`);
-// //     }
-// //   };
-
-// //   const filteredListings = listings.filter((item) => {
-// //     const titleMatch = item.title
-// //       .toLowerCase()
-// //       .includes(appliedSearch.toLowerCase());
-// //     const categoryMatch =
-// //       appliedFilter.category === "All" ||
-// //       item.categoryId?.name === appliedFilter.category;
-// //     const price = item.items?.[0]?.price || 0;
-// //     const minMatch =
-// //       appliedFilter.minPrice === "" || price >= Number(appliedFilter.minPrice);
-// //     const maxMatch =
-// //       appliedFilter.maxPrice === "" || price <= Number(appliedFilter.maxPrice);
-// //     return titleMatch && categoryMatch && minMatch && maxMatch;
-// //   });
-
-// //   if (loading)
-// //     return (
-// //       <div className="min-vh-100 d-flex align-items-center justify-content-center text-navy fw-800 ls-1">
-// //         LOADING LISTINGS...
-// //       </div>
-// //     );
-
-// //   return (
-// //     <div className="min-vh-100 bg-light py-5">
-// //       <div className="container">
-// //         {/* Filter Section */}
-// //         <div className="card border-0 shadow-sm p-4 mb-5 rounded-4">
-// //           <div className="row g-3 align-items-end">
-// //             <div className="col-12 col-md-5">
-// //               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-// //                 Search
-// //               </label>
-// //               <div className="input-group bg-light rounded shadow-none border">
-// //                 <span className="input-group-text bg-transparent border-0">
-// //                   <Search size={18} />
-// //                 </span>
-// //                 <input
-// //                   type="text"
-// //                   className="form-control border-0 bg-transparent shadow-none"
-// //                   placeholder="What are you looking for?"
-// //                   value={searchQuery}
-// //                   onChange={(e) => setSearchQuery(e.target.value)}
-// //                 />
-// //               </div>
-// //             </div>
-// //             <div className="col-6 col-md-3">
-// //               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-// //                 Category
-// //               </label>
-// //               <select
-// //                 className="form-select border shadow-none"
-// //                 value={filter.category}
-// //                 onChange={(e) =>
-// //                   setFilter({ ...filter, category: e.target.value })
-// //                 }>
-// //                 <option>All</option>
-// //                 {[...new Set(listings.map((l) => l.categoryId?.name))]
-// //                   .filter(Boolean)
-// //                   .map((cat) => (
-// //                     <option key={cat} value={cat}>
-// //                       {cat}
-// //                     </option>
-// //                   ))}
-// //               </select>
-// //             </div>
-// //             <div className="col-3 col-md-2">
-// //               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-// //                 Min $
-// //               </label>
-// //               <input
-// //                 type="text"
-// //                 className="form-control border shadow-none"
-// //                 placeholder="Min"
-// //                 value={filter.minPrice}
-// //                 onChange={(e) =>
-// //                   setFilter({ ...filter, minPrice: e.target.value })
-// //                 }
-// //               />
-// //             </div>
-// //             <div className="col-3 col-md-2">
-// //               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-// //                 Max $
-// //               </label>
-// //               <input
-// //                 type="text"
-// //                 className="form-control border shadow-none"
-// //                 placeholder="Max"
-// //                 value={filter.maxPrice}
-// //                 onChange={(e) =>
-// //                   setFilter({ ...filter, maxPrice: e.target.value })
-// //                 }
-// //               />
-// //             </div>
-// //             <div className="col-12 text-end pt-2">
-// //               <button
-// //                 className="uma-btn-navy uma-btn px-5 w-20 w-md-auto"
-// //                 onClick={handleApplyFilters}>
-// //                 APPLY FILTERS
-// //               </button>
-// //             </div>
-// //           </div>
-// //         </div>
-
-// //         {/* Grid Section */}
-// //         <div className="row g-4">
-// //           {filteredListings.map((item) => (
-// //             <div key={item._id} className="col-12 col-md-6 col-lg-4">
-// //               <div
-// //                 className="card h-100 border-0 shadow-sm overflow-hidden listing-card rounded-4 bg-white"
-// //                 style={{ cursor: "pointer" }}
-// //                 onClick={() => navigate(`/browse/${slugify(item.title)}`)}>
-// //                 {/* Image Container */}
-// //                 <div
-// //                   className="ratio ratio-4x3 position-relative"
-// //                   style={{ overflow: "hidden" }}>
-// //                   {/* IMAGE */}
-// //                   <img
-// //                     src={getImgURL(item.images?.[0])}
-// //                     alt={item.title}
-// //                     className="object-fit-cover w-100 h-100"
-// //                     onError={(e) => {
-// //                       e.target.src =
-// //                         "https://via.placeholder.com/400x300?text=No+Image";
-// //                     }}
-// //                   />
-
-// //                   {/* NEW OVERLAY CONTAINER - Jo Price aur Heart ko alag karega */}
-// //                   <div
-// //                     className="position-absolute top-0 start-0 w-100 d-flex justify-content-between align-items-start p-3"
-// //                     style={{ zIndex: 10, pointerEvents: "none" }}>
-// //                     {/* PRICE (LEFT SIDE) */}
-// //                     <div style={{ pointerEvents: "auto" }}>
-// //                       <span className="badge bg-white text-navy shadow-sm fw-800 px-3 py-2 rounded-3 border-0">
-// //                         ${item.items?.[0]?.price?.toLocaleString() || 0}
-// //                       </span>
-// //                     </div>
-
-// //                     {/* HEART (RIGHT SIDE) */}
-// //                     <div style={{ pointerEvents: "auto" }}>
-// //                       <button
-// //                         className="btn btn-white rounded-circle shadow-sm p-0 d-flex align-items-center justify-content-center"
-// //                         style={{
-// //                           backgroundColor: "white",
-// //                           border: "none",
-// //                           width: "38px",
-// //                           height: "38px",
-// //                         }}
-// //                         onClick={(e) => handleBookmark(e, item)}>
-// //                         <Heart size={20} color="#ff4d4d" fill="white" />
-// //                       </button>
-// //                     </div>
-// //                   </div>
-// //                 </div>
-
-// //                 <div className="card-body p-4 d-flex flex-column">
-// //                   <div className="d-flex justify-content-between align-items-center mb-2">
-// //                     <small className="text-tan fw-800 text-uppercase ls-1">
-// //                       {item.categoryId?.name}
-// //                     </small>
-// //                     <span
-// //                       className="small fw-800 text-primary text-decoration-underline"
-// //                       style={{ cursor: "pointer" }}
-// //                       onClick={(e) => {
-// //                         e.stopPropagation();
-// //                         navigate(`/reviews/${slugify(item.title)}`, {
-// //                           state: {
-// //                             listingId: item._id,
-// //                             title: item.title, // Title bhi pass karein
-// //                           },
-// //                         });
-// //                       }}>
-// //                       View Reviews
-// //                     </span>
-// //                   </div>
-
-// //                   <h5 className="fw-800 text-navy mb-2 text-truncate ls-1">
-// //                     {item.title}
-// //                   </h5>
-
-// //                   <p className="text-muted small mb-4">
-// //                     <MapPin size={14} className="text-danger me-1" />
-// //                     {item.address}
-// //                   </p>
-
-// //                   <div className="d-flex justify-content-end mt-auto">
-// //                     <button
-// //                       className="bg-white border rounded px-3 py-2"
-// //                       onClick={(e) => {
-// //                         e.stopPropagation();
-// //                         window.open(
-// //                           `https://www.google.com/maps/search/${encodeURIComponent(item.address)}`,
-// //                         );
-// //                       }}>
-// //                       <Navigation size={18} />
-// //                     </button>
-// //                   </div>
-// //                 </div>
-// //               </div>
-// //             </div>
-// //           ))}
-// //         </div>
-// //       </div>
-// //     </div>
-// //   );
-// // };
-
-// // export default BrowseListings;
-
-// import React, { useState, useEffect } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { Search, MapPin, Heart, Navigation } from "lucide-react";
-// import { getAllListingsApi, getImgURL } from "../services/authService";
-
-// const BrowseListings = () => {
-//   const navigate = useNavigate();
-//   const [listings, setListings] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [searchQuery, setSearchQuery] = useState("");
-//   const [filter, setFilter] = useState({
-//     category: "All",
-//     minPrice: "",
-//     maxPrice: "",
-//   });
-//   const [appliedSearch, setAppliedSearch] = useState("");
-//   const [appliedFilter, setAppliedFilter] = useState(filter);
-
-//   const isLoggedIn = !!localStorage.getItem("token");
-
-//   const slugify = (text) =>
-//     text
-//       .toLowerCase()
-//       .trim()
-//       .replace(/[^\w\s-]/g, "")
-//       .replace(/[\s_-]+/g, "-")
-//       .replace(/^-+|-+$/g, "");
-
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       try {
-//         const res = await getAllListingsApi();
-//         setListings(res?.listings || []);
-//       } catch (err) {
-//         console.error("Error fetching listings:", err);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-//     fetchData();
-//   }, []);
-
-//   const handleApplyFilters = () => {
-//     setAppliedSearch(searchQuery.trim());
-//     setAppliedFilter(filter);
-//   };
-
-//   const handleBookmark = (e, item) => {
-//     e.stopPropagation();
-//     if (!isLoggedIn) {
-//       alert("Please login to bookmark this listing.");
-//     } else {
-//       alert(`${item.title} added to your favorites!`);
-//     }
-//   };
-
-//   const filteredListings = listings.filter((item) => {
-//     const titleMatch = item.title
-//       .toLowerCase()
-//       .includes(appliedSearch.toLowerCase());
-//     const categoryMatch =
-//       appliedFilter.category === "All" ||
-//       item.categoryId?.name === appliedFilter.category;
-//     const price = item.items?.[0]?.price || 0;
-//     const minMatch =
-//       appliedFilter.minPrice === "" || price >= Number(appliedFilter.minPrice);
-//     const maxMatch =
-//       appliedFilter.maxPrice === "" || price <= Number(appliedFilter.maxPrice);
-//     return titleMatch && categoryMatch && minMatch && maxMatch;
-//   });
-
-//   if (loading)
-//     return (
-//       <div className="min-vh-100 d-flex align-items-center justify-content-center text-navy fw-800 ls-1">
-//         LOADING LISTINGS...
-//       </div>
-//     );
-
-//   return (
-//     <div className="min-vh-100 bg-light py-5">
-//       <div className="container">
-//         <div className="card border-0 shadow-sm p-4 mb-5 rounded-4">
-//           <div className="row g-3 align-items-end">
-//             <div className="col-12 col-md-5">
-//               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-//                 Search
-//               </label>
-//               <div className="input-group bg-light rounded shadow-none border">
-//                 <span className="input-group-text bg-transparent border-0">
-//                   <Search size={18} />
-//                 </span>
-//                 <input
-//                   type="text"
-//                   className="form-control border-0 bg-transparent shadow-none"
-//                   placeholder="Search listings..."
-//                   value={searchQuery}
-//                   onChange={(e) => setSearchQuery(e.target.value)}
-//                 />
-//               </div>
-//             </div>
-//             <div className="col-6 col-md-3">
-//               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-//                 Category
-//               </label>
-//               <select
-//                 className="form-select border shadow-none"
-//                 value={filter.category}
-//                 onChange={(e) =>
-//                   setFilter({ ...filter, category: e.target.value })
-//                 }>
-//                 <option>All</option>
-//                 {[...new Set(listings.map((l) => l.categoryId?.name))]
-//                   .filter(Boolean)
-//                   .map((cat) => (
-//                     <option key={cat} value={cat}>
-//                       {cat}
-//                     </option>
-//                   ))}
-//               </select>
-//             </div>
-//             <div className="col-3 col-md-2">
-//               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-//                 Min
-//               </label>
-//               <input
-//                 type="text"
-//                 className="form-control border shadow-none"
-//                 value={filter.minPrice}
-//                 onChange={(e) =>
-//                   setFilter({ ...filter, minPrice: e.target.value })
-//                 }
-//               />
-//             </div>
-//             <div className="col-3 col-md-2">
-//               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-//                 Max
-//               </label>
-//               <input
-//                 type="text"
-//                 className="form-control border shadow-none"
-//                 value={filter.maxPrice}
-//                 onChange={(e) =>
-//                   setFilter({ ...filter, maxPrice: e.target.value })
-//                 }
-//               />
-//             </div>
-//             <div className="col-12 text-end pt-2">
-//               <button
-//                 className="uma-btn-navy uma-btn px-5"
-//                 onClick={handleApplyFilters}>
-//                 APPLY FILTERS
-//               </button>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="row g-4">
-//           {filteredListings.map((item) => (
-//             <div key={item._id} className="col-12 col-md-6 col-lg-4">
-//               <div
-//                 className="card h-100 border-0 shadow-sm overflow-hidden listing-card rounded-4 bg-white"
-//                 style={{ cursor: "pointer" }}
-//                 onClick={() => navigate(`/browse/${slugify(item.title)}`)}>
-//                 <div
-//                   className="ratio ratio-4x3 position-relative"
-//                   style={{ overflow: "hidden" }}>
-//                   <img
-//                     src={getImgURL(item.images?.[0])}
-//                     alt={item.title}
-//                     className="object-fit-cover w-100 h-100"
-//                     onError={(e) => {
-//                       // Prevent infinite loop by checking current src
-//                       const fallback =
-//                         "https://placehold.co/400x300?text=No+Image";
-//                       if (e.target.src !== fallback) {
-//                         e.target.onerror = null; // Disable future error triggers
-//                         e.target.src = fallback;
-//                       }
-//                     }}
-//                   />
-
-//                   <div
-//                     className="position-absolute top-0 start-0 w-100 d-flex justify-content-between align-items-start p-3"
-//                     style={{ zIndex: 10, pointerEvents: "none" }}>
-//                     <div style={{ pointerEvents: "auto" }}>
-//                       <span className="badge bg-white text-navy shadow-sm fw-800 px-3 py-2 rounded-3">
-//                         ${item.items?.[0]?.price?.toLocaleString() || 0}
-//                       </span>
-//                     </div>
-//                     <div style={{ pointerEvents: "auto" }}>
-//                       <button
-//                         className="btn btn-white rounded-circle shadow-sm p-0 d-flex align-items-center justify-content-center"
-//                         style={{
-//                           backgroundColor: "white",
-//                           width: "38px",
-//                           height: "38px",
-//                           border: "none",
-//                         }}
-//                         onClick={(e) => handleBookmark(e, item)}>
-//                         <Heart size={20} color="#ff4d4d" fill="white" />
-//                       </button>
-//                     </div>
-//                   </div>
-//                 </div>
-
-//                 <div className="card-body p-4 d-flex flex-column">
-//                   <div className="d-flex justify-content-between align-items-center mb-2">
-//                     <small className="text-tan fw-800 text-uppercase ls-1">
-//                       {item.categoryId?.name}
-//                     </small>
-//                     <span
-//                       className="small fw-800 text-primary text-decoration-underline"
-//                       onClick={(e) => {
-//                         e.stopPropagation();
-//                         navigate(`/reviews/${slugify(item.title)}`, {
-//                           state: { listingId: item._id, title: item.title },
-//                         });
-//                       }}>
-//                       View Reviews
-//                     </span>
-//                   </div>
-
-//                   <h5 className="fw-800 text-navy mb-2 text-truncate ls-1">
-//                     {item.title}
-//                   </h5>
-//                   <p className="text-muted small mb-4">
-//                     <MapPin size={14} className="text-danger me-1" />
-//                     {item.address}
-//                   </p>
-
-//                   <div className="d-flex justify-content-end mt-auto">
-//                     <button
-//                       className="bg-white border rounded px-3 py-2"
-//                       onClick={(e) => {
-//                         e.stopPropagation();
-//                         window.open(
-//                           `https://www.google.com/maps/search/${encodeURIComponent(item.address)}`,
-//                         );
-//                       }}>
-//                       <Navigation size={18} />
-//                     </button>
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default BrowseListings;
-
-// import React, { useState, useEffect } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { Search, MapPin, Heart, Navigation } from "lucide-react";
-// import { getAllListingsApi, getImgURL } from "../services/authService";
-
-// const BrowseListings = () => {
-//   const navigate = useNavigate();
-//   const [listings, setListings] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [searchQuery, setSearchQuery] = useState("");
-//   const [filter, setFilter] = useState({
-//     category: "All",
-//     minPrice: "",
-//     maxPrice: "",
-//   });
-//   const [appliedSearch, setAppliedSearch] = useState("");
-//   const [appliedFilter, setAppliedFilter] = useState(filter);
-
-//   const isLoggedIn = !!localStorage.getItem("token");
-
-//   const slugify = (text) =>
-//     text
-//       .toLowerCase()
-//       .trim()
-//       .replace(/[^\w\s-]/g, "")
-//       .replace(/[\s_-]+/g, "-")
-//       .replace(/^-+|-+$/g, "");
-
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       try {
-//         const res = await getAllListingsApi();
-//         setListings(res?.listings || []);
-//       } catch (err) {
-//         console.error("Error fetching listings:", err);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-//     fetchData();
-//   }, []);
-
-//   const handleApplyFilters = () => {
-//     setAppliedSearch(searchQuery.trim());
-//     setAppliedFilter(filter);
-//   };
-
-//   const handleBookmark = (e, item) => {
-//     e.stopPropagation();
-//     if (!isLoggedIn) {
-//       alert("Please login to bookmark this listing.");
-//     } else {
-//       alert(`${item.title} added to your favorites!`);
-//     }
-//   };
-
-//   const filteredListings = listings.filter((item) => {
-//     const titleMatch = item.title
-//       .toLowerCase()
-//       .includes(appliedSearch.toLowerCase());
-//     const categoryMatch =
-//       appliedFilter.category === "All" ||
-//       item.categoryId?.name === appliedFilter.category;
-//     const price = item.items?.[0]?.price || 0;
-//     const minMatch =
-//       appliedFilter.minPrice === "" || price >= Number(appliedFilter.minPrice);
-//     const maxMatch =
-//       appliedFilter.maxPrice === "" || price <= Number(appliedFilter.maxPrice);
-//     return titleMatch && categoryMatch && minMatch && maxMatch;
-//   });
-
-//   if (loading)
-//     return (
-//       <div className="min-vh-100 d-flex align-items-center justify-content-center text-navy fw-800 ls-1">
-//         LOADING LISTINGS...
-//       </div>
-//     );
-
-//   return (
-//     <div className="min-vh-100 bg-light py-5">
-//       <div className="container">
-//         {/* Filters Box */}
-//         <div className="card border-0 shadow-sm p-4 mb-5 rounded-4">
-//           <div className="row g-3 align-items-end">
-//             <div className="col-12 col-md-5">
-//               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-//                 Search
-//               </label>
-//               <div className="input-group bg-light rounded shadow-none border">
-//                 <span className="input-group-text bg-transparent border-0">
-//                   <Search size={18} />
-//                 </span>
-//                 <input
-//                   type="text"
-//                   className="form-control border-0 bg-transparent shadow-none"
-//                   placeholder="Search listings..."
-//                   value={searchQuery}
-//                   onChange={(e) => setSearchQuery(e.target.value)}
-//                 />
-//               </div>
-//             </div>
-//             <div className="col-6 col-md-3">
-//               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-//                 Category
-//               </label>
-//               <select
-//                 className="form-select border shadow-none"
-//                 value={filter.category}
-//                 onChange={(e) =>
-//                   setFilter({ ...filter, category: e.target.value })
-//                 }>
-//                 <option>All</option>
-//                 {[...new Set(listings.map((l) => l.categoryId?.name))]
-//                   .filter(Boolean)
-//                   .map((cat) => (
-//                     <option key={cat} value={cat}>
-//                       {cat}
-//                     </option>
-//                   ))}
-//               </select>
-//             </div>
-//             <div className="col-3 col-md-2">
-//               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-//                 Min
-//               </label>
-//               <input
-//                 type="text"
-//                 className="form-control border shadow-none"
-//                 value={filter.minPrice}
-//                 onChange={(e) =>
-//                   setFilter({ ...filter, minPrice: e.target.value })
-//                 }
-//               />
-//             </div>
-//             <div className="col-3 col-md-2">
-//               <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-//                 Max
-//               </label>
-//               <input
-//                 type="text"
-//                 className="form-control border shadow-none"
-//                 value={filter.maxPrice}
-//                 onChange={(e) =>
-//                   setFilter({ ...filter, maxPrice: e.target.value })
-//                 }
-//               />
-//             </div>
-//             <div className="col-12 text-end pt-2">
-//               <button
-//                 className="uma-btn-navy uma-btn px-5"
-//                 onClick={handleApplyFilters}>
-//                 APPLY FILTERS
-//               </button>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Listings Grid */}
-//         <div className="row g-4">
-//           {filteredListings.map((item) => (
-//             <div key={item._id} className="col-12 col-md-6 col-lg-4">
-//               <div
-//                 className="card h-100 border-0 shadow-sm overflow-hidden listing-card rounded-4 bg-white"
-//                 style={{ cursor: "pointer" }}
-//                 onClick={() => navigate(`/browse/${slugify(item.title)}`)}>
-//                 <div className="ratio ratio-4x3 position-relative">
-//                   <img
-//                     src={getImgURL(item.images?.[0])}
-//                     alt={item.title}
-//                     className="object-fit-cover w-100 h-100"
-//                   />
-//                   <div
-//                     className="position-absolute top-0 start-0 w-100 d-flex justify-content-between align-items-start p-3"
-//                     style={{ zIndex: 10 }}>
-//                     <span className="badge bg-white text-navy shadow-sm fw-800 px-3 py-2 rounded-3">
-//                       ₹{item.items?.[0]?.price?.toLocaleString() || 0}
-//                     </span>
-//                     <button
-//                       className="btn btn-white rounded-circle shadow-sm p-0 d-flex align-items-center justify-content-center"
-//                       style={{
-//                         backgroundColor: "white",
-//                         width: "38px",
-//                         height: "38px",
-//                         border: "none",
-//                       }}
-//                       onClick={(e) => handleBookmark(e, item)}>
-//                       <Heart size={20} color="#ff4d4d" fill="white" />
-//                     </button>
-//                   </div>
-//                 </div>
-
-//                 <div className="card-body p-4 d-flex flex-column">
-//                   {/* UPDATED: CATEGORY & SUBCATEGORY LABEL */}
-//                   <div className="d-flex justify-content-between align-items-center mb-2">
-//                     <small className="text-tan fw-800 text-uppercase ls-1">
-//                       {item.categoryId?.name}
-//  <br/>
-
-//                       {item.subCategoryId?.subcategoryName}
-
-//                     </small>
-//                     <span
-//                       className="small fw-800 text-primary text-decoration-underline"
-//                       onClick={(e) => {
-//                         e.stopPropagation();
-//                         navigate(`/reviews/${slugify(item.title)}`, {
-//                           state: { listingId: item._id, title: item.title },
-//                         });
-//                       }}>
-//                       View Reviews
-//                     </span>
-//                   </div>
-
-//                   <h5 className="fw-800 text-navy mb-2 text-truncate ls-1">
-//                     {item.title}
-//                   </h5>
-//                   <p className="text-muted small mb-4">
-//                     <MapPin size={14} className="text-danger me-1" />
-//                     {item.address}
-//                   </p>
-
-//                   <div className="d-flex justify-content-end mt-auto">
-//                     <button
-//                       className="bg-white border rounded px-3 py-2"
-//                       onClick={(e) => {
-//                         e.stopPropagation();
-//                         window.open(
-//                           `https://www.google.com/maps/search/${encodeURIComponent(item.address)}`,
-//                         );
-//                       }}>
-//                       <Navigation size={18} />
-//                     </button>
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default BrowseListings;
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, MapPin, Heart, Navigation } from "lucide-react";
+import { toast } from "react-toastify";
 import {
   getAllListingsApi,
   getImgURL,
@@ -1214,7 +15,7 @@ import { getUser } from "../utils/storage";
 const BrowseListings = () => {
   const navigate = useNavigate();
   const [listings, setListings] = useState([]);
-  const [favorites, setFavorites] = useState([]); // Store user's favorite records
+  const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState({
@@ -1236,51 +37,49 @@ const BrowseListings = () => {
       .replace(/[\s_-]+/g, "-")
       .replace(/^-+|-+$/g, "");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch all listings
-        const res = await getAllListingsApi();
-        setListings(res?.listings || []);
+  const fetchData = async () => {
+    try {
+      const res = await getAllListingsApi();
+      setListings(res?.listings || []);
 
-        // Fetch user favorites if logged in
-        if (isLoggedIn && currentUser) {
-          const userId = currentUser._id || currentUser.id;
-          const favRes = await getFavoritesByUserAPI(userId);
-          if (favRes.success) {
-            setFavorites(favRes.data);
-          }
+      if (isLoggedIn && currentUser) {
+        const userId = currentUser._id || currentUser.id;
+        const favRes = await getFavoritesByUserAPI(userId);
+        if (favRes.success) {
+          setFavorites(favRes.data);
         }
-      } catch (err) {
-        console.error("Error fetching listings:", err);
-      } finally {
-        setLoading(false);
       }
-    };
-    fetchData();
-  }, [isLoggedIn]);
-
-  const handleApplyFilters = () => {
-    setAppliedSearch(searchQuery.trim());
-    setAppliedFilter(filter);
+    } catch (err) {
+      console.error("Error fetching listings:", err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, [isLoggedIn]); // Jab login state change ho tab refresh kare
 
   const handleBookmark = async (e, item) => {
     e.stopPropagation();
     if (!isLoggedIn) {
-      alert("Please login to bookmark this listing.");
+      toast.warn("Please login to bookmark this listing.");
+      navigate("/login");
       return;
     }
 
-    const existingFav = favorites.find((fav) => fav.itemId === item._id);
+    const existingFav = favorites.find((fav) => {
+      const favId =
+        typeof fav.itemId === "object" ? fav.itemId._id : fav.itemId;
+      return favId?.toString() === item._id?.toString();
+    });
 
     try {
       if (existingFav) {
-        // REMOVE from favorites
         await deleteFavoriteAPI(existingFav._id);
         setFavorites(favorites.filter((fav) => fav._id !== existingFav._id));
+        toast.info("Removed from bookmarks");
       } else {
-        // ADD to favorites
         const payload = {
           userId: currentUser._id || currentUser.id,
           itemId: item._id,
@@ -1288,10 +87,11 @@ const BrowseListings = () => {
         const res = await addFavoriteAPI(payload);
         if (res.success) {
           setFavorites([...favorites, res.data]);
+          toast.success("Added to bookmarks");
         }
       }
     } catch (error) {
-      console.error("Favorite action failed:", error);
+      toast.error("Favorite action failed");
     }
   };
 
@@ -1312,176 +112,86 @@ const BrowseListings = () => {
 
   if (loading)
     return (
-      <div className="min-vh-100 d-flex align-items-center justify-content-center text-navy fw-800 ls-1">
-        LOADING LISTINGS...
+      <div className="min-vh-100 d-flex align-items-center justify-content-center fw-bold">
+        LOADING...
       </div>
     );
 
   return (
     <div className="min-vh-100 bg-light py-5">
       <div className="container">
-        {/* Filters Box */}
+        {/* Filter Section */}
         <div className="card border-0 shadow-sm p-4 mb-5 rounded-4">
           <div className="row g-3 align-items-end">
-            <div className="col-12 col-md-5">
-              <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-                Search
-              </label>
-              <div className="input-group bg-light rounded shadow-none border">
-                <span className="input-group-text bg-transparent border-0">
-                  <Search size={18} />
-                </span>
-                <input
-                  type="text"
-                  className="form-control border-0 bg-transparent shadow-none"
-                  placeholder="Search listings..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="col-6 col-md-3">
-              <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-                Category
-              </label>
-              <select
-                className="form-select border shadow-none"
-                value={filter.category}
-                onChange={(e) =>
-                  setFilter({ ...filter, category: e.target.value })
-                }>
-                <option>All</option>
-                {[...new Set(listings.map((l) => l.categoryId?.name))]
-                  .filter(Boolean)
-                  .map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-              </select>
-            </div>
-            <div className="col-3 col-md-2">
-              <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-                Min
-              </label>
+            <div className="col-md-5">
+              <label className="form-label small fw-bold">SEARCH</label>
               <input
                 type="text"
-                className="form-control border shadow-none"
-                value={filter.minPrice}
-                onChange={(e) =>
-                  setFilter({ ...filter, minPrice: e.target.value })
-                }
+                className="form-control"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="col-3 col-md-2">
-              <label className="form-label small fw-800 text-navy text-uppercase ls-1">
-                Max
-              </label>
-              <input
-                type="text"
-                className="form-control border shadow-none"
-                value={filter.maxPrice}
-                onChange={(e) =>
-                  setFilter({ ...filter, maxPrice: e.target.value })
-                }
-              />
-            </div>
-            <div className="col-12 text-end pt-2">
+            <div className="col-md-7 text-end">
               <button
-                className="uma-btn-navy uma-btn px-5"
-                onClick={handleApplyFilters}>
+                className="btn btn-dark px-5"
+                onClick={() => {
+                  setAppliedSearch(searchQuery);
+                  setAppliedFilter(filter);
+                }}>
                 APPLY FILTERS
               </button>
             </div>
           </div>
         </div>
 
-        {/* Listings Grid */}
+        {/* Grid */}
         <div className="row g-4">
           {filteredListings.map((item) => {
-            // Check if this item is favorited
-            const isFavorited = favorites.some(
-              (fav) => fav.itemId === item._id,
-            );
+            const isFavorited = favorites.some((fav) => {
+              const favId =
+                typeof fav.itemId === "object" ? fav.itemId._id : fav.itemId;
+              return favId?.toString() === item._id?.toString();
+            });
 
             return (
               <div key={item._id} className="col-12 col-md-6 col-lg-4">
                 <div
-                  className="card h-100 border-0 shadow-sm overflow-hidden listing-card rounded-4 bg-white"
+                  className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden"
                   style={{ cursor: "pointer" }}
                   onClick={() => navigate(`/browse/${slugify(item.title)}`)}>
                   <div className="ratio ratio-4x3 position-relative">
                     <img
                       src={getImgURL(item.images?.[0])}
                       alt={item.title}
-                      className="object-fit-cover w-100 h-100"
-                      onError={(e) => {
-                        e.target.src =
-                          "https://placehold.co/400x300?text=No+Image";
-                      }}
+                      className="object-fit-cover"
                     />
-                    <div
-                      className="position-absolute top-0 start-0 w-100 d-flex justify-content-between align-items-start p-3"
-                      style={{ zIndex: 10 }}>
-                      <span className="badge bg-white text-navy shadow-sm fw-800 px-3 py-2 rounded-3">
-                        ${item.items?.[0]?.price?.toLocaleString() || 0}
-                      </span>
+                    <div className="position-absolute top-0 end-0 p-3">
                       <button
-                        className="btn btn-white rounded-circle shadow-sm p-0 d-flex align-items-center justify-content-center"
+                        className="btn btn-white rounded-circle shadow-sm d-flex align-items-center justify-content-center"
                         style={{
+                          width: "40px",
+                          height: "40px",
                           backgroundColor: "white",
-                          width: "38px",
-                          height: "38px",
                           border: "none",
                         }}
                         onClick={(e) => handleBookmark(e, item)}>
                         <Heart
-                          size={20}
+                          size={22}
                           color="#ff4d4d"
-                          fill={isFavorited ? "#ff4d4d" : "white"}
+                          fill={isFavorited ? "#ff4d4d" : "none"}
                         />
                       </button>
                     </div>
                   </div>
-
-                  <div className="card-body p-4 d-flex flex-column">
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <small className="text-tan fw-800 text-uppercase ls-1">
-                        {item.categoryId?.name}
-                        <br />
-                        {item.subCategoryId?.subcategoryName}
-                      </small>
-                      <span
-                        className="small fw-800 text-primary text-decoration-underline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/reviews/${slugify(item.title)}`, {
-                            state: { listingId: item._id, title: item.title },
-                          });
-                        }}>
-                        View Reviews
-                      </span>
-                    </div>
-
-                    <h5 className="fw-800 text-navy mb-2 text-truncate ls-1">
-                      {item.title}
-                    </h5>
-                    <p className="text-muted small mb-4">
-                      <MapPin size={14} className="text-danger me-1" />
-                      {item.address}
+                  <div className="card-body">
+                    <h5 className="fw-bold text-navy">{item.title}</h5>
+                    <p className="text-muted small">
+                      <MapPin size={14} /> {item.address}
                     </p>
-
-                    <div className="d-flex justify-content-end mt-auto">
-                      <button
-                        className="bg-white border rounded px-3 py-2"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.open(
-                            `https://www.google.com/maps/search/${encodeURIComponent(item.address)}`,
-                          );
-                        }}>
-                        <Navigation size={18} />
-                      </button>
+                    <div className="fw-bold text-primary">
+                      ${item.items?.[0]?.price || 0}
                     </div>
                   </div>
                 </div>

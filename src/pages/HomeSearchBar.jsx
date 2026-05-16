@@ -1,8 +1,284 @@
+// import React, { useState, useEffect } from "react";
+// import { usePlacesWidget } from "react-google-autocomplete";
+// import {
+//   MapPin,
+//   ChevronDown,
+//   ArrowLeft,
+//   X,
+//   Car,
+//   Bike,
+//   Briefcase,
+// } from "lucide-react";
+// import { getAllSubCategoriesApi } from "../services/authService";
+
+// const HomeSearchBar = () => {
+//   const [categoriesData, setCategoriesData] = useState([]);
+//   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+//   const [currentView, setCurrentView] = useState("categories");
+//   const [activeCategory, setActiveCategory] = useState(null);
+
+//   const [searchState, setSearchState] = useState({
+//     keyword: "",
+//     location: "",
+//     radius: "Radius search",
+//     category: "All Categories",
+//   });
+
+//   useEffect(() => {
+//     const loadData = async () => {
+//       try {
+//         const res = await getAllSubCategoriesApi();
+//         if (res.success) setCategoriesData(res.data);
+//       } catch (err) {
+//         console.error("API Error:", err);
+//       }
+//     };
+//     loadData();
+//   }, []);
+
+//   const { ref: placeRef } = usePlacesWidget({
+//     apiKey: "YOUR_GOOGLE_MAPS_API_KEY",
+//     onPlaceSelected: (place) =>
+//       setSearchState({ ...searchState, location: place.formatted_address }),
+//     options: { types: ["(regions)"] },
+//   });
+
+//   // ✅ 1. सिर्फ नाम पर क्लिक करने पर कैटेगरी सिलेक्ट होगी
+//   const selectCategoryOnly = (name) => {
+//     setSearchState({ ...searchState, category: name });
+//     setIsDropdownOpen(false);
+//   };
+
+//   // ✅ 2. सिर्फ Arrow पर क्लिक करने पर सब-कैटेगरी खुलेगी
+//   const openSubView = (e, item) => {
+//     e.stopPropagation(); // ताकि नाम वाला क्लिक ट्रिगर न हो
+//     if (item.subcategories && item.subcategories.length > 0) {
+//       setActiveCategory(item);
+//       setCurrentView("subcategories");
+//     }
+//   };
+
+//   const handleSubSelect = (subName) => {
+//     setSearchState({ ...searchState, category: subName });
+//     setIsDropdownOpen(false);
+//     setCurrentView("categories");
+//   };
+
+//   const styles = {
+//     wrapper: {
+//       width: "100%",
+//       display: "flex",
+//       flexDirection: "column",
+//       alignItems: "center",
+//     },
+//     pillBar: {
+//       background: "#ffffff",
+//       borderRadius: "50px",
+//       height: "60px",
+//       display: "flex",
+//       alignItems: "center",
+//       padding: "1px",
+//       boxShadow: "0 10px 40px rgba(0, 0, 0, 0.15)",
+//       width: "100%",
+//       maxWidth: "1140px",
+//       border: "1px solid #eee",
+//     },
+//     section: {
+//       flex: 1,
+//       height: "100%",
+//       display: "flex",
+//       alignItems: "center",
+//       padding: "0 20px",
+//       position: "relative",
+//     },
+//     divider: { width: "1px", height: "40px", backgroundColor: "#eee" },
+//     input: {
+//       width: "100%",
+//       border: "none",
+//       outline: "none",
+//       fontSize: "15px",
+//       color: "#333",
+//     },
+//     searchBtn: {
+//       backgroundColor: "#ff1f4b",
+//       color: "white",
+//       border: "none",
+//       height: "50px",
+//       padding: "0 15px",
+//       borderRadius: "100px",
+//       fontWeight: "700",
+//       fontSize: "15px",
+//       cursor: "pointer",
+//       marginLeft: "10px",
+//     },
+//     scrollContainer: {
+//       maxHeight: "300px",
+//       overflowY: "auto",
+//       textAlign: "left",
+//     },
+//   };
+
+//   return (
+//     <div style={styles.wrapper}>
+//       <style>{`
+//         .menu-item { padding: 12px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f8f8f8; color: #555; transition: 0.2s; }
+//         .cat-name-box { flex-grow: 1; height: 100%; display: flex; align-items: center; }
+//         .cat-name-box:hover { color: #ff1f4b; }
+//         .arrow-box { padding: 5px 10px; border-radius: 4px; transition: 0.2s; }
+//         .arrow-box:hover { background: #eee; color: #ff1f4b; }
+//         .featured-item { background: #1c2a38; color: white; padding: 10px 25px; border-radius: 50px; display: flex; align-items: center; gap: 10px; cursor: pointer; opacity: 0.9; }
+//         .dropdown-box { position: absolute; top: 90px; right: 10px; width: 320px; background: white; border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 999; overflow: hidden; border: 1px solid #eee; }
+//         .custom-scroll::-webkit-scrollbar { width: 6px; }
+//         .custom-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+//       `}</style>
+
+//       <div style={styles.pillBar}>
+//         <div style={styles.section}>
+//           <input
+//             type="text"
+//             placeholder="What are you looking for?"
+//             style={styles.input}
+//           />
+//         </div>
+//         <div style={styles.divider}></div>
+//         <div style={styles.section}>
+//           <input ref={placeRef} placeholder="Location" style={styles.input} />
+//           <MapPin size={18} color="#ccc" />
+//         </div>
+//         <div style={styles.divider}></div>
+//         <div style={styles.section}>
+//           <div
+//             style={{
+//               ...styles.input,
+//               cursor: "pointer",
+//               display: "flex",
+//               justifyContent: "space-between",
+//               alignItems: "center",
+//             }}
+//             onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+//             <span
+//               style={{
+//                 color:
+//                   searchState.category === "All Categories" ? "#999" : "#333",
+//                 overflow: "hidden",
+//                 textOverflow: "ellipsis",
+//                 whiteSpace: "nowrap",
+//               }}>
+//               {searchState.category}
+//             </span>
+//             <ChevronDown size={18} color="#ccc" />
+//           </div>
+
+//           <button style={styles.searchBtn}>SEARCH</button>
+
+//           {isDropdownOpen && (
+//             <div className="dropdown-box">
+//               {currentView === "categories" ? (
+//                 <div>
+//                   <div
+//                     style={{
+//                       padding: "12px 20px",
+//                       background: "#f9f9f9",
+//                       fontSize: "11px",
+//                       fontWeight: "bold",
+//                       color: "#999",
+//                       display: "flex",
+//                       justifyContent: "space-between",
+//                     }}>
+//                     ALL CATEGORIES
+//                     <X
+//                       size={14}
+//                       style={{ cursor: "pointer" }}
+//                       onClick={() => setIsDropdownOpen(false)}
+//                     />
+//                   </div>
+//                   <div style={styles.scrollContainer} className="custom-scroll">
+//                     {categoriesData.map((item) => (
+//                       <div key={item.categoryId._id} className="menu-item">
+//                         {/* नाम पर क्लिक: सिर्फ सर्च */}
+//                         <div
+//                           className="cat-name-box"
+//                           onClick={() =>
+//                             selectCategoryOnly(item.categoryId.name)
+//                           }>
+//                           {item.categoryId.name}
+//                         </div>
+
+//                         {/* Arrow पर क्लिक: सब-कैटेगरी ओपन (अगर मौजूद है) */}
+//                         {item.subcategories &&
+//                           item.subcategories.length > 0 && (
+//                             <div
+//                               className="arrow-box"
+//                               onClick={(e) => openSubView(e, item)}>
+//                               <ChevronDown
+//                                 size={14}
+//                                 style={{ transform: "rotate(-90deg)" }}
+//                               />
+//                             </div>
+//                           )}
+//                       </div>
+//                     ))}
+//                   </div>
+//                 </div>
+//               ) : (
+//                 <div>
+//                   <div
+//                     onClick={() => setCurrentView("categories")}
+//                     style={{
+//                       background: "#ff1f4b",
+//                       color: "white",
+//                       padding: "12px 20px",
+//                       fontWeight: "bold",
+//                       cursor: "pointer",
+//                       display: "flex",
+//                       alignItems: "center",
+//                     }}>
+//                     <ArrowLeft size={16} style={{ marginRight: "10px" }} />{" "}
+//                     {activeCategory?.categoryId.name}
+//                   </div>
+//                   <div style={styles.scrollContainer} className="custom-scroll">
+//                     {activeCategory?.subcategories.map((sub) => (
+//                       <div
+//                         key={sub._id}
+//                         className="menu-item"
+//                         onClick={() => handleSubSelect(sub.subcategoryName)}>
+//                         {sub.subcategoryName}
+//                       </div>
+//                     ))}
+//                   </div>
+//                 </div>
+//               )}
+//             </div>
+//           )}
+//         </div>
+//       </div>
+
+//       {/* Featured Badges */}
+//       <div style={{ marginTop: "40px", textAlign: "center" }}>
+//         <p style={{ color: "white", marginBottom: "15px", fontSize: "16px" }}>
+//           Or browse featured categories:
+//         </p>
+//         <div style={{ display: "flex", gap: "15px", justifyContent: "center" }}>
+//           <div className="featured-item">
+//             <Car size={18} /> Cars
+//           </div>
+//           <div className="featured-item">
+//             <Bike size={18} /> Bikes
+//           </div>
+//           <div className="featured-item">
+//             <Briefcase size={18} /> Business Listings
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default HomeSearchBar;
 import React, { useState, useEffect } from "react";
-// ✅ FIX 1: यहाँ 'Autocomplete' को 'default' इम्पोर्ट की तरह ट्राई करें
-import Autocomplete from "react-google-autocomplete";
+import { useNavigate } from "react-router-dom";
+import { usePlacesWidget } from "react-google-autocomplete";
 import {
-  Search,
   MapPin,
   ChevronDown,
   ArrowLeft,
@@ -10,198 +286,338 @@ import {
   Car,
   Bike,
   Briefcase,
+  Search,
 } from "lucide-react";
-import { getSubCategoriesAPI } from "../services/authService";
+import {
+  getAllSubCategoriesApi,
+  getAllListingsApi,
+} from "../services/authService";
 
 const HomeSearchBar = () => {
+  const navigate = useNavigate();
   const [categoriesData, setCategoriesData] = useState([]);
-  const [isCatOpen, setIsCatOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [currentView, setCurrentView] = useState("categories");
   const [activeCategory, setActiveCategory] = useState(null);
 
   const [searchState, setSearchState] = useState({
     keyword: "",
     location: "",
-    radius: "Radius search",
     category: "All Categories",
   });
 
+  // URL Friendly Name banane ke liye helper
+  const slugify = (text) =>
+    text
+      ? text
+          .toLowerCase()
+          .trim()
+          .replace(/[^\w\s-]/g, "")
+          .replace(/[\s_-]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+      : "";
+
   useEffect(() => {
-    const loadCats = async () => {
+    const loadData = async () => {
       try {
-        const res = await getSubCategoriesAPI();
-        if (res.success) {
-          setCategoriesData(res.data || []);
-        }
+        const res = await getAllSubCategoriesApi();
+        if (res.success) setCategoriesData(res.data);
       } catch (err) {
         console.error("API Error:", err);
       }
     };
-    loadCats();
+    loadData();
   }, []);
 
-  const handleSubSelect = (sub) => {
-    setSearchState({ ...searchState, category: sub.subcategoryName });
-    setIsCatOpen(false);
-    setActiveCategory(null);
+  const { ref: placeRef } = usePlacesWidget({
+    apiKey: "YOUR_GOOGLE_MAPS_API_KEY", // Apni API Key yahan dalein
+    onPlaceSelected: (place) =>
+      setSearchState({ ...searchState, location: place.formatted_address }),
+    options: { types: ["(regions)"] },
+  });
+
+  // ✅ Main Search Functionality
+  const handleSearch = async () => {
+    try {
+      const { keyword, category, location } = searchState;
+
+      // 1. Pehle check karein ki kya keyword kisi Listing Title se match hota hai
+      const res = await getAllListingsApi();
+      const allListings = res?.listings || [];
+
+      const directMatch = allListings.find(
+        (item) =>
+          item.title.toLowerCase().trim() === keyword.toLowerCase().trim(),
+      );
+
+      if (directMatch) {
+        // Agar Exact Title mil gaya toh Details Page
+        navigate(`/browse/${slugify(directMatch.title)}`);
+      } else {
+        // Agar title nahi mila toh Browse page par filters ke saath jayein
+        navigate("/browse", {
+          state: {
+            keyword: keyword,
+            category: category,
+            location: location,
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Search Action Error:", error);
+      navigate("/browse");
+    }
+  };
+
+  const selectCategoryOnly = (name) => {
+    setSearchState({ ...searchState, category: name });
+    setIsDropdownOpen(false);
+  };
+
+  const openSubView = (e, item) => {
+    e.stopPropagation();
+    if (item.subcategories && item.subcategories.length > 0) {
+      setActiveCategory(item);
+      setCurrentView("subcategories");
+    }
+  };
+
+  const handleSubSelect = (subName) => {
+    setSearchState({ ...searchState, category: subName });
+    setIsDropdownOpen(false);
+    setCurrentView("categories");
+  };
+
+  const styles = {
+    wrapper: {
+      width: "100%",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    },
+    pillBar: {
+      background: "#ffffff",
+      borderRadius: "50px",
+      height: "60px",
+      display: "flex",
+      alignItems: "center",
+      padding: "1px",
+      boxShadow: "0 10px 40px rgba(0, 0, 0, 0.15)",
+      width: "100%",
+      maxWidth: "1140px",
+      border: "1px solid #eee",
+    },
+    section: {
+      flex: 1,
+      height: "100%",
+      display: "flex",
+      alignItems: "center",
+      padding: "0 20px",
+      position: "relative",
+    },
+    divider: { width: "1px", height: "40px", backgroundColor: "#eee" },
+    input: {
+      width: "100%",
+      border: "none",
+      outline: "none",
+      fontSize: "15px",
+      color: "#333",
+    },
+    searchBtn: {
+      backgroundColor: "#ff1f4b",
+      color: "white",
+      border: "none",
+      height: "50px",
+      padding: "0 25px",
+      borderRadius: "100px",
+      fontWeight: "700",
+      fontSize: "15px",
+      cursor: "pointer",
+      marginLeft: "10px",
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+    },
+    scrollContainer: {
+      maxHeight: "300px",
+      overflowY: "auto",
+      textAlign: "left",
+    },
   };
 
   return (
-    <div className="w-full py-6 flex flex-col items-center justify-center font-sans">
-      {/* --- PILL SHAPED SEARCH BAR --- */}
-      <div className="w-full max-w-6xl bg-white rounded-full shadow-xl flex flex-col lg:flex-row items-center p-1 border border-gray-200">
-        {/* 1. Keyword */}
-        <div className="flex-[1.5] w-full px-6 py-2">
+    <div style={styles.wrapper}>
+      <style>{`
+        .menu-item { padding: 12px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f8f8f8; color: #555; transition: 0.2s; }
+        .cat-name-box { flex-grow: 1; height: 100%; display: flex; align-items: center; }
+        .cat-name-box:hover { color: #ff1f4b; }
+        .arrow-box { padding: 5px 10px; border-radius: 4px; transition: 0.2s; }
+        .arrow-box:hover { background: #eee; color: #ff1f4b; }
+        .featured-item { background: #1c2a38; color: white; padding: 10px 25px; border-radius: 50px; display: flex; align-items: center; gap: 10px; cursor: pointer; opacity: 0.9; transition: 0.3s; }
+        .featured-item:hover { background: #ff1f4b; transform: translateY(-3px); }
+        .dropdown-box { position: absolute; top: 70px; right: 0; width: 320px; background: white; border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 999; overflow: hidden; border: 1px solid #eee; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+      `}</style>
+
+      <div style={styles.pillBar}>
+        {/* KEYWORD SEARCH */}
+        <div style={styles.section}>
           <input
             type="text"
-            placeholder="What are you looking for?"
-            className="w-full outline-none text-gray-600 text-[14px] bg-transparent"
+            placeholder="Search titles, keywords..."
+            style={styles.input}
+            value={searchState.keyword}
             onChange={(e) =>
               setSearchState({ ...searchState, keyword: e.target.value })
             }
           />
         </div>
 
-        <div className="hidden lg:block h-8 w-[1px] bg-gray-200"></div>
+        <div style={styles.divider}></div>
 
-        {/* 2. Location (Google API) */}
-        <div className="flex-1 w-full px-6 py-2 flex items-center justify-between">
-          {/* ✅ FIX 2: Autocomplete के लिए undefined चेक */}
-          {Autocomplete ? (
-            <Autocomplete
-              apiKey="YOUR_GOOGLE_MAPS_API_KEY" // अपना असली API की डालें
-              onPlaceSelected={(place) =>
-                setSearchState({
-                  ...searchState,
-                  location: place.formatted_address,
-                })
-              }
-              options={{ types: ["(regions)"] }}
-              placeholder="Location"
-              className="w-full outline-none text-gray-600 text-[14px] bg-transparent"
-            />
-          ) : (
-            <input
-              placeholder="Location"
-              className="w-full outline-none text-gray-600 text-[14px]"
-              onChange={(e) =>
-                setSearchState({ ...searchState, location: e.target.value })
-              }
-            />
-          )}
-          <MapPin size={16} className="text-gray-400" />
+        {/* LOCATION SEARCH */}
+        <div style={styles.section}>
+          <input
+            ref={placeRef}
+            placeholder="Location"
+            style={styles.input}
+            defaultValue={searchState.location}
+          />
+          <MapPin size={18} color="#ccc" />
         </div>
 
-        <div className="hidden lg:block h-8 w-[1px] bg-gray-200"></div>
+        <div style={styles.divider}></div>
 
-        {/* 3. Radius */}
-        <div className="flex-1 w-full px-6 py-2 flex items-center justify-between">
-          <select
-            className="w-full outline-none text-gray-600 text-[14px] bg-transparent appearance-none cursor-pointer"
-            onChange={(e) =>
-              setSearchState({ ...searchState, radius: e.target.value })
-            }>
-            <option>Radius search</option>
-            <option>10 km</option>
-            <option>50 km</option>
-          </select>
-          <ChevronDown size={16} className="text-gray-400" />
-        </div>
-
-        <div className="hidden lg:block h-8 w-[1px] bg-gray-200"></div>
-
-        {/* 4. Category */}
-        <div className="relative flex-1 w-full px-6 py-2">
+        {/* CATEGORY DROPDOWN */}
+        <div style={styles.section}>
           <div
-            className="flex items-center justify-between cursor-pointer"
-            onClick={() => setIsCatOpen(!isCatOpen)}>
-            <span className="text-gray-700 text-[14px] font-medium truncate">
+            style={{
+              ...styles.input,
+              cursor: "pointer",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+            <span
+              style={{
+                color:
+                  searchState.category === "All Categories" ? "#999" : "#333",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}>
               {searchState.category}
             </span>
-            <ChevronDown size={16} className="text-gray-400" />
+            <ChevronDown size={18} color="#ccc" />
           </div>
 
-          {isCatOpen && (
-            <div className="absolute top-full left-0 mt-4 w-72 bg-white rounded-xl shadow-2xl border border-gray-100 z-[999] overflow-hidden text-left">
-              {!activeCategory ? (
-                <div className="max-h-[350px] overflow-y-auto">
-                  <div className="p-3 bg-gray-50 border-b flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                    All Categories
+          <button style={styles.searchBtn} onClick={handleSearch}>
+            <Search size={18} /> SEARCH
+          </button>
+
+          {isDropdownOpen && (
+            <div className="dropdown-box">
+              {currentView === "categories" ? (
+                <div>
+                  <div
+                    style={{
+                      padding: "12px 20px",
+                      background: "#f9f9f9",
+                      fontSize: "11px",
+                      fontWeight: "bold",
+                      color: "#999",
+                      display: "flex",
+                      justifyContent: "space-between",
+                    }}>
+                    ALL CATEGORIES
                     <X
                       size={14}
-                      className="cursor-pointer"
-                      onClick={() => setIsCatOpen(false)}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setIsDropdownOpen(false)}
                     />
                   </div>
-                  {categoriesData.map((item) => (
-                    <div
-                      key={item.categoryId?._id || item._id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActiveCategory(item);
-                      }}
-                      className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0">
-                      <span className="text-gray-700 text-sm">
-                        {item.categoryId?.name}
-                      </span>
-                      <ChevronDown
-                        size={16}
-                        className="-rotate-90 text-gray-300"
-                      />
-                    </div>
-                  ))}
+                  <div style={styles.scrollContainer} className="custom-scroll">
+                    {categoriesData.map((item) => (
+                      <div key={item.categoryId._id} className="menu-item">
+                        <div
+                          className="cat-name-box"
+                          onClick={() =>
+                            selectCategoryOnly(item.categoryId.name)
+                          }>
+                          {item.categoryId.name}
+                        </div>
+
+                        {item.subcategories &&
+                          item.subcategories.length > 0 && (
+                            <div
+                              className="arrow-box"
+                              onClick={(e) => openSubView(e, item)}>
+                              <ChevronDown
+                                size={14}
+                                style={{ transform: "rotate(-90deg)" }}
+                              />
+                            </div>
+                          )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : (
-                <div className="max-h-[350px] overflow-y-auto">
+                <div>
                   <div
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveCategory(null);
-                    }}
-                    className="p-3 bg-[#ff1f4b] text-white flex items-center gap-2 cursor-pointer font-semibold text-sm">
-                    <ArrowLeft size={16} /> Back
+                    onClick={() => setCurrentView("categories")}
+                    style={{
+                      background: "#ff1f4b",
+                      color: "white",
+                      padding: "12px 20px",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                    }}>
+                    <ArrowLeft size={16} style={{ marginRight: "10px" }} />{" "}
+                    {activeCategory?.categoryId.name}
                   </div>
-                  <div className="p-3 bg-gray-100 text-[10px] font-bold text-gray-500 uppercase">
-                    {activeCategory.categoryId?.name}
+                  <div style={styles.scrollContainer} className="custom-scroll">
+                    {activeCategory?.subcategories.map((sub) => (
+                      <div
+                        key={sub._id}
+                        className="menu-item"
+                        onClick={() => handleSubSelect(sub.subcategoryName)}>
+                        {sub.subcategoryName}
+                      </div>
+                    ))}
                   </div>
-                  {activeCategory.subcategories?.map((sub) => (
-                    <div
-                      key={sub._id}
-                      onClick={() => handleSubSelect(sub)}
-                      className="px-8 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 text-gray-600 text-sm">
-                      {sub.subcategoryName}
-                    </div>
-                  ))}
                 </div>
               )}
             </div>
           )}
         </div>
-
-        {/* 5. Search Button */}
-        <button className="bg-[#ff1f4b] hover:bg-red-600 text-white px-10 py-3.5 rounded-full font-bold text-[16px] transition-all m-1 shadow-lg shadow-red-200">
-          Search
-        </button>
       </div>
 
-      {/* --- FEATURED CATEGORIES --- */}
-      <div className="mt-6 flex flex-wrap justify-center gap-3">
-        <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-5 py-2 rounded-full border border-white/20 text-white cursor-pointer hover:bg-white/30 transition-all">
-          <Car size={16} />
-          <span className="text-xs font-bold uppercase tracking-wider">
-            Cars
-          </span>
-        </div>
-        <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-5 py-2 rounded-full border border-white/20 text-white cursor-pointer hover:bg-white/30 transition-all">
-          <Bike size={16} />
-          <span className="text-xs font-bold uppercase tracking-wider">
-            Bikes
-          </span>
-        </div>
-        <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-5 py-2 rounded-full border border-white/20 text-white cursor-pointer hover:bg-white/30 transition-all">
-          <Briefcase size={16} />
-          <span className="text-xs font-bold uppercase tracking-wider">
-            Business
-          </span>
+      {/* Featured Badges */}
+      <div style={{ marginTop: "40px", textAlign: "center" }}>
+        <p style={{ color: "white", marginBottom: "15px", fontSize: "16px" }}>
+          Or browse featured categories:
+        </p>
+        <div style={{ display: "flex", gap: "15px", justifyContent: "center" }}>
+          <div
+            className="featured-item"
+            onClick={() => selectCategoryOnly("Cars")}>
+            <Car size={18} /> Cars
+          </div>
+          <div
+            className="featured-item"
+            onClick={() => selectCategoryOnly("Bikes")}>
+            <Bike size={18} /> Bikes
+          </div>
+          <div
+            className="featured-item"
+            onClick={() => selectCategoryOnly("Business")}>
+            <Briefcase size={18} /> Business
+          </div>
         </div>
       </div>
     </div>
