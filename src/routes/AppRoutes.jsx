@@ -73,18 +73,18 @@ const AppRoutes = () => {
           <Route path="/blog/:slug" element={<BlogDetail />} />
           <Route path="/testimonials" element={<TestimonialPage />} />
           <Route path="/home-search" element={<HomeSearchBar />} />
+          <Route path="/browse/:slug" element={<BrowseDetails />} />
 
           {/* --- PROTECTED ROUTES (Sirf Login aur Payment ke baad) --- */}
           <Route element={<ProtectedRoute />}>
             <Route path="/browse" element={<BrowseListings />} />
-            <Route path="/browse/:slug" element={<BrowseDetails />} />
             <Route path="/reviews/:slug" element={<ListingReviews />} />
             <Route path="/listing/:slug" element={<ListingDetails />} />
 
             {/* Dashboard Nested Routes */}
             <Route element={<DashboardLayout />}>
               <Route path="/listing" element={<Listing />} />
-              <Route path="/profile" element={<ProfileUpdate/>} />
+              <Route path="/profile" element={<ProfileUpdate />} />
               <Route path="/reviews" element={<Reviews />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/bookmarks" element={<MyBookings />} />

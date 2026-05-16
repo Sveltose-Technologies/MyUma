@@ -1,21 +1,35 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getFooterAPI } from "../../features/auth/api";
+// Import Logo APIs
+import { getLogoAPI, getImgURL } from "../../services/authService";
+
 const Footer = () => {
   const [footerData, setFooterData] = useState(null);
-  const footerAPI = async () => {
+  const [logoUrl, setLogoUrl] = useState("");
+  const [imageError, setImageError] = useState(false);
+
+  const fetchFooterAndLogo = async () => {
     try {
-      const response = await getFooterAPI();
-      if (response && response.length > 0) {
-        setFooterData(response[0]);
+      // 1. Fetch Footer Data
+      const footerRes = await getFooterAPI();
+      if (footerRes && footerRes.length > 0) {
+        setFooterData(footerRes[0]);
+      }
+
+      // 2. Fetch Logo Data
+      const logoRes = await getLogoAPI();
+      if (logoRes && logoRes.logo && logoRes.logo.logo) {
+        const finalUrl = getImgURL(logoRes.logo.logo);
+        setLogoUrl(finalUrl);
       }
     } catch (error) {
-      console.error("Error fetching footer data:", error);
+      console.error("Error fetching data:", error);
     }
   };
 
   useEffect(() => {
-    footerAPI();
+    fetchFooterAndLogo();
   }, []);
 
   return (
@@ -26,35 +40,47 @@ const Footer = () => {
           <div className="col-lg-4 col-md-12">
             <Link
               className="navbar-brand d-flex align-items-center text-decoration-none"
-              to="/"
-            >
-              <span className="brand-text text-white fs-2 fw-bold pb-2">
-                My<span className="text-tan">Uma</span>
-              </span>
+              to="/">
+              {/* Dynamic Logo Logic */}
+              {logoUrl && !imageError ? (
+                <img
+                  src={logoUrl}
+                  alt="Logo"
+                  onError={() => setImageError(true)}
+                  style={{
+                    maxHeight: "55px",
+                    width: "auto",
+                    objectFit: "contain",
+                  }}
+                  className="mb-3"
+                />
+              ) : (
+                <span className="brand-text text-white fs-2 fw-bold pb-2">
+                  My<span className="text-tan">Uma</span>
+                </span>
+              )}
             </Link>
-            <p className="text-white-50 mb-4">
+
+            <p className="text-white-50 mb-4 mt-2">
               {footerData?.content || "local businesses and services."}
             </p>
             <div className="d-flex gap-2">
               <a
                 href="#"
                 className="btn bg-gold rounded-circle d-flex align-items-center justify-content-center p-0"
-                style={{ width: "35px", height: "35px" }}
-              >
+                style={{ width: "35px", height: "35px" }}>
                 <i className="bi bi-facebook text-navy"></i>
               </a>
               <a
                 href="#"
                 className="btn bg-gold rounded-circle d-flex align-items-center justify-content-center p-0"
-                style={{ width: "35px", height: "35px" }}
-              >
+                style={{ width: "35px", height: "35px" }}>
                 <i className="bi bi-instagram text-navy"></i>
               </a>
               <a
                 href="#"
                 className="btn bg-gold rounded-circle d-flex align-items-center justify-content-center p-0"
-                style={{ width: "35px", height: "35px" }}
-              >
+                style={{ width: "35px", height: "35px" }}>
                 <i className="bi bi-twitter-x text-navy"></i>
               </a>
             </div>
@@ -67,24 +93,21 @@ const Footer = () => {
               <li className="mb-2">
                 <Link
                   to="/privacy"
-                  className="text-white-50 text-decoration-none"
-                >
+                  className="text-white-50 text-decoration-none">
                   Privacy Policy
                 </Link>
               </li>
               <li className="mb-2">
                 <Link
                   to="/about"
-                  className="text-white-50 text-decoration-none"
-                >
+                  className="text-white-50 text-decoration-none">
                   About Us
                 </Link>
               </li>
               <li className="mb-2">
                 <Link
                   to="/terms"
-                  className="text-white-50 text-decoration-none"
-                >
+                  className="text-white-50 text-decoration-none">
                   Terms & Conditions
                 </Link>
               </li>
@@ -96,9 +119,11 @@ const Footer = () => {
             <h6 className="fw-bold text-gold mb-4 text-uppercase">Services</h6>
             <ul className="list-unstyled">
               <li className="mb-2">
-                <a href="#" className="text-white-50 text-decoration-none">
+                <Link
+                  to="/listing"
+                  className="text-white-50 text-decoration-none">
                   Add Listing
-                </a>
+                </Link>
               </li>
               <li className="mb-2">
                 <a href="#" className="text-white-50 text-decoration-none">
@@ -106,9 +131,11 @@ const Footer = () => {
                 </a>
               </li>
               <li className="mb-2">
-                <a href="#" className="text-white-50 text-decoration-none">
+                <Link
+                  to="/contact"
+                  className="text-white-50 text-decoration-none">
                   Contact Us
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -148,15 +175,16 @@ const Footer = () => {
             </p>
           </div>
           <div className="col-md-6 text-center text-md-end">
-            <a
-              href="#"
-              className="text-white-50 small text-decoration-none me-3"
-            >
+            <Link
+              to="/privacy"
+              className="text-white-50 small text-decoration-none me-3">
               Privacy
-            </a>
-            <a href="#" className="text-white-50 small text-decoration-none">
+            </Link>
+            <Link
+              to="/terms"
+              className="text-white-50 small text-decoration-none">
               Terms
-            </a>
+            </Link>
           </div>
         </div>
       </div>

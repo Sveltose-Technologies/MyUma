@@ -608,7 +608,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg bg-white sticky-top shadow-sm w-100 border-0 py-2">
+    <nav className="navbar navbar-expand-lg bg-white fixed-top shadow-sm w-100 border-0 py-2">
       <div className="container px-4">
         {/* Logo Section */}
         <Link

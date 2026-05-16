@@ -965,8 +965,8 @@ const BrowseDetails = () => {
                   ${listing.items?.[0]?.price?.toLocaleString()}
                 </h2>
               </div>
-              <button className="btn btn-primary w-100 py-3 mb-3 fw-bold">
-                SCHEDULE VISIT
+              <button className="btn btn-primary w-100 mb-3 fw-bold">
+                Login To Bookmark Items
               </button>
               <a
                 href={`tel:${listing.phone}`}

@@ -490,7 +490,7 @@ const BrowseListings = () => {
                             </small>
                           )}
                         </div>
-                        <span
+                        {/* <span
                           className="small fw-800 text-primary text-decoration-underline"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -499,7 +499,7 @@ const BrowseListings = () => {
                             });
                           }}>
                           View Reviews
-                        </span>
+                        </span> */}
                       </div>
 
                       <h5 className="fw-800 text-navy mb-2 text-truncate ls-1">

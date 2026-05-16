@@ -366,6 +366,9 @@
 // };
 
 // export default FeaturedListings;
+
+
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navigation, Heart, Layers } from "lucide-react";
@@ -567,7 +570,7 @@ const FeaturedListings = () => {
                                   </small>
                                 )}
                               </div>
-                              <span
+                              {/* <span
                                 className="small fw-800 text-primary text-decoration-underline"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -576,7 +579,7 @@ const FeaturedListings = () => {
                                   });
                                 }}>
                                 View Reviews
-                              </span>
+                              </span> */}
                             </div>
 
                             <h5 className="fw-800 text-navy mb-2 text-truncate ls-1">
