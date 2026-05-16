@@ -528,6 +528,7 @@
 // };;
 
 // export default Login;
+
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser, registerUser, verifyOtp, logout } from "./authSlice";
@@ -578,7 +579,7 @@ const Login = () => {
     country: "",
     city: "",
     contactNo: "",
-    role: "user", // Default role
+    role: "user",
     status: "deactive",
     profileImage: null,
   });
@@ -597,30 +598,30 @@ const Login = () => {
     }
   };
 
+  // 1. LOGIN HANDLER
   const handleLogin = async (e) => {
     e.preventDefault();
     const res = await dispatch(loginUser(loginData));
 
     if (res.meta.requestStatus === "fulfilled") {
-      // 1. Check karein 'auth' object ko (kyunki payload mein 'auth' hai)
       const userData = res.payload.auth;
-      const userRole = userData?.role;
+      const token = res.payload.token;
 
-      // 2. Admin restriction logic
-      if (userRole === "admin") {
-        toast.error("Admin login not allowed here.");
-        dispatch(logout());
-        return;
-      }
+      // Save to localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      // Trigger Navbar Sync
+      window.dispatchEvent(new Event("storage"));
 
       startSession();
-      // 3. 'userData.fullName' use karein
       toast.success(`Welcome back, ${userData?.fullName || "User"}`);
       navigate("/");
     } else {
       toast.error(res.payload || "Login Failed");
     }
   };
+
   // 2. SIGNUP HANDLER
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -639,7 +640,7 @@ const Login = () => {
     }
   };
 
-  // 3. OTP VERIFICATION HANDLER (Registration & Forgot Password)
+  // 3. OTP VERIFICATION HANDLER
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     const emailToVerify =
@@ -656,12 +657,11 @@ const Login = () => {
           toast.error(res.payload || "Invalid OTP");
         }
       } else {
-        // Verification for Forgot Password
         const res = await verifyOtpAPI({ email: emailToVerify, otp });
         if (res) {
           toast.success("OTP Verified! Set your new password.");
           setShowOtp(false);
-          setShowResetForm(true); // Open Reset Password Form
+          setShowResetForm(true);
         }
       }
     } catch (error) {
@@ -669,7 +669,7 @@ const Login = () => {
     }
   };
 
-  // 4. FORGOT PASSWORD HANDLER
+  // 4. FORGOT PASSWORD
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     if (!resetEmail) return toast.error("Please enter email");
@@ -678,20 +678,19 @@ const Login = () => {
       setMode("forgot");
       setShowOtp(true);
       toast.info("Verification code sent to " + resetEmail);
-      // Close modal manually if needed (using data-bs-dismiss on button)
     } catch (err) {
       toast.error("User not found");
     }
   };
 
-  // 5. RESET PASSWORD HANDLER
+  // 5. RESET PASSWORD
   const handleResetPassword = async (e) => {
     e.preventDefault();
     if (changePasswordData.password !== changePasswordData.confirmPassword) {
       return toast.error("Passwords do not match");
     }
     try {
-      const res = await resetPasswordAPI({
+      await resetPasswordAPI({
         email: resetEmail,
         newPassword: changePasswordData.password,
         confirmPassword: changePasswordData.confirmPassword,
@@ -719,19 +718,17 @@ const Login = () => {
                 MyUma{" "}
               </h2>
 
-              {/* OTP VIEW */}
+              {/* VIEW LOGIC */}
               {showOtp ? (
                 <form onSubmit={handleVerifyOtp}>
                   <h4 className="text-center fw-bold">Verify OTP</h4>
                   <p className="text-center text-muted mb-4 small">
-                    {mode === "signup"
-                      ? "Verify your email to complete registration"
-                      : "Enter code to reset password"}
+                    Enter the 6-digit code sent to your email
                   </p>
                   <input
                     type="text"
                     className="form-control form-control-lg mb-3 text-center"
-                    placeholder="Enter 6-digit OTP"
+                    placeholder="Enter OTP"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
                     required
@@ -749,38 +746,33 @@ const Login = () => {
                     Back
                   </button>
                 </form>
-              ) : /* RESET PASSWORD VIEW */
-              showResetForm ? (
+              ) : showResetForm ? (
                 <form onSubmit={handleResetPassword}>
                   <h4 className="fw-bold text-center mb-4">New Password</h4>
-                  <div className="mb-3">
-                    <input
-                      type="password"
-                      placeholder="New Password"
-                      className="form-control py-2"
-                      required
-                      onChange={(e) =>
-                        setChangePasswordData({
-                          ...changePasswordData,
-                          password: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <input
-                      type="password"
-                      placeholder="Confirm New Password"
-                      className="form-control py-2"
-                      required
-                      onChange={(e) =>
-                        setChangePasswordData({
-                          ...changePasswordData,
-                          confirmPassword: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
+                  <input
+                    type="password"
+                    placeholder="New Password"
+                    className="form-control py-2 mb-3"
+                    required
+                    onChange={(e) =>
+                      setChangePasswordData({
+                        ...changePasswordData,
+                        password: e.target.value,
+                      })
+                    }
+                  />
+                  <input
+                    type="password"
+                    placeholder="Confirm Password"
+                    className="form-control py-2 mb-4"
+                    required
+                    onChange={(e) =>
+                      setChangePasswordData({
+                        ...changePasswordData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
+                  />
                   <button
                     className="btn btn-lg w-100 text-white"
                     style={{ backgroundColor: "#001f3f" }}>
@@ -788,7 +780,6 @@ const Login = () => {
                   </button>
                 </form>
               ) : (
-                /* MAIN LOGIN/REGISTER VIEW */
                 <>
                   <div className="p-1 mb-4 d-flex bg-light rounded-3 border">
                     <button
@@ -1022,7 +1013,6 @@ const Login = () => {
                           })
                         }
                       />
-
                       <button
                         className="btn btn-lg w-100 text-white fw-bold"
                         style={{ backgroundColor: "#001f3f" }}>

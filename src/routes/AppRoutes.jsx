@@ -19,7 +19,7 @@ import Pricing from "../pages/Pricing";
 import PaymentSuccess from "../pages/PaymentSuccess";
 import Blog from "../pages/Blog";
 import BlogDetail from "../pages/BlogDetail";
-import ProfileUpdate from "../pages/profile";
+import ProfileUpdate from "../pages/Profile";
 import BrowseListings from "../pages/BrowseListings";
 import BrowseDetails from "../pages/BrowseDetails";
 import AboutUs from "../pages/AboutUs";
@@ -84,7 +84,7 @@ const AppRoutes = () => {
             {/* Dashboard Nested Routes */}
             <Route element={<DashboardLayout />}>
               <Route path="/listing" element={<Listing />} />
-              <Route path="/profile" element={<ProfileUpdate />} />
+              <Route path="/profile" element={<ProfileUpdate/>} />
               <Route path="/reviews" element={<Reviews />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/bookmarks" element={<MyBookings />} />

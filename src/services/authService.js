@@ -77,13 +77,15 @@ export const getBannerAPI = async () => {
 // get profile
 
 export const getProfileAPI = async (id) => {
-  const response = await API.get(`/auth/get-by-id/${id}`); // Adjust URL to your backend
+  const response = await API.get(`/auth/get-by-id/${id}`);
+   // Adjust URL to your backend
   return response.data;
 };
 // update profile
 
 export const updateProfileAPI = async (id, data) => {
   const response = await API.put(`/auth/update/${id}`, data);
+  console.log("updated profile", response.data);
 
   return response.data;
 };
