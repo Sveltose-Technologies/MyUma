@@ -1,8 +1,26 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { MapPin, Heart, Clock, Star } from "lucide-react";
+import { MapPin, Heart, Clock, Star, User, Share2, Layers } from "lucide-react";
 import { toast } from "react-toastify";
+
+// Swiper for Carousel
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+
+import {
+  FaFacebook,
+  FaInstagram,
+  FaLinkedin,
+  FaYoutube,
+  FaWhatsapp,
+  FaSquareXTwitter,
+  FaEnvelope,
+  FaPinterest,
+} from "react-icons/fa6";
+
 import {
   getAllListingsApi,
   getImgURL,
@@ -18,18 +36,15 @@ const BrowseDetails = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
 
-  // Get Auth state from Redux
   const { isAuthenticated, user: reduxUser } = useSelector(
     (state) => state.auth,
   );
-
   const [listing, setListing] = useState(null);
   const [nearby, setNearby] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [listingRatings, setListingRatings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Syncing login check (Redux + LocalStorage)
   const currentUser = reduxUser || getUser();
   const isLoggedIn = isAuthenticated || !!localStorage.getItem("token");
 
@@ -58,8 +73,6 @@ const BrowseDetails = () => {
               i._id !== found._id,
           ),
         );
-
-        // Fetch Ratings
         const ratRes = await getRatingsAPI();
         if (ratRes.status && ratRes.data) {
           const filtered = ratRes.data.filter((r) => r.itemId === found._id);
@@ -84,24 +97,18 @@ const BrowseDetails = () => {
     window.scrollTo(0, 0);
   }, [fetchData]);
 
-  // Handle Bookmark Action
   const handleBookmark = async (e, item) => {
     e.stopPropagation();
-
-    // IF NOT LOGGED IN -> REDIRECT TO LOGIN PAGE
     if (!isLoggedIn) {
       toast.info("Please login to bookmark items...");
       navigate("/login");
       return;
     }
-
-    // IF LOGGED IN -> PERFORM BOOKMARK LOGIC
     const existingFav = favorites.find(
       (fav) =>
         (typeof fav.itemId === "object" ? fav.itemId._id : fav.itemId) ===
         item._id,
     );
-
     try {
       if (existingFav) {
         await deleteFavoriteAPI(existingFav._id);
@@ -135,66 +142,74 @@ const BrowseDetails = () => {
   );
 
   return (
-    <div className="bg-light min-vh-100 mt-5 pt-5 pb-5">
+    <div className="bg-light min-vh-100 mt-5 pt-lg-5 pt-4 pb-5">
       {/* HEADER SECTION */}
       <div className="bg-white border-bottom py-4 shadow-sm">
         <div className="container">
-          <div className="d-flex justify-content-between align-items-start flex-wrap">
-            <div>
-              <h1 className="fw-bold h2 mb-1" style={{ color: "#002147" }}>
-                {listing.title}
-              </h1>
-              <div className="d-flex align-items-center gap-3 mt-1">
-                <p className="text-muted small m-0 d-flex align-items-center gap-1">
-                  <MapPin size={14} className="text-danger" /> {listing.address}
+          <div className="row align-items-center g-3">
+            <div className="col-12 col-md-8">
+              <h1 className="fw-800 h2 mb-2 text-navy">{listing.title}</h1>
+              <div className="d-flex align-items-start gap-2">
+                <MapPin size={18} className="text-danger mt-1 flex-shrink-0" />
+                <p
+                  className="text-muted m-0 lh-sm"
+                  style={{ fontSize: "14px" }}>
+                  {listing.address}{" "}
                 </p>
-                <div className="d-flex align-items-center gap-1 bg-warning-subtle px-2 py-1 rounded text-warning fw-bold small">
-                  <Star size={12} fill="currentColor" /> {listingRatings.length}{" "}
-                  Ratings
-                </div>
               </div>
             </div>
-
-            {/* DYNAMIC BOOKMARK BUTTON */}
-            <button
-              onClick={(e) => handleBookmark(e, listing)}
-              className="btn bg-white border rounded-pill px-4 py-2 d-flex align-items-center gap-2 shadow-sm mt-2"
-              style={{ borderColor: "#ddd", color: "#555" }}>
-              <Heart
-                size={18}
-                color="#ff4d4d"
-                fill={isAlreadyFavorited ? "#ff4d4d" : "none"}
-              />
-              <span className="fw-bold small">
-                {isLoggedIn
-                  ? isAlreadyFavorited
-                    ? "Bookmarked"
-                    : "Bookmark Listing"
-                  : "Login To Bookmark Items"}
-              </span>
-            </button>
+            <div className="col-12 col-md-4 text-md-end">
+              <button
+                onClick={(e) => handleBookmark(e, listing)}
+                className="btn bg-white border rounded-pill px-4 py-2 d-inline-flex align-items-center gap-2 shadow-sm">
+                <Heart
+                  size={18}
+                  color="#ff4d4d"
+                  fill={isAlreadyFavorited ? "#ff4d4d" : "none"}
+                />
+                <span className="fw-bold small">
+                  {isLoggedIn
+                    ? isAlreadyFavorited
+                      ? "Bookmarked"
+                      : "Bookmark Listing"
+                    : "Login To Bookmark"}
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="container mt-4">
         <div className="row g-4">
-          <div className="col-lg-8">
-            <div
-              className="rounded-4 overflow-hidden mb-4 shadow-sm border"
-              style={{ height: "400px" }}>
-              <img
-                src={getImgURL(listing.images?.[0])}
-                className="w-100 h-100 object-fit-cover"
-                alt={listing.title}
-              />
+          <div className="col-lg-8 col-12">
+            {/* CAROUSEL */}
+            <div className="rounded-4 overflow-hidden mb-4 shadow-sm border bg-white">
+              <div
+                className="ratio ratio-16x9 ratio-md-4x3"
+                style={{ maxHeight: "450px" }}>
+                <Swiper
+                  modules={[Pagination, Autoplay]}
+                  pagination={{ clickable: true }}
+                  autoplay={{ delay: 3500 }}
+                  loop={listing.images?.length > 1}
+                  className="w-100 h-100">
+                  {listing.images?.map((img, index) => (
+                    <SwiperSlide key={index}>
+                      <img
+                        src={getImgURL(img)}
+                        className="w-100 h-100 object-fit-cover"
+                        alt={listing.title}
+                      />
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </div>
             </div>
 
             <BusinessDetailsUI
               listing={listing}
               nearby={nearby}
-              favorites={favorites}
-              handleBookmark={handleBookmark}
               navigate={navigate}
               slugify={slugify}
               getImgURL={getImgURL}
@@ -203,13 +218,36 @@ const BrowseDetails = () => {
             />
           </div>
 
-          <div className="col-lg-4">
-            {/* OPENING HOURS */}
+          <div className="col-lg-4 col-12">
+            {/* DYNAMIC CATEGORY & PRICE */}
             <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border">
-              <h6
-                className="fw-bold mb-4 d-flex align-items-center gap-2"
-                style={{ color: "#002147" }}>
-                <Clock size={18} className="text-warning" /> Opening Hours
+              <div className="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <small className="text-muted d-block mb-1">Category</small>
+                  <span className="badge bg-danger-subtle text-danger px-3 py-2 rounded-3 fw-800">
+                    {listing.categoryId?.name}
+                  </span>
+                </div>
+                <div className="text-end">
+                  <small className="text-muted d-block mb-1">Price Range</small>
+                  <h4 className="fw-800 m-0 text-navy">
+                    ${listing.items?.[0]?.price || 0}
+                  </h4>
+                </div>
+              </div>
+              {listing.subCategoryId && (
+                <div className="pt-2 border-top">
+                  <small className="text-muted d-block mb-1">Subcategory</small>
+                  <div className="d-flex align-items-center gap-2 text-navy fw-bold small">
+                    <Layers size={14} /> {listing.subCategoryId.subcategoryName}
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* DYNAMIC OWNER INFO */}
+            <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border">
+              <h6 className="fw-800 mb-3 d-flex align-items-center gap-2 text-navy">
+                <Clock size={18} className="text-warning" /> OPENING HOURS
               </h6>
               <div className="small text-muted">
                 {[
@@ -234,6 +272,100 @@ const BrowseDetails = () => {
                 </div>
               </div>
             </div>
+
+            <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border">
+              <div className="d-flex align-items-center gap-3">
+                <div
+                  className="bg-light rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                  style={{ width: "60px", height: "60px" }}>
+                  <User size={30} className="text-secondary" />
+                </div>
+                <div>
+                  <small className="text-muted d-block">Added By</small>
+                  <h5 className="fw-800 m-0 text-navy">MyUma</h5>
+                  <button className="btn btn-link text-danger p-0 text-decoration-none small fw-bold">
+                    View Profile ›
+                  </button>
+                </div>
+              </div>
+              <hr className="my-3 opacity-50" />
+              <p className="text-center small mb-0">
+                Please{" "}
+                <span
+                  className="text-danger fw-bold cursor-pointer"
+                  onClick={() => navigate("/login")}>
+                  sign in
+                </span>{" "}
+                to see contact details.
+              </p>
+            </div>
+            {/* FULLY DYNAMIC SOCIAL PROFILES - ONLY SHOWS IF DATA EXISTS */}
+            <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border">
+              <h6
+                className="fw-800 mb-3 text-navy ls-1 text-uppercase"
+                style={{ fontSize: "12px" }}>
+                Connect with Business
+              </h6>
+              <div className="d-flex flex-wrap gap-2 justify-content-center">
+                {listing.facebook && (
+                  <a
+                    href={listing.facebook}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-outline-facebook btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
+                    <FaFacebook /> <span className="fw-bold">Facebook</span>
+                  </a>
+                )}
+                {listing.twitter && (
+                  <a
+                    href={listing.twitter}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-outline-dark btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
+                    <FaSquareXTwitter />{" "}
+                    <span className="fw-bold">Twitter</span>
+                  </a>
+                )}
+                {listing.linkedin && (
+                  <a
+                    href={listing.linkedin}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-outline-linkedin btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
+                    <FaLinkedin /> <span className="fw-bold">LinkedIn</span>
+                  </a>
+                )}
+                {listing.instagram && (
+                  <a
+                    href={listing.instagram}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-outline-instagram btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
+                    <FaInstagram /> <span className="fw-bold">Instagram</span>
+                  </a>
+                )}
+                {listing.youtube && (
+                  <a
+                    href={listing.youtube}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-outline-danger btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
+                    <FaYoutube /> <span className="fw-bold">YouTube</span>
+                  </a>
+                )}
+                {listing.whatsappNo && (
+                  <a
+                    href={`https://wa.me/${listing.whatsappNo.replace(/\D/g, "")}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-outline-success btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
+                    <FaWhatsapp /> <span className="fw-bold">WhatsApp</span>
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* OPENING HOURS */}
           </div>
         </div>
       </div>

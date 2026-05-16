@@ -243,3 +243,23 @@ html, body {
 .navbar {
   z-index: 1030 !important;
 }
+
+/* Add these to your index.css to match all buttons */
+
+.btn-outline-facebook { border-color: #3b5998 !important; color: #3b5998 !important; }
+.btn-outline-facebook:hover { background-color: #3b5998 !important; color: #fff !important; }
+
+.btn-outline-linkedin { border-color: #0077b5 !important; color: #0077b5 !important; }
+.btn-outline-linkedin:hover { background-color: #0077b5 !important; color: #fff !important; }
+
+.btn-outline-instagram { border-color: #E4405F !important; color: #E4405F !important; }
+.btn-outline-instagram:hover { background-color: #E4405F !important; color: #fff !important; }
+
+.btn-outline-youtube { border-color: #FF0000 !important; color: #FF0000 !important; }
+.btn-outline-youtube:hover { background-color: #FF0000 !important; color: #fff !important; }
+
+/* Ensure standard Bootstrap Success (WhatsApp) and Dark (Twitter) are clean pills */
+.btn-outline-success.rounded-pill, 
+.btn-outline-dark.rounded-pill {
+  font-weight: 700 !important;
+}
