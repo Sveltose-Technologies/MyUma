@@ -1,773 +1,3 @@
-// // import React, { useState, useEffect, useCallback } from "react";
-// // import { useNavigate, useParams } from "react-router-dom";
-// // import { useSelector } from "react-redux";
-// // import { MapPin, Heart, Clock, Star, User, Share2, Layers } from "lucide-react";
-// // import { toast } from "react-toastify";
-
-// // // Swiper for Carousel
-// // import { Swiper, SwiperSlide } from "swiper/react";
-// // import { Pagination, Autoplay } from "swiper/modules";
-// // import "swiper/css";
-// // import "swiper/css/pagination";
-
-// // import {
-// //   FaFacebook,
-// //   FaInstagram,
-// //   FaLinkedin,
-// //   FaYoutube,
-// //   FaWhatsapp,
-// //   FaSquareXTwitter,
-// //   FaEnvelope,
-// //   FaPinterest,
-// // } from "react-icons/fa6";
-
-// // import {
-// //   getAllListingsApi,
-// //   getImgURL,
-// //   getFavoritesByUserAPI,
-// //   addFavoriteAPI,
-// //   deleteFavoriteAPI,
-// //   getRatingsAPI,
-// // } from "../services/authService";
-// // import { getUser } from "../utils/storage";
-// // import BusinessDetailsUI from "./BusinessDetailsUI";
-
-// // const BrowseDetails = () => {
-// //   const { slug } = useParams();
-// //   const navigate = useNavigate();
-
-// //   const { isAuthenticated, user: reduxUser } = useSelector(
-// //     (state) => state.auth,
-// //   );
-// //   const [listing, setListing] = useState(null);
-// //   const [nearby, setNearby] = useState([]);
-// //   const [favorites, setFavorites] = useState([]);
-// //   const [listingRatings, setListingRatings] = useState([]);
-// //   const [loading, setLoading] = useState(true);
-
-// //   const currentUser = reduxUser || getUser();
-// //   const isLoggedIn = isAuthenticated || !!localStorage.getItem("token");
-
-// //   const slugify = (text) =>
-// //     text
-// //       ? text
-// //           .toLowerCase()
-// //           .trim()
-// //           .replace(/[^\w\s-]/g, "")
-// //           .replace(/[\s_-]+/g, "-")
-// //           .replace(/^-+|-+$/g, "")
-// //       : "";
-
-// //   const fetchData = useCallback(async () => {
-// //     try {
-// //       const res = await getAllListingsApi();
-// //       const all = res?.listings || [];
-// //       const found = all.find((i) => slugify(i.title) === slug);
-
-// //       if (found) {
-// //         setListing(found);
-// //         setNearby(
-// //           all.filter(
-// //             (i) =>
-// //               i.categoryId?._id === found.categoryId?._id &&
-// //               i._id !== found._id,
-// //           ),
-// //         );
-// //         const ratRes = await getRatingsAPI();
-// //         if (ratRes.status && ratRes.data) {
-// //           const filtered = ratRes.data.filter((r) => r.itemId === found._id);
-// //           setListingRatings(filtered);
-// //         }
-// //       }
-
-// //       if (isLoggedIn && currentUser) {
-// //         const userId = currentUser._id || currentUser.id;
-// //         const favRes = await getFavoritesByUserAPI(userId);
-// //         if (favRes.success) setFavorites(favRes.data);
-// //       }
-// //     } catch (e) {
-// //       console.error("Fetch Error:", e);
-// //     } finally {
-// //       setLoading(false);
-// //     }
-// //   }, [slug, isLoggedIn, currentUser]);
-
-// //   useEffect(() => {
-// //     fetchData();
-// //     window.scrollTo(0, 0);
-// //   }, [fetchData]);
-
-// //   const handleBookmark = async (e, item) => {
-// //     e.stopPropagation();
-// //     if (!isLoggedIn) {
-// //       toast.info("Please login to bookmark items...");
-// //       navigate("/login");
-// //       return;
-// //     }
-// //     const existingFav = favorites.find(
-// //       (fav) =>
-// //         (typeof fav.itemId === "object" ? fav.itemId._id : fav.itemId) ===
-// //         item._id,
-// //     );
-// //     try {
-// //       if (existingFav) {
-// //         await deleteFavoriteAPI(existingFav._id);
-// //         setFavorites(favorites.filter((f) => f._id !== existingFav._id));
-// //         toast.info("Removed from bookmarks");
-// //       } else {
-// //         const res = await addFavoriteAPI({
-// //           userId: currentUser._id || currentUser.id,
-// //           itemId: item._id,
-// //         });
-// //         if (res.success) {
-// //           setFavorites([...favorites, res.data]);
-// //           toast.success("Added to bookmarks");
-// //         }
-// //       }
-// //     } catch (error) {
-// //       toast.error("Bookmark action failed");
-// //     }
-// //   };
-
-// //   if (loading || !listing)
-// //     return (
-// //       <div className="vh-100 d-flex align-items-center justify-content-center fw-bold text-navy">
-// //         Loading...
-// //       </div>
-// //     );
-
-// //   const isAlreadyFavorited = favorites.some(
-// //     (f) =>
-// //       (typeof f.itemId === "object" ? f.itemId._id : f.itemId) === listing._id,
-// //   );
-
-// //   return (
-// //     <div className="bg-light min-vh-100 mt-5 pt-lg-5 pt-4 pb-5">
-// //       {/* HEADER SECTION */}
-// //       <div className="bg-white border-bottom py-4 shadow-sm">
-// //         <div className="container">
-// //           <div className="row align-items-center g-3">
-// //             <div className="col-12 col-md-8">
-// //               <h1 className="fw-800 h2 mb-2 text-navy">{listing.title}</h1>
-// //               <div className="d-flex align-items-start gap-2">
-// //                 <MapPin size={18} className="text-danger mt-1 flex-shrink-0" />
-// //                 <p
-// //                   className="text-muted m-0 lh-sm"
-// //                   style={{ fontSize: "14px" }}>
-// //                   {listing.address}{" "}
-// //                 </p>
-// //               </div>
-// //             </div>
-// //             <div className="col-12 col-md-4 text-md-end">
-// //               <button
-// //                 onClick={(e) => handleBookmark(e, listing)}
-// //                 className="btn bg-white border rounded-pill px-4 py-2 d-inline-flex align-items-center gap-2 shadow-sm">
-// //                 <Heart
-// //                   size={18}
-// //                   color="#ff4d4d"
-// //                   fill={isAlreadyFavorited ? "#ff4d4d" : "none"}
-// //                 />
-// //                 <span className="fw-bold small">
-// //                   {isLoggedIn
-// //                     ? isAlreadyFavorited
-// //                       ? "Bookmarked"
-// //                       : "Bookmark Listing"
-// //                     : "Login To Bookmark"}
-// //                 </span>
-// //               </button>
-// //             </div>
-// //           </div>
-// //         </div>
-// //       </div>
-
-// //       <div className="container mt-4">
-// //         <div className="row g-4">
-// //           <div className="col-lg-8 col-12">
-// //             {/* CAROUSEL */}
-// //             <div className="rounded-4 overflow-hidden mb-4 shadow-sm border bg-white">
-// //               <div
-// //                 className="ratio ratio-16x9 ratio-md-4x3"
-// //                 style={{ maxHeight: "450px" }}>
-// //                 <Swiper
-// //                   modules={[Pagination, Autoplay]}
-// //                   pagination={{ clickable: true }}
-// //                   autoplay={{ delay: 3500 }}
-// //                   loop={listing.images?.length > 1}
-// //                   className="w-100 h-100">
-// //                   {listing.images?.map((img, index) => (
-// //                     <SwiperSlide key={index}>
-// //                       <img
-// //                         src={getImgURL(img)}
-// //                         className="w-100 h-100 object-fit-cover"
-// //                         alt={listing.title}
-// //                       />
-// //                     </SwiperSlide>
-// //                   ))}
-// //                 </Swiper>
-// //               </div>
-// //             </div>
-
-// //             <BusinessDetailsUI
-// //               listing={listing}
-// //               nearby={nearby}
-// //               navigate={navigate}
-// //               slugify={slugify}
-// //               getImgURL={getImgURL}
-// //               listingRatings={listingRatings}
-// //               refreshData={fetchData}
-// //             />
-// //           </div>
-
-// //           <div className="col-lg-4 col-12">
-// //             {/* DYNAMIC CATEGORY & PRICE */}
-// //             <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border">
-// //               <div className="d-flex justify-content-between align-items-start mb-3">
-// //                 <div>
-// //                   <small className="text-muted d-block mb-1">Category</small>
-// //                   <span className="badge bg-danger-subtle text-danger px-3 py-2 rounded-3 fw-800">
-// //                     {listing.categoryId?.name}
-// //                   </span>
-// //                 </div>
-// //                 <div className="text-end">
-// //                   <small className="text-muted d-block mb-1">Price Range</small>
-// //                   <h4 className="fw-800 m-0 text-navy">
-// //                     ${listing.items?.[0]?.price || 0}
-// //                   </h4>
-// //                 </div>
-// //               </div>
-// //               {listing.subCategoryId && (
-// //                 <div className="pt-2 border-top">
-// //                   <small className="text-muted d-block mb-1">Subcategory</small>
-// //                   <div className="d-flex align-items-center gap-2 text-navy fw-bold small">
-// //                     <Layers size={14} /> {listing.subCategoryId.subcategoryName}
-// //                   </div>
-// //                 </div>
-// //               )}
-// //             </div>
-// //             {/* DYNAMIC OWNER INFO */}
-// //             <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border">
-// //               <h6 className="fw-800 mb-3 d-flex align-items-center gap-2 text-navy">
-// //                 <Clock size={18} className="text-warning" /> OPENING HOURS
-// //               </h6>
-// //               <div className="small text-muted">
-// //                 {[
-// //                   "Monday",
-// //                   "Tuesday",
-// //                   "Wednesday",
-// //                   "Thursday",
-// //                   "Friday",
-// //                   "Saturday",
-// //                 ].map((day) => (
-// //                   <div
-// //                     key={day}
-// //                     className="d-flex justify-content-between py-2 border-bottom border-light">
-// //                     <span>{day}</span>{" "}
-// //                     <span className="fw-bold text-dark">
-// //                       08:00 AM - 06:00 PM
-// //                     </span>
-// //                   </div>
-// //                 ))}
-// //                 <div className="d-flex justify-content-between py-2 text-danger fw-bold">
-// //                   <span>Sunday</span> <span>Closed</span>
-// //                 </div>
-// //               </div>
-// //             </div>
-
-// //             <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border">
-// //               <div className="d-flex align-items-center gap-3">
-// //                 <div
-// //                   className="bg-light rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-// //                   style={{ width: "60px", height: "60px" }}>
-// //                   <User size={30} className="text-secondary" />
-// //                 </div>
-// //                 <div>
-// //                   <small className="text-muted d-block">Added By</small>
-// //                   <h5 className="fw-800 m-0 text-navy">MyUma</h5>
-
-// //                 </div>
-// //               </div>
-// //               <hr className="my-3 opacity-50" />
-// //               <p className="text-center small mb-0">
-// //                 Please{" "}
-// //                 <span
-// //                   className="text-danger fw-bold cursor-pointer"
-// //                   onClick={() => navigate("/login")}>
-// //                   sign in
-// //                 </span>{" "}
-// //                 to see contact details.
-// //               </p>
-// //             </div>
-// //             {/* FULLY DYNAMIC SOCIAL PROFILES - ONLY SHOWS IF DATA EXISTS */}
-// //             <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border">
-// //               <h6
-// //                 className="fw-800 mb-3 text-navy ls-1 text-uppercase"
-// //                 style={{ fontSize: "12px" }}>
-// //                 Connect with Business
-// //               </h6>
-// //               <div className="d-flex flex-wrap gap-2 justify-content-center">
-// //                 {listing.facebook && (
-// //                   <a
-// //                     href={listing.facebook}
-// //                     target="_blank"
-// //                     rel="noreferrer"
-// //                     className="btn btn-outline-facebook btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
-// //                     <FaFacebook /> <span className="fw-bold">Facebook</span>
-// //                   </a>
-// //                 )}
-// //                 {listing.twitter && (
-// //                   <a
-// //                     href={listing.twitter}
-// //                     target="_blank"
-// //                     rel="noreferrer"
-// //                     className="btn btn-outline-dark btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
-// //                     <FaSquareXTwitter />{" "}
-// //                     <span className="fw-bold">Twitter</span>
-// //                   </a>
-// //                 )}
-// //                 {listing.linkedin && (
-// //                   <a
-// //                     href={listing.linkedin}
-// //                     target="_blank"
-// //                     rel="noreferrer"
-// //                     className="btn btn-outline-linkedin btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
-// //                     <FaLinkedin /> <span className="fw-bold">LinkedIn</span>
-// //                   </a>
-// //                 )}
-// //                 {listing.instagram && (
-// //                   <a
-// //                     href={listing.instagram}
-// //                     target="_blank"
-// //                     rel="noreferrer"
-// //                     className="btn btn-outline-instagram btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
-// //                     <FaInstagram /> <span className="fw-bold">Instagram</span>
-// //                   </a>
-// //                 )}
-// //                 {listing.youtube && (
-// //                   <a
-// //                     href={listing.youtube}
-// //                     target="_blank"
-// //                     rel="noreferrer"
-// //                     className="btn btn-outline-danger btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
-// //                     <FaYoutube /> <span className="fw-bold">YouTube</span>
-// //                   </a>
-// //                 )}
-// //                 {listing.whatsappNo && (
-// //                   <a
-// //                     href={`https://wa.me/${listing.whatsappNo.replace(/\D/g, "")}`}
-// //                     target="_blank"
-// //                     rel="noreferrer"
-// //                     className="btn btn-outline-success btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
-// //                     <FaWhatsapp /> <span className="fw-bold">WhatsApp</span>
-// //                   </a>
-// //                 )}
-// //               </div>
-// //             </div>
-
-// //             {/* OPENING HOURS */}
-// //           </div>
-// //         </div>
-// //       </div>
-// //     </div>
-// //   );
-// // };
-
-// // export default BrowseDetails;
-// import React, { useState, useEffect, useCallback } from "react";
-// import { useNavigate, useParams } from "react-router-dom";
-// import { useSelector } from "react-redux";
-// import {
-//   MapPin,
-//   Heart,
-//   Clock,
-//   Star,
-//   User,
-//   Share2,
-//   Layers,
-//   Phone,
-// } from "lucide-react";
-// import { toast } from "react-toastify";
-
-// // Swiper for Carousel
-// import { Swiper, SwiperSlide } from "swiper/react";
-// import { Pagination, Autoplay } from "swiper/modules";
-// import "swiper/css";
-// import "swiper/css/pagination";
-
-// import {
-//   FaFacebook,
-//   FaInstagram,
-//   FaLinkedin,
-//   FaYoutube,
-//   FaWhatsapp,
-//   FaSquareXTwitter,
-// } from "react-icons/fa6";
-
-// import {
-//   getAllListingsApi,
-//   getImgURL,
-//   getFavoritesByUserAPI,
-//   addFavoriteAPI,
-//   deleteFavoriteAPI,
-//   getRatingsAPI,
-// } from "../services/authService";
-// import { getUser } from "../utils/storage";
-// import BusinessDetailsUI from "./BusinessDetailsUI";
-
-// const BrowseDetails = () => {
-//   const { slug } = useParams();
-//   const navigate = useNavigate();
-
-//   const { isAuthenticated, user: reduxUser } = useSelector(
-//     (state) => state.auth,
-//   );
-//   const [listing, setListing] = useState(null);
-//   const [nearby, setNearby] = useState([]);
-//   const [favorites, setFavorites] = useState([]);
-//   const [listingRatings, setListingRatings] = useState([]);
-//   const [loading, setLoading] = useState(true);
-
-//   const currentUser = reduxUser || getUser();
-//   const isLoggedIn = isAuthenticated || !!localStorage.getItem("token");
-
-//   const slugify = (text) =>
-//     text
-//       ? text
-//           .toLowerCase()
-//           .trim()
-//           .replace(/[^\w\s-]/g, "")
-//           .replace(/[\s_-]+/g, "-")
-//           .replace(/^-+|-+$/g, "")
-//       : "";
-
-//   const fetchData = useCallback(async () => {
-//     try {
-//       const res = await getAllListingsApi();
-//       const all = res?.listings || [];
-//       const found = all.find((i) => slugify(i.title) === slug);
-
-//       if (found) {
-//         setListing(found);
-//         setNearby(
-//           all.filter(
-//             (i) =>
-//               i.categoryId?._id === found.categoryId?._id &&
-//               i._id !== found._id,
-//           ),
-//         );
-//         const ratRes = await getRatingsAPI();
-//         if (ratRes.status && ratRes.data) {
-//           const filtered = ratRes.data.filter((r) => r.itemId === found._id);
-//           setListingRatings(filtered);
-//         }
-//       }
-
-//       if (isLoggedIn && currentUser) {
-//         const userId = currentUser._id || currentUser.id;
-//         const favRes = await getFavoritesByUserAPI(userId);
-//         if (favRes.success) setFavorites(favRes.data);
-//       }
-//     } catch (e) {
-//       console.error("Fetch Error:", e);
-//     } finally {
-//       setLoading(false);
-//     }
-//   }, [slug, isLoggedIn, currentUser]);
-
-//   useEffect(() => {
-//     fetchData();
-//     window.scrollTo(0, 0);
-//   }, [fetchData]);
-
-//   const handleBookmark = async (e, item) => {
-//     e.stopPropagation();
-//     if (!isLoggedIn) {
-//       toast.info("Please login to bookmark items...");
-//       navigate("/login");
-//       return;
-//     }
-//     const existingFav = favorites.find(
-//       (fav) =>
-//         (typeof fav.itemId === "object" ? fav.itemId._id : fav.itemId) ===
-//         item._id,
-//     );
-//     try {
-//       if (existingFav) {
-//         await deleteFavoriteAPI(existingFav._id);
-//         setFavorites(favorites.filter((f) => f._id !== existingFav._id));
-//         toast.info("Removed from bookmarks");
-//       } else {
-//         const res = await addFavoriteAPI({
-//           userId: currentUser._id || currentUser.id,
-//           itemId: item._id,
-//         });
-//         if (res.success) {
-//           setFavorites([...favorites, res.data]);
-//           toast.success("Added to bookmarks");
-//         }
-//       }
-//     } catch (error) {
-//       toast.error("Bookmark action failed");
-//     }
-//   };
-
-//   if (loading || !listing)
-//     return (
-//       <div className="vh-100 d-flex align-items-center justify-content-center fw-bold text-navy">
-//         Loading...
-//       </div>
-//     );
-
-//   const isAlreadyFavorited = favorites.some(
-//     (f) =>
-//       (typeof f.itemId === "object" ? f.itemId._id : f.itemId) === listing._id,
-//   );
-
-//   return (
-//     <div className="bg-light min-vh-100 mt-5 pt-lg-5 pt-4 pb-5">
-//       {/* HEADER SECTION */}
-//       <div className="bg-white border-bottom py-4 shadow-sm">
-//         <div className="container">
-//           <div className="row align-items-center g-3">
-//             <div className="col-12 col-md-8">
-//               <h1 className="fw-800 h2 mb-2 text-navy">{listing.title}</h1>
-//               <div className="d-flex align-items-start gap-2">
-//                 <MapPin size={18} className="text-danger mt-1 flex-shrink-0" />
-//                 <p
-//                   className="text-muted m-0 lh-sm"
-//                   style={{ fontSize: "14px" }}>
-//                   {listing.address}
-//                 </p>
-//               </div>
-//             </div>
-//             <div className="col-12 col-md-4 text-md-end">
-//               <button
-//                 onClick={(e) => handleBookmark(e, listing)}
-//                 className="btn bg-white border rounded-pill px-4 py-2 d-inline-flex align-items-center gap-2 shadow-sm">
-//                 <Heart
-//                   size={18}
-//                   color="#ff4d4d"
-//                   fill={isAlreadyFavorited ? "#ff4d4d" : "none"}
-//                 />
-//                 <span className="fw-bold small">
-//                   {isLoggedIn
-//                     ? isAlreadyFavorited
-//                       ? "Bookmarked"
-//                       : "Bookmark Listing"
-//                     : "Login To Bookmark"}
-//                 </span>
-//               </button>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-
-//       <div className="container mt-4">
-//         <div className="row g-4">
-//           <div className="col-lg-8 col-12">
-//             {/* CAROUSEL */}
-//             <div className="rounded-4 overflow-hidden mb-4 shadow-sm border bg-white">
-//               <div
-//                 className="ratio ratio-16x9 ratio-md-4x3"
-//                 style={{ maxHeight: "450px" }}>
-//                 <Swiper
-//                   modules={[Pagination, Autoplay]}
-//                   pagination={{ clickable: true }}
-//                   autoplay={{ delay: 3500 }}
-//                   loop={listing.images?.length > 1}
-//                   className="w-100 h-100">
-//                   {listing.images?.map((img, index) => (
-//                     <SwiperSlide key={index}>
-//                       <img
-//                         src={getImgURL(img)}
-//                         className="w-100 h-100 object-fit-cover"
-//                         alt={listing.title}
-//                       />
-//                     </SwiperSlide>
-//                   ))}
-//                 </Swiper>
-//               </div>
-//             </div>
-
-//             {/* MAIN CONTENT (Includes Video & Description logic inside) */}
-//             <BusinessDetailsUI
-//               listing={listing}
-//               nearby={nearby}
-//               navigate={navigate}
-//               slugify={slugify}
-//               getImgURL={getImgURL}
-//               listingRatings={listingRatings}
-//               refreshData={fetchData}
-//             />
-//           </div>
-
-//           <div className="col-lg-4 col-12">
-//             {/* CATEGORY & PRICE */}
-//             <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border">
-//               <div className="d-flex justify-content-between align-items-start mb-3">
-//                 <div>
-//                   <small className="text-muted d-block mb-1">Category</small>
-//                   <span className="badge bg-danger-subtle text-danger px-3 py-2 rounded-3 fw-800">
-//                     {listing.categoryId?.name}
-//                   </span>
-//                 </div>
-//                 <div className="text-end">
-//                   <small className="text-muted d-block mb-1">Price Range</small>
-//                   <h4 className="fw-800 m-0 text-navy">
-//                     ${listing.items?.[0]?.price || 0}
-//                   </h4>
-//                 </div>
-//               </div>
-//               {listing.subCategoryId && (
-//                 <div className="pt-2 border-top">
-//                   <small className="text-muted d-block mb-1">Subcategory</small>
-//                   <div className="d-flex align-items-center gap-2 text-navy fw-bold small">
-//                     <Layers size={14} /> {listing.subCategoryId.subcategoryName}
-//                   </div>
-//                 </div>
-//               )}
-//             </div>
-
-//             {/* OPENING HOURS */}
-//             <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border">
-//               <h6 className="fw-800 mb-3 d-flex align-items-center gap-2 text-navy">
-//                 <Clock size={18} className="text-warning" /> OPENING HOURS
-//               </h6>
-//               <div className="small text-muted">
-//                 {[
-//                   "Monday",
-//                   "Tuesday",
-//                   "Wednesday",
-//                   "Thursday",
-//                   "Friday",
-//                   "Saturday",
-//                 ].map((day) => (
-//                   <div
-//                     key={day}
-//                     className="d-flex justify-content-between py-2 border-bottom border-light">
-//                     <span>{day}</span>
-//                     <span className="fw-bold text-dark">
-//                       08:00 AM - 06:00 PM
-//                     </span>
-//                   </div>
-//                 ))}
-//                 <div className="d-flex justify-content-between py-2 text-danger fw-bold">
-//                   <span>Sunday</span> <span>Closed</span>
-//                 </div>
-//               </div>
-//             </div>
-
-//             {/* CONTACT CARD */}
-//             <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border">
-//               <div className="d-flex align-items-center gap-3">
-//                 <div
-//                   className="bg-light rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-//                   style={{ width: "60px", height: "60px" }}>
-//                   <User size={30} className="text-secondary" />
-//                 </div>
-//                 <div>
-//                   <small className="text-muted d-block">Added By</small>
-//                   <h5 className="fw-800 m-0 text-navy">MyUma</h5>
-//                 </div>
-//               </div>
-//               <hr className="my-3 opacity-50" />
-
-//               {isLoggedIn ? (
-//                 <div className="text-center py-2">
-//                   <p className="text-muted small mb-1 uppercase fw-bold">
-//                     Contact Details
-//                   </p>
-//                   <a
-//                     href={`tel:${listing.phone}`}
-//                     className="text-danger fw-800 text-decoration-none h5 d-flex align-items-center justify-content-center gap-2">
-//                     <Phone size={18} /> {listing.phone || "No Phone Provided"}
-//                   </a>
-//                 </div>
-//               ) : (
-//                 <p className="text-center small mb-0">
-//                   Please{" "}
-//                   <span
-//                     className="text-danger fw-bold cursor-pointer"
-//                     onClick={() => navigate("/login")}>
-//                     sign in
-//                   </span>{" "}
-//                   to see contact details.
-//                 </p>
-//               )}
-//             </div>
-
-//             {/* SOCIAL PROFILES */}
-//             <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border">
-//               <h6
-//                 className="fw-800 mb-3 text-navy ls-1 text-uppercase"
-//                 style={{ fontSize: "12px" }}>
-//                 Connect with Business
-//               </h6>
-//               <div className="d-flex flex-wrap gap-2 justify-content-center">
-//                 {listing.facebook && (
-//                   <a
-//                     href={listing.facebook}
-//                     target="_blank"
-//                     rel="noreferrer"
-//                     className="btn btn-outline-facebook btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
-//                     <FaFacebook /> <span className="fw-bold">Facebook</span>
-//                   </a>
-//                 )}
-//                 {listing.twitter && (
-//                   <a
-//                     href={listing.twitter}
-//                     target="_blank"
-//                     rel="noreferrer"
-//                     className="btn btn-outline-dark btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
-//                     <FaSquareXTwitter />{" "}
-//                     <span className="fw-bold">Twitter</span>
-//                   </a>
-//                 )}
-//                 {listing.linkedin && (
-//                   <a
-//                     href={listing.linkedin}
-//                     target="_blank"
-//                     rel="noreferrer"
-//                     className="btn btn-outline-linkedin btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
-//                     <FaLinkedin /> <span className="fw-bold">LinkedIn</span>
-//                   </a>
-//                 )}
-//                 {listing.instagram && (
-//                   <a
-//                     href={listing.instagram}
-//                     target="_blank"
-//                     rel="noreferrer"
-//                     className="btn btn-outline-instagram btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
-//                     <FaInstagram /> <span className="fw-bold">Instagram</span>
-//                   </a>
-//                 )}
-//                 {listing.youtube && (
-//                   <a
-//                     href={listing.youtube}
-//                     target="_blank"
-//                     rel="noreferrer"
-//                     className="btn btn-outline-danger btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
-//                     <FaYoutube /> <span className="fw-bold">YouTube</span>
-//                   </a>
-//                 )}
-//                 {listing.whatsappNo && (
-//                   <a
-//                     href={`https://wa.me/${listing.whatsappNo.replace(/\D/g, "")}`}
-//                     target="_blank"
-//                     rel="noreferrer"
-//                     className="btn btn-outline-success btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
-//                     <FaWhatsapp /> <span className="fw-bold">WhatsApp</span>
-//                   </a>
-//                 )}
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default BrowseDetails;
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -782,6 +12,7 @@ import {
   Send,
   X,
   Loader2,
+  ArrowLeft,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -797,7 +28,6 @@ import {
   FaLinkedin,
   FaYoutube,
   FaWhatsapp,
-  FaSquareXTwitter,
 } from "react-icons/fa6";
 
 import {
@@ -809,6 +39,7 @@ import {
   getRatingsAPI,
   getChatHistoryAPI,
   sendMessageAPI,
+  getChatByAdminAPI,
 } from "../services/authService";
 import { getUser } from "../utils/storage";
 import BusinessDetailsUI from "./BusinessDetailsUI";
@@ -827,13 +58,17 @@ const BrowseDetails = () => {
   const [listingRatings, setListingRatings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Chat States
+  // --- CHAT STATES ---
   const [showChat, setShowChat] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [chatUsers, setChatUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [viewMode, setViewMode] = useState("list");
 
   const currentUser = reduxUser || getUser();
+  const currentId = currentUser?._id || currentUser?.id;
   const isLoggedIn = isAuthenticated || !!localStorage.getItem("token");
 
   const slugify = (text) =>
@@ -867,10 +102,8 @@ const BrowseDetails = () => {
           setListingRatings(filtered);
         }
       }
-
-      if (isLoggedIn && currentUser) {
-        const userId = currentUser._id || currentUser.id;
-        const favRes = await getFavoritesByUserAPI(userId);
+      if (isLoggedIn && currentId) {
+        const favRes = await getFavoritesByUserAPI(currentId);
         if (favRes.success) setFavorites(favRes.data);
       }
     } catch (e) {
@@ -878,57 +111,86 @@ const BrowseDetails = () => {
     } finally {
       setLoading(false);
     }
-  }, [slug, isLoggedIn, currentUser]);
+  }, [slug, isLoggedIn, currentId]);
 
   useEffect(() => {
     fetchData();
     window.scrollTo(0, 0);
   }, [fetchData]);
 
-  // --- Chat Logic ---
-  const fetchChatHistory = async () => {
-    if (!isLoggedIn || !listing?.ownerId?._id) return;
+  // --- CHAT LOGIC ---
+  const isOwnerOfListing = isLoggedIn && currentId === listing?.ownerId?._id;
+
+  // REQ: Login check logic for Chat Icon
+  const handleChatIconClick = () => {
+    if (!isLoggedIn) {
+      toast.info("Please login to start a conversation with the owner.");
+      navigate("/login");
+      return;
+    }
+    setShowChat(true);
+  };
+
+  const fetchChatData = async () => {
+    if (!isLoggedIn || !listing) return;
     try {
-      const res = await getChatHistoryAPI(
-        currentUser._id || currentUser.id,
-        listing.ownerId._id,
-      );
-      if (res.success) setChatMessages(res.data);
+      if (isOwnerOfListing) {
+        const res = await getChatByAdminAPI(currentId);
+        if (res.success) {
+          const uniqueUsers = [];
+          const map = new Map();
+          res.data.forEach((msg) => {
+            const otherUser =
+              msg.senderId === currentId ? msg.receiverData : msg.senderData;
+            if (otherUser && !map.has(otherUser._id)) {
+              map.set(otherUser._id, true);
+              uniqueUsers.push(otherUser);
+            }
+          });
+          setChatUsers(uniqueUsers);
+        }
+        if (selectedUser) {
+          const history = await getChatHistoryAPI(currentId, selectedUser._id);
+          if (history.success) setChatMessages(history.data);
+        }
+      } else {
+        const history = await getChatHistoryAPI(currentId, listing.ownerId._id);
+        if (history.success) setChatMessages(history.data);
+      }
     } catch (err) {
-      console.error("Chat history error", err);
+      console.error(err);
     }
   };
 
   useEffect(() => {
     if (showChat) {
-      fetchChatHistory();
-      const interval = setInterval(fetchChatHistory, 5000); // Poll for new messages
+      fetchChatData();
+      const interval = setInterval(fetchChatData, 4000);
       return () => clearInterval(interval);
     }
-  }, [showChat]);
+  }, [showChat, selectedUser, listing]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages]);
+  }, [chatMessages, viewMode]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
-
     setIsSending(true);
     try {
       const payload = {
-        senderId: currentUser._id || currentUser.id,
-        receiverId: listing.ownerId._id,
+        senderId: currentId,
+        receiverId: isOwnerOfListing ? selectedUser._id : listing.ownerId._id,
         message: newMessage,
       };
       const res = await sendMessageAPI(payload);
       if (res.success) {
         setNewMessage("");
-        fetchChatHistory();
+        fetchChatData();
       }
     } catch (err) {
-      toast.error("Failed to send message");
+      toast.error("Failed to send");
     } finally {
       setIsSending(false);
     }
@@ -937,7 +199,7 @@ const BrowseDetails = () => {
   const handleBookmark = async (e, item) => {
     e.stopPropagation();
     if (!isLoggedIn) {
-      toast.info("Please login to bookmark items...");
+      toast.info("Login to bookmark this item");
       navigate("/login");
       return;
     }
@@ -950,25 +212,21 @@ const BrowseDetails = () => {
       if (existingFav) {
         await deleteFavoriteAPI(existingFav._id);
         setFavorites(favorites.filter((f) => f._id !== existingFav._id));
-        toast.info("Removed from bookmarks");
       } else {
         const res = await addFavoriteAPI({
-          userId: currentUser._id || currentUser.id,
+          userId: currentId,
           itemId: item._id,
         });
-        if (res.success) {
-          setFavorites([...favorites, res.data]);
-          toast.success("Added to bookmarks");
-        }
+        if (res.success) setFavorites([...favorites, res.data]);
       }
     } catch (error) {
-      toast.error("Bookmark action failed");
+      toast.error("Bookmark failed");
     }
   };
 
   if (loading || !listing)
     return (
-      <div className="vh-100 d-flex align-items-center justify-content-center fw-bold text-navy">
+      <div className="vh-100 d-flex align-items-center justify-content-center">
         Loading...
       </div>
     );
@@ -980,7 +238,7 @@ const BrowseDetails = () => {
 
   return (
     <div className="bg-light min-vh-100 mt-5 pt-lg-5 pt-4 pb-5">
-      {/* HEADER SECTION */}
+      {/* HEADER */}
       <div className="bg-white border-bottom py-4 shadow-sm">
         <div className="container">
           <div className="row align-items-center g-3">
@@ -1008,8 +266,8 @@ const BrowseDetails = () => {
                   {isLoggedIn
                     ? isAlreadyFavorited
                       ? "Bookmarked"
-                      : "Bookmark Listing"
-                    : "Login To Bookmark"}
+                      : "Bookmark"
+                    : "Login to Bookmark"}
                 </span>
               </button>
             </div>
@@ -1020,10 +278,9 @@ const BrowseDetails = () => {
       <div className="container mt-4">
         <div className="row g-4">
           <div className="col-lg-8 col-12">
+            {/* CAROUSEL */}
             <div className="rounded-4 overflow-hidden mb-4 shadow-sm border bg-white">
-              <div
-                className="ratio ratio-16x9 ratio-md-4x3"
-                style={{ maxHeight: "450px" }}>
+              <div className="ratio ratio-16x9" style={{ maxHeight: "450px" }}>
                 <Swiper
                   modules={[Pagination, Autoplay]}
                   pagination={{ clickable: true }}
@@ -1045,17 +302,17 @@ const BrowseDetails = () => {
 
             <BusinessDetailsUI
               listing={listing}
-              nearby={nearby}
+              nearby={nearby || []}
               navigate={navigate}
               slugify={slugify}
               getImgURL={getImgURL}
-              listingRatings={listingRatings}
+              listingRatings={listingRatings || []}
               refreshData={fetchData}
             />
           </div>
 
           <div className="col-lg-4 col-12">
-            {/* DYNAMIC CATEGORY & PRICE */}
+            {/* CATEGORY & CHAT BUTTON */}
             <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border">
               <div className="d-flex justify-content-between align-items-start mb-3">
                 <div>
@@ -1071,36 +328,29 @@ const BrowseDetails = () => {
                   </h4>
                 </div>
               </div>
-
-              {listing.subCategoryId && (
-                <div className="pt-2 border-top d-flex justify-content-between align-items-center">
-                  <div>
-                    <small className="text-muted d-block mb-1">
-                      Subcategory
-                    </small>
-                    <div className="d-flex align-items-center gap-2 text-navy fw-bold small">
-                      <Layers size={14} />{" "}
-                      {listing.subCategoryId.subcategoryName}
-                    </div>
-                  </div>
-
-                  {/* CHAT ICON NEXT TO SUBCATEGORY */}
-                  {isLoggedIn && currentUser._id !== listing.ownerId?._id && (
-                    <button
-                      onClick={() => setShowChat(true)}
-                      className="btn btn-sm btn-outline-primary rounded-circle p-2 shadow-sm"
-                      title="Chat with Owner"> chat
-                      <MessageCircle size={20} />
-                    </button>
-                  )}
+              <div className="pt-3 border-top d-flex justify-content-between align-items-center">
+                <div>
+                  <small className="text-muted d-block mb-1">Subcategory</small>
+                  <h6 className="text-navy fw-bold m-0">
+                    <Layers size={16} className="me-2" />
+                    {listing.subCategoryId?.subcategoryName || "General"}
+                  </h6>
                 </div>
-              )}
+                {!isOwnerOfListing && (
+                  <button
+                    onClick={handleChatIconClick}
+                    className="btn btn-primary rounded-circle p-0 d-flex align-items-center justify-content-center shadow"
+                    style={{ width: "42px", height: "42px" }}>
+                    <MessageCircle size={22} color="white" />
+                  </button>
+                )}
+              </div>
             </div>
 
-            {/* OPENING HOURS */}
+            {/* OPENING HOURS UI */}
             <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border">
-              <h6 className="fw-800 mb-3 d-flex align-items-center gap-2 text-navy">
-                <Clock size={18} className="text-warning" /> OPENING HOURS
+              <h6 className="fw-800 mb-3 text-navy d-flex align-items-center">
+                <Clock size={18} className="text-warning me-2" /> OPENING HOURS
               </h6>
               <div className="small text-muted">
                 {[
@@ -1114,9 +364,9 @@ const BrowseDetails = () => {
                   <div
                     key={day}
                     className="d-flex justify-content-between py-2 border-bottom border-light">
-                    <span>{day}</span>{" "}
+                    <span>{day}</span>
                     <span className="fw-bold text-dark">
-                      08:00 AM - 06:00 PM
+                      09:00 AM - 06:00 PM
                     </span>
                   </div>
                 ))}
@@ -1130,21 +380,29 @@ const BrowseDetails = () => {
             <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border text-center">
               <div className="d-flex align-items-center gap-3 justify-content-center">
                 <div
-                  className="bg-light rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                  className="rounded-circle overflow-hidden d-flex align-items-center justify-content-center border"
                   style={{ width: "60px", height: "60px" }}>
-                  <User size={30} className="text-secondary" />
+                  {listing.ownerId?.profileImage ? (
+                    <img
+                      src={getImgURL(listing.ownerId.profileImage)}
+                      alt="Owner"
+                      className="w-100 h-100 object-fit-cover"
+                    />
+                  ) : (
+                    <User size={30} className="text-secondary" />
+                  )}
                 </div>
                 <div className="text-start">
                   <small className="text-muted d-block">Added By</small>
                   <h5 className="fw-800 m-0 text-navy">
-                    {listing.ownerId?.fullName || "MyUma"}
+                    {listing.ownerId?.fullName || "Owner"}
                   </h5>
                 </div>
               </div>
               <hr className="my-3 opacity-50" />
               {isLoggedIn ? (
                 <div className="py-2">
-                  <p className="text-muted small mb-1 uppercase fw-bold">
+                  <p className="text-muted small mb-1 fw-bold">
                     Contact Details
                   </p>
                   <a
@@ -1161,16 +419,16 @@ const BrowseDetails = () => {
                     onClick={() => navigate("/login")}>
                     sign in
                   </span>{" "}
-                  to see contact details.
+                  to see contact.
                 </p>
               )}
             </div>
 
-            {/* SOCIALS */}
+            {/* SOCIAL MEDIA DYNAMIC UI */}
             <div className="card border-0 shadow-sm rounded-4 p-4 bg-white border">
               <h6
                 className="fw-800 mb-3 text-navy ls-1 text-uppercase text-center"
-                style={{ fontSize: "12px" }}>
+                style={{ fontSize: "11px" }}>
                 Connect with Business
               </h6>
               <div className="d-flex flex-wrap gap-2 justify-content-center">
@@ -1179,8 +437,8 @@ const BrowseDetails = () => {
                     href={listing.facebook}
                     target="_blank"
                     rel="noreferrer"
-                    className="btn btn-outline-facebook btn-sm rounded-pill px-3">
-                    <FaFacebook className="me-1" /> Facebook
+                    className="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-sm">
+                    <FaFacebook />
                   </a>
                 )}
                 {listing.instagram && (
@@ -1188,8 +446,26 @@ const BrowseDetails = () => {
                     href={listing.instagram}
                     target="_blank"
                     rel="noreferrer"
-                    className="btn btn-outline-instagram btn-sm rounded-pill px-3">
-                    <FaInstagram className="me-1" /> Instagram
+                    className="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm">
+                    <FaInstagram />
+                  </a>
+                )}
+                {listing.linkedin && (
+                  <a
+                    href={listing.linkedin}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-outline-info btn-sm rounded-pill px-3 shadow-sm">
+                    <FaLinkedin />
+                  </a>
+                )}
+                {listing.youtube && (
+                  <a
+                    href={listing.youtube}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm">
+                    <FaYoutube />
                   </a>
                 )}
                 {listing.whatsappNo && (
@@ -1197,83 +473,215 @@ const BrowseDetails = () => {
                     href={`https://wa.me/${listing.whatsappNo.replace(/\D/g, "")}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="btn btn-outline-success btn-sm rounded-pill px-3">
-                    <FaWhatsapp className="me-1" /> WhatsApp
+                    className="btn btn-outline-success btn-sm rounded-pill px-3 shadow-sm">
+                    <FaWhatsapp />
                   </a>
                 )}
+                {/* Fallback if no socials */}
+                {!listing.facebook &&
+                  !listing.instagram &&
+                  !listing.linkedin &&
+                  !listing.youtube &&
+                  !listing.whatsappNo && (
+                    <small className="text-muted italic">
+                      No social links provided.
+                    </small>
+                  )}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* CHAT POPUP MODAL */}
+      {/* --- WHATSAPP STYLE CHAT POPUP --- */}
       {showChat && (
         <div
-          className="position-fixed bottom-0 end-0 m-4 shadow-lg border-0 rounded-4 overflow-hidden bg-white"
+          className="position-fixed bottom-0 end-0 m-3 shadow-lg border-0 rounded-4 overflow-hidden bg-white chat-popup"
           style={{
-            width: "350px",
+            width: "380px",
             zIndex: 10000,
-            height: "450px",
+            height: "550px",
             display: "flex",
             flexDirection: "column",
+            border: "1px solid #ddd",
           }}>
+          {/* Header */}
           <div
             className="p-3 d-flex justify-content-between align-items-center text-white"
-            style={{ backgroundColor: "var(--navy)" }}>
+            style={{ backgroundColor: "#001f3f" }}>
             <div className="d-flex align-items-center gap-2">
+              {isOwnerOfListing && viewMode === "chat" && (
+                <ArrowLeft
+                  className="cursor-pointer me-2"
+                  size={20}
+                  onClick={() => {
+                    setViewMode("list");
+                    setSelectedUser(null);
+                  }}
+                />
+              )}
               <div
-                className="bg-white rounded-circle text-navy d-flex align-items-center justify-content-center"
-                style={{ width: "30px", height: "30px" }}>
-                <User size={16} />
+                className="bg-white rounded-circle overflow-hidden d-flex align-items-center justify-content-center"
+                style={{ width: "38px", height: "38px" }}>
+                {!isOwnerOfListing && listing.ownerId?.profileImage ? (
+                  <img
+                    src={getImgURL(listing.ownerId.profileImage)}
+                    className="w-100 h-100 object-fit-cover"
+                    alt="owner"
+                  />
+                ) : selectedUser?.profileImage ? (
+                  <img
+                    src={getImgURL(selectedUser.profileImage)}
+                    className="w-100 h-100 object-fit-cover"
+                    alt="user"
+                  />
+                ) : (
+                  <User size={18} color="#001f3f" />
+                )}
               </div>
-              <span className="fw-bold small">{listing.ownerId?.fullName}</span>
+              <div>
+                <span
+                  className="fw-bold d-block lh-1"
+                  style={{ fontSize: "14px" }}>
+                  {isOwnerOfListing
+                    ? viewMode === "list"
+                      ? "Clients"
+                      : selectedUser?.fullName
+                    : listing.ownerId?.fullName}
+                </span>
+                <small style={{ fontSize: "10px", opacity: 0.8 }}>Online</small>
+              </div>
             </div>
             <X
-              size={20}
               className="cursor-pointer"
+              size={20}
               onClick={() => setShowChat(false)}
             />
           </div>
 
+          {/* Chat Body */}
           <div
-            className="flex-grow-1 p-3 overflow-auto bg-light"
-            style={{ fontSize: "13px" }}>
-            {chatMessages.map((msg, i) => (
-              <div
-                key={i}
-                className={`mb-3 d-flex ${msg.senderId === (currentUser._id || currentUser.id) ? "justify-content-end" : "justify-content-start"}`}>
-                <div
-                  className={`p-2 rounded-3 shadow-sm ${msg.senderId === (currentUser._id || currentUser.id) ? "bg-primary text-white" : "bg-white text-dark"}`}
-                  style={{ maxWidth: "80%" }}>
-                  {msg.message}
-                </div>
+            className="flex-grow-1 overflow-auto p-3 d-flex flex-column"
+            style={{
+              backgroundColor: "#e5ddd5",
+              backgroundImage: `url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')`,
+              backgroundRepeat: "repeat",
+            }}>
+            {isOwnerOfListing && viewMode === "list" ? (
+              <div className="d-flex flex-column gap-2">
+                {chatUsers.length > 0 ? (
+                  chatUsers.map((u) => (
+                    <div
+                      key={u._id}
+                      onClick={() => {
+                        setSelectedUser(u);
+                        setViewMode("chat");
+                      }}
+                      className="d-flex align-items-center gap-3 p-3 bg-white rounded-3 shadow-sm cursor-pointer border">
+                      <div className="bg-light rounded-circle p-2">
+                        <User size={20} />
+                      </div>
+                      <div className="overflow-hidden">
+                        <div className="fw-bold text-navy text-truncate small">
+                          {u.fullName}
+                        </div>
+                        <div
+                          className="text-muted text-truncate"
+                          style={{ fontSize: "11px" }}>
+                          {u.email}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center mt-5 p-3 bg-white rounded-3 shadow-sm">
+                    No messages yet.
+                  </div>
+                )}
               </div>
-            ))}
-            <div ref={chatEndRef} />
+            ) : (
+              <div className="d-flex flex-column gap-3">
+                {chatMessages.map((msg, i) => {
+                  const sId =
+                    typeof msg.senderId === "object"
+                      ? msg.senderId._id
+                      : msg.senderId;
+                  const isMe = sId === currentId;
+                  return (
+                    <div
+                      key={i}
+                      className={`d-flex ${isMe ? "justify-content-end" : "justify-content-start"}`}>
+                      <div
+                        className="shadow-sm position-relative"
+                        style={{
+                          maxWidth: "85%",
+                          padding: "10px 45px 20px 12px",
+                          fontSize: "14px",
+                          lineHeight: "1.4",
+                          borderRadius: isMe
+                            ? "15px 15px 0 15px"
+                            : "15px 15px 15px 0",
+                          backgroundColor: isMe ? "#001f3f" : "#ffffff",
+                          color: isMe ? "#ffffff" : "#333333",
+                          minWidth: "80px",
+                          wordBreak: "break-word",
+                        }}>
+                        <span>{msg.message}</span>
+                        <div
+                          className="position-absolute"
+                          style={{
+                            bottom: "4px",
+                            right: "8px",
+                            fontSize: "10px",
+                            opacity: isMe ? 0.8 : 0.6,
+                            whiteSpace: "nowrap",
+                            color: isMe ? "#fff" : "#666",
+                          }}>
+                          {new Date(msg.createdAt).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                <div ref={chatEndRef} />
+              </div>
+            )}
           </div>
 
-          <form
-            onSubmit={handleSendMessage}
-            className="p-3 border-top bg-white d-flex gap-2">
-            <input
-              type="text"
-              className="form-control form-control-sm rounded-pill shadow-none"
-              placeholder="Type a message..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-            />
-            <button
-              type="submit"
-              disabled={isSending}
-              className="btn btn-primary rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm">
-              {isSending ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <Send size={16} />
-              )}
-            </button>
-          </form>
+          {/* Input Form */}
+          {(viewMode === "chat" || !isOwnerOfListing) && (
+            <form
+              onSubmit={handleSendMessage}
+              className="p-3 bg-light border-top d-flex gap-2 align-items-center">
+              <input
+                type="text"
+                className="form-control rounded-pill border-0 shadow-sm px-4 py-2 small"
+                placeholder="Type a message..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                disabled={isSending}
+              />
+              <button
+                type="submit"
+                disabled={isSending || !newMessage.trim()}
+                className="btn btn-primary rounded-circle d-flex align-items-center justify-content-center shadow"
+                style={{
+                  width: "45px",
+                  height: "45px",
+                  flexShrink: 0,
+                  backgroundColor: "#001f3f",
+                }}>
+                {isSending ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <Send size={18} />
+                )}
+              </button>
+            </form>
+          )}
         </div>
       )}
     </div>
