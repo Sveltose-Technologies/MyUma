@@ -6,6 +6,16 @@ html, body {
   overflow-x: hidden;
   background-color: #f8f9fa; /* Matches bg-light */
 }
+/* Navbar ke niche space dene ke liye */
+.page-wrapper {
+  padding-top: 65px; /* Desktop navbar height */
+}
+
+@media (max-width: 991px) {
+  .page-wrapper {
+    padding-top: 65px; /* Mobile navbar height */
+  }
+}
 
 /* Remove margin-collapse gaps between Navbar and Content */
 #root {

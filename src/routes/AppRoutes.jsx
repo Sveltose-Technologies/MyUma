@@ -58,9 +58,9 @@ const AppRoutes = () => {
     <Router>
       <Navbar />
 
-      <div style={{ minHeight: "80vh" }}>
+      <div className="page-wrapper" style={{ minHeight: "80vh" }}>
         <Routes>
-          {/* --- PUBLIC ROUTES (Har koi dekh sakta hai) --- */}
+          {/* --- PUBLIC ROUTES --- */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/pricing" element={<Pricing />} />
@@ -76,12 +76,11 @@ const AppRoutes = () => {
           <Route path="/browse/:slug" element={<BrowseDetails />} />
           <Route path="/browse" element={<BrowseListings />} />
 
-          {/* --- PROTECTED ROUTES (Sirf Login aur Payment ke baad) --- */}
+          {/* --- PROTECTED ROUTES --- */}
           <Route element={<ProtectedRoute />}>
             <Route path="/reviews/:slug" element={<ListingReviews />} />
             <Route path="/listing/:slug" element={<ListingDetails />} />
 
-            {/* Dashboard Nested Routes */}
             <Route element={<DashboardLayout />}>
               <Route path="/listing" element={<Listing />} />
               <Route path="/profile" element={<ProfileUpdate />} />
