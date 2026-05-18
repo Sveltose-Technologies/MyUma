@@ -10,19 +10,18 @@ import {
   Star,
 } from "lucide-react";
 import {
-  getAllSubCategoriesApi,
+  getCategoriesAPI, // Using main category API for badges
   getAllListingsApi,
+  getAllSubCategoriesApi, // Kept for the dropdown logic
 } from "../services/authService";
 
 const HomeSearchBar = () => {
   const navigate = useNavigate();
   const [categoriesData, setCategoriesData] = useState([]);
+  const [dropdownData, setDropdownData] = useState([]); // For the nested menu
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [currentView, setCurrentView] = useState("categories");
   const [activeCategory, setActiveCategory] = useState(null);
-
-  // 1. Featured IDs ke liye state
-  const [featuredIds, setFeaturedIds] = useState([]);
 
   const [searchState, setSearchState] = useState({
     keyword: "",
@@ -43,16 +42,17 @@ const HomeSearchBar = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // API se saari categories lao
-        const res = await getAllSubCategoriesApi();
-        if (res.success) {
-          setCategoriesData(res.data || []);
+        // 1. Fetch Main Categories for the Badges
+        const catRes = await getCategoriesAPI();
+        if (catRes.success) {
+          // IMPORTANT: Your JSON shows the data is in .categories
+          setCategoriesData(catRes.categories || []);
         }
 
-        // 2. LocalStorage se Featured IDs read karo
-        const saved = localStorage.getItem("local_featured_categories");
-        if (saved) {
-          setFeaturedIds(JSON.parse(saved));
+        // 2. Fetch Subcategories for the Dropdown menu
+        const subRes = await getAllSubCategoriesApi();
+        if (subRes.success) {
+          setDropdownData(subRes.data || []);
         }
       } catch (err) {
         console.error("API Error:", err);
@@ -61,16 +61,22 @@ const HomeSearchBar = () => {
     loadData();
   }, []);
 
-  // 3. LOGIC: API data ko LocalStorage IDs ke saath match karo
-  const dynamicBadges = categoriesData
-    .filter((item) => {
-      const id = item.categoryId?._id || item._id;
-      const name = item.categoryId?.name || item.name;
+  // --- LOGIC FOR 3 CATEGORY BADGES ---
 
-      // Agar ID localStorage mein hai aur name "Business Directory" nahi hai
-      return featuredIds.includes(id) && name !== "Business Directory";
+  // 1. Find "Business Directory" (Dynamic check)
+  const businessDirObj = categoriesData.find(
+    (cat) => cat.name?.toLowerCase() === "business directory",
+  );
+
+  // 2. Filter ONLY TRUE favoriteCategories (excluding Business Directory)
+  const featuredBadges = categoriesData
+    .filter((cat) => {
+      return (
+        cat.favoriteCategories === true &&
+        cat.name?.toLowerCase() !== "business directory"
+      );
     })
-    .slice(-2); // Sirf 2 latest items lo
+    .slice(-2); // Get latest 2
 
   const handleSearch = async (overrideCategory) => {
     try {
@@ -199,7 +205,7 @@ const HomeSearchBar = () => {
         <div style={styles.section}>
           <input
             type="text"
-            placeholder="Location (City, State...)"
+            placeholder="Location..."
             style={styles.input}
             value={searchState.location}
             onChange={(e) =>
@@ -250,7 +256,7 @@ const HomeSearchBar = () => {
                       display: "flex",
                       justifyContent: "space-between",
                     }}>
-                    CATEGORIES
+                    CATEGORIES{" "}
                     <X
                       size={14}
                       style={{ cursor: "pointer" }}
@@ -263,7 +269,7 @@ const HomeSearchBar = () => {
                       onClick={() => selectCategoryOnly("All Categories")}>
                       All Categories
                     </div>
-                    {categoriesData.map((item) => (
+                    {dropdownData.map((item) => (
                       <div key={item.categoryId?._id} className="menu-item">
                         <div
                           style={{ flexGrow: 1 }}
@@ -326,7 +332,7 @@ const HomeSearchBar = () => {
         </div>
       </div>
 
-      {/* Badges Section */}
+      {/* THREE CATEGORY BADGES SECTION */}
       <div
         style={{
           marginTop: "30px",
@@ -335,20 +341,25 @@ const HomeSearchBar = () => {
           flexWrap: "wrap",
           justifyContent: "center",
         }}>
-        {/* 1. Static Badge */}
+        {/* Badge 1: Business Directory */}
         <div
           className="featured-item"
-          onClick={() => handleSearch("Business Directory")}>
-          <Briefcase size={18} /> Business Directory
+          onClick={() =>
+            handleSearch(
+              businessDirObj ? businessDirObj.name : "Business Directory",
+            )
+          }>
+          <Briefcase size={18} />
+          {businessDirObj ? businessDirObj.name : "Business Directory"}
         </div>
 
-        {/* 2. Dynamic Badges from LocalStorage */}
-        {dynamicBadges.map((item) => (
+        {/* Badges 2 & 3: Only TRUE favoriteCategories */}
+        {featuredBadges.map((item) => (
           <div
-            key={item.categoryId?._id || item._id}
+            key={item._id}
             className="featured-item"
-            onClick={() => handleSearch(item.categoryId?.name || item.name)}>
-            <Star size={18} /> {item.categoryId?.name || item.name}
+            onClick={() => handleSearch(item.name)}>
+            <Star size={18} /> {item.name}
           </div>
         ))}
       </div>

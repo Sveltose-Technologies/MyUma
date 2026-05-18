@@ -374,6 +374,8 @@ export const createListingAPI = async (formData) => {
 export const getCategoriesAPI = async () => {
   try {
     const response = await API.get("/category/get-all"); // Adjust to your actual endpoint
+    console.log("category response",response.data);
+    
     return response.data; // This returns the whole object { success, categories, etc. }
   } catch (error) {
     console.error("Error in getCategoriesAPI:", error);
