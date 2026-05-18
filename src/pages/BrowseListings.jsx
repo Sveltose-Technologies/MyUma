@@ -335,7 +335,7 @@ const BrowseListings = () => {
     );
 
   return (
-    <div className="min-vh-100 bg-light py-5">
+    <div className="min-vh-100 bg-light pt-5">
       <div className="container">
         {/* Advanced Filter Box */}
         <div className="card border-0 shadow-sm p-4 mb-5 rounded-4">

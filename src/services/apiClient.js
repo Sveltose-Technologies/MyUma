@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://nrislaw.rxchartsquare.com/",
+  baseURL: "https://nrislaw.rxchartsquare.com",
 });
 
 // Attach token automatically

@@ -5,10 +5,9 @@ import {
   ChevronDown,
   ArrowLeft,
   X,
-  Car,
-  Bike,
   Briefcase,
   Search,
+  Star,
 } from "lucide-react";
 import {
   getAllSubCategoriesApi,
@@ -21,6 +20,9 @@ const HomeSearchBar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [currentView, setCurrentView] = useState("categories");
   const [activeCategory, setActiveCategory] = useState(null);
+
+  // 1. Featured IDs ke liye state
+  const [featuredIds, setFeaturedIds] = useState([]);
 
   const [searchState, setSearchState] = useState({
     keyword: "",
@@ -41,8 +43,17 @@ const HomeSearchBar = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
+        // API se saari categories lao
         const res = await getAllSubCategoriesApi();
-        if (res.success) setCategoriesData(res.data);
+        if (res.success) {
+          setCategoriesData(res.data || []);
+        }
+
+        // 2. LocalStorage se Featured IDs read karo
+        const saved = localStorage.getItem("local_featured_categories");
+        if (saved) {
+          setFeaturedIds(JSON.parse(saved));
+        }
       } catch (err) {
         console.error("API Error:", err);
       }
@@ -50,14 +61,24 @@ const HomeSearchBar = () => {
     loadData();
   }, []);
 
-  // ✅ Search Function: Navigates to Browse with current text state
-  const handleSearch = async () => {
+  // 3. LOGIC: API data ko LocalStorage IDs ke saath match karo
+  const dynamicBadges = categoriesData
+    .filter((item) => {
+      const id = item.categoryId?._id || item._id;
+      const name = item.categoryId?.name || item.name;
+
+      // Agar ID localStorage mein hai aur name "Business Directory" nahi hai
+      return featuredIds.includes(id) && name !== "Business Directory";
+    })
+    .slice(-2); // Sirf 2 latest items lo
+
+  const handleSearch = async (overrideCategory) => {
     try {
-      const { keyword, category, location } = searchState;
+      const categoryToSearch = overrideCategory || searchState.category;
+      const { keyword, location } = searchState;
       const res = await getAllListingsApi();
       const allListings = res?.listings || [];
 
-      // Exact title match check
       const directMatch = allListings.find(
         (item) =>
           item.title.toLowerCase().trim() === keyword.toLowerCase().trim(),
@@ -66,17 +87,16 @@ const HomeSearchBar = () => {
       if (directMatch && keyword.trim() !== "") {
         navigate(`/browse/${slugify(directMatch.title)}`);
       } else {
-        // Send keyword, category name, and location string to BrowseListings
         navigate("/browse", {
           state: {
             keyword: keyword,
-            category: category === "All Categories" ? "All" : category,
+            category:
+              categoryToSearch === "All Categories" ? "All" : categoryToSearch,
             location: location,
           },
         });
       }
     } catch (error) {
-      console.error("Search Action Error:", error);
       navigate("/browse");
     }
   };
@@ -88,7 +108,7 @@ const HomeSearchBar = () => {
 
   const openSubView = (e, item) => {
     e.stopPropagation();
-    if (item.subcategories && item.subcategories.length > 0) {
+    if (item.subcategories?.length > 0) {
       setActiveCategory(item);
       setCurrentView("subcategories");
     }
@@ -158,12 +178,12 @@ const HomeSearchBar = () => {
         .menu-item { padding: 12px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f8f8f8; color: #555; transition: 0.2s; }
         .menu-item:hover { background: #fff5f6; color: #ff1f4b; }
         .dropdown-box { position: absolute; top: 70px; right: 0; width: 320px; background: white; border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); z-index: 9999; overflow: hidden; border: 1px solid #eee; }
-        .featured-item { background: rgba(255,255,255,0.1); color: white; padding: 10px 25px; border-radius: 50px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); transition: 0.3s; }
+        .featured-item { background: rgba(255,255,255,0.1); color: white; padding: 10px 25px; border-radius: 50px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); transition: 0.3s; white-space: nowrap; }
         .featured-item:hover { background: #ff1f4b; transform: translateY(-3px); }
       `}</style>
 
+      {/* Search Bar */}
       <div style={styles.pillBar}>
-        {/* KEYWORD SEARCH */}
         <div style={styles.section}>
           <input
             type="text"
@@ -175,10 +195,7 @@ const HomeSearchBar = () => {
             }
           />
         </div>
-
         <div style={styles.divider}></div>
-
-        {/* LOCATION SEARCH (Simple Text Input) */}
         <div style={styles.section}>
           <input
             type="text"
@@ -191,17 +208,14 @@ const HomeSearchBar = () => {
           />
           <MapPin size={18} color="#ccc" />
         </div>
-
         <div style={styles.divider}></div>
-
-        {/* CATEGORY DROPDOWN */}
         <div style={styles.section}>
           <div
             style={{
               ...styles.input,
               cursor: "pointer",
               display: "flex",
-              justifyBetween: "space-between",
+              justifyContent: "space-between",
               alignItems: "center",
             }}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
@@ -218,8 +232,7 @@ const HomeSearchBar = () => {
             </span>
             <ChevronDown size={18} color="#ccc" />
           </div>
-
-          <button style={styles.searchBtn} onClick={handleSearch}>
+          <button style={styles.searchBtn} onClick={() => handleSearch()}>
             <Search size={18} /> SEARCH
           </button>
 
@@ -313,32 +326,31 @@ const HomeSearchBar = () => {
         </div>
       </div>
 
-      {/* Featured Badges */}
-      <div style={{ marginTop: "30px", display: "flex", gap: "15px" }}>
+      {/* Badges Section */}
+      <div
+        style={{
+          marginTop: "30px",
+          display: "flex",
+          gap: "15px",
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}>
+        {/* 1. Static Badge */}
         <div
           className="featured-item"
-          onClick={() => {
-            setSearchState({ ...searchState, category: "Cars" });
-            handleSearch();
-          }}>
-          <Car size={18} /> Cars
+          onClick={() => handleSearch("Business Directory")}>
+          <Briefcase size={18} /> Business Directory
         </div>
-        <div
-          className="featured-item"
-          onClick={() => {
-            setSearchState({ ...searchState, category: "Bikes" });
-            handleSearch();
-          }}>
-          <Bike size={18} /> Bikes
-        </div>
-        <div
-          className="featured-item"
-          onClick={() => {
-            setSearchState({ ...searchState, category: "Services" });
-            handleSearch();
-          }}>
-          <Briefcase size={18} /> Services
-        </div>
+
+        {/* 2. Dynamic Badges from LocalStorage */}
+        {dynamicBadges.map((item) => (
+          <div
+            key={item.categoryId?._id || item._id}
+            className="featured-item"
+            onClick={() => handleSearch(item.categoryId?.name || item.name)}>
+            <Star size={18} /> {item.categoryId?.name || item.name}
+          </div>
+        ))}
       </div>
     </div>
   );

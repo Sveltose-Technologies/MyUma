@@ -1,41 +1,466 @@
+// import React, { useEffect, useState } from "react";
+// import { toast } from "react-toastify";
+// import { useNavigate } from "react-router-dom";
+// import {
+//   Plus,
+//   Trash2,
+//   Globe,
+//   Image as ImageIcon,
+//   MapPin,
+//   Layers,
+//   Loader2,
+//   ListTree, // Added icon for subcategory
+// } from "lucide-react";
+// import {
+//   getCategoriesAPI,
+//   createListingAPI,
+//   getAllSubCategoriesApi, // Ensure this is exported from your api.js
+// } from "../services/authService";
 
-import React, { useEffect, useState } from "react";
+// const Listing = () => {
+//   const navigate = useNavigate();
+//   const [categories, setCategories] = useState([]);
+//   const [allSubCategories, setAllSubCategories] = useState([]); // Store raw API data
+//   const [filteredSubCats, setFilteredSubCats] = useState([]); // Options for selected category
+//   const [loading, setLoading] = useState(false);
+
+//   const [formData, setFormData] = useState({
+//     title: "",
+//     category: "",
+//     subcategoryId: "", // New Field
+//     description: "",
+//     address: "",
+//     phone: "",
+//     youtube: "",
+//     linkedin: "",
+//     facebook: "",
+//     twitter: "",
+//     instagram: "",
+//     whatsappNo: "",
+//   });
+
+//   const [images, setImages] = useState([]);
+//   const [items, setItems] = useState([{ name: "", price: "" }]);
+
+//   const theme = {
+//     primary: "#001f3f",
+//     accent: "#f39c12",
+//     lightBg: "#f8f9fa",
+//   };
+
+//   // 1. Fetch Categories AND Subcategories on mount
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       try {
+//         const [catRes, subRes] = await Promise.all([
+//           getCategoriesAPI(),
+//           getAllSubCategoriesApi(),
+//         ]);
+
+//         if (catRes.success) setCategories(catRes.categories);
+//         if (subRes.success) setAllSubCategories(subRes.data);
+//       } catch (err) {
+//         toast.error("Failed to load form data ❌");
+//       }
+//     };
+//     fetchData();
+//   }, []);
+
+//   // 2. Filter Subcategories whenever the category selection changes
+//   useEffect(() => {
+//     if (formData.category) {
+//       const categoryGroup = allSubCategories.find(
+//         (group) => group.categoryId._id === formData.category,
+//       );
+//       setFilteredSubCats(categoryGroup ? categoryGroup.subcategories : []);
+//     } else {
+//       setFilteredSubCats([]);
+//     }
+//   }, [formData.category, allSubCategories]);
+
+//   const handleInputChange = (e) => {
+//     const { name, value } = e.target;
+//     if (name === "category") {
+//       // Reset subcategory when category changes
+//       setFormData({ ...formData, category: value, subcategoryId: "" });
+//     } else {
+//       setFormData({ ...formData, [name]: value });
+//     }
+//   };
+
+//   const handleItemChange = (index, e) => {
+//     const newItems = [...items];
+//     newItems[index][e.target.name] = e.target.value;
+//     setItems(newItems);
+//   };
+
+//   const addItem = () => setItems([...items, { name: "", price: "" }]);
+//   const removeItem = (index) => setItems(items.filter((_, i) => i !== index));
+//   const handleImageChange = (e) => setImages(Array.from(e.target.files));
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+
+//     if (
+//       !formData.category ||
+//       !formData.subcategoryId ||
+//       !formData.title ||
+//       images.length === 0
+//     ) {
+//       return toast.warn(
+//         "Please select category, subcategory and upload images.",
+//       );
+//     }
+
+//     setLoading(true);
+//     try {
+//       const data = new FormData();
+//       data.append("categoryId", formData.category);
+//       data.append("subcategoryId", formData.subcategoryId); // Append Subcategory
+//       data.append("title", formData.title);
+//       data.append("description", formData.description);
+//       data.append("address", formData.address);
+//       data.append("phone", formData.phone);
+//       data.append("facebook", formData.facebook);
+//       data.append("linkedin", formData.linkedin);
+//       data.append("youtube", formData.youtube);
+//       data.append("twitter", formData.twitter || "");
+//       data.append("instagram", formData.instagram || "");
+//       data.append("whatsappNo", formData.whatsappNo || formData.phone);
+//       data.append("items", JSON.stringify(items));
+
+//       images.forEach((file) => data.append("images", file));
+
+//       const res = await createListingAPI(data);
+//       if (res.success) {
+//         toast.success("Listing published successfully! 🎉");
+//         navigate("/browse");
+//       }
+//     } catch (err) {
+//       toast.error(err.response?.data?.message || "Failed to create listing");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="min-vh-100 py-5" style={{ backgroundColor: theme.lightBg }}>
+//       <div className="container">
+//         <div className="row justify-content-center">
+//           <div className="col-lg-10">
+//             <div
+//               className="card border-0 shadow-lg"
+//               style={{ borderRadius: "20px" }}>
+//               <div
+//                 className="p-5 text-white text-center"
+//                 style={{
+//                   backgroundColor: theme.primary,
+//                   borderRadius: "20px 20px 0 0",
+//                 }}>
+//                 <h2 className="fw-bold mb-2">Create New Listing</h2>
+//                 <p className="opacity-75">
+//                   Fill in the details below to showcase your property or service
+//                 </p>
+//               </div>
+
+//               <form className="p-4 p-md-5" onSubmit={handleSubmit}>
+//                 <div className="mb-5">
+//                   <h5
+//                     className="text-uppercase fw-bold mb-4"
+//                     style={{ color: theme.primary, letterSpacing: "1px" }}>
+//                     <Layers size={20} className="me-2" /> Basic Information
+//                   </h5>
+//                   <div className="row g-4">
+//                     <div className="col-md-12">
+//                       <label className="form-label small fw-bold">
+//                         Listing Title *
+//                       </label>
+//                       <input
+//                         type="text"
+//                         name="title"
+//                         required
+//                         className="form-control form-control-lg border-0 bg-light"
+//                         placeholder="e.g. Modern 3BHK Apartment"
+//                         value={formData.title}
+//                         onChange={handleInputChange}
+//                       />
+//                     </div>
+
+//                     <div className="col-md-6">
+//                       <label className="form-label small fw-bold">
+//                         Category *
+//                       </label>
+//                       <select
+//                         name="category"
+//                         required
+//                         className="form-select form-control-lg border-0 bg-light"
+//                         value={formData.category}
+//                         onChange={handleInputChange}>
+//                         <option value="">Select Category...</option>
+//                         {categories.map((cat) => (
+//                           <option key={cat._id} value={cat._id}>
+//                             {cat.name}
+//                           </option>
+//                         ))}
+//                       </select>
+//                     </div>
+
+//                     <div className="col-md-6">
+//                       <label className="form-label small fw-bold">
+//                         Subcategory *
+//                       </label>
+//                       <select
+//                         name="subcategoryId"
+//                         required
+//                         className="form-select form-control-lg border-0 bg-light"
+//                         value={formData.subcategoryId}
+//                         onChange={handleInputChange}
+//                         disabled={!formData.category}>
+//                         <option value="">
+//                           {formData.category
+//                             ? "Select Subcategory..."
+//                             : "Choose Category First"}
+//                         </option>
+//                         {filteredSubCats.map((sub) => (
+//                           <option key={sub._id} value={sub._id}>
+//                             {sub.subcategoryName}
+//                           </option>
+//                         ))}
+//                       </select>
+//                     </div>
+
+//                     <div className="col-12">
+//                       <label className="form-label small fw-bold">
+//                         Description
+//                       </label>
+//                       <textarea
+//                         name="description"
+//                         rows="4"
+//                         className="form-control border-0 bg-light"
+//                         placeholder="Describe the highlights..."
+//                         onChange={handleInputChange}></textarea>
+//                     </div>
+//                   </div>
+//                 </div>
+
+//                 <div className="mb-5">
+//                   <h5
+//                     className="text-uppercase fw-bold mb-4"
+//                     style={{ color: theme.primary, letterSpacing: "1px" }}>
+//                     <MapPin size={20} className="me-2" /> Location & Contact
+//                   </h5>
+//                   <div className="row g-4">
+//                     <div className="col-md-8">
+//                       <label className="form-label small fw-bold">
+//                         Address
+//                       </label>
+//                       <input
+//                         type="text"
+//                         name="address"
+//                         className="form-control border-0 bg-light"
+//                         placeholder="Full street address"
+//                         onChange={handleInputChange}
+//                       />
+//                     </div>
+//                     <div className="col-md-4">
+//                       <label className="form-label small fw-bold">
+//                         Phone Number
+//                       </label>
+//                       <input
+//                         type="text"
+//                         name="phone"
+//                         className="form-control border-0 bg-light"
+//                         placeholder="+91 ..."
+//                         onChange={handleInputChange}
+//                       />
+//                     </div>
+//                   </div>
+//                 </div>
+
+//                 <div className="mb-5">
+//                   <h5
+//                     className="text-uppercase fw-bold mb-4"
+//                     style={{ color: theme.primary, letterSpacing: "1px" }}>
+//                     <ImageIcon size={20} className="me-2" /> Gallery *
+//                   </h5>
+//                   <div
+//                     className="upload-box border-dashed p-5 text-center bg-light rounded-4"
+//                     style={{ border: "2px dashed #ccc" }}>
+//                     <input
+//                       type="file"
+//                       multiple
+//                       className="form-control d-none"
+//                       id="imageUpload"
+//                       accept="image/*"
+//                       onChange={handleImageChange}
+//                     />
+//                     <label htmlFor="imageUpload" style={{ cursor: "pointer" }}>
+//                       <div className="btn btn-outline-dark mb-2">
+//                         Upload Images
+//                       </div>
+//                       <p className="text-muted small mb-0">
+//                         {images.length} files selected
+//                       </p>
+//                     </label>
+//                   </div>
+//                 </div>
+
+//                 <div className="mb-5">
+//                   <h5
+//                     className="text-uppercase fw-bold mb-4"
+//                     style={{ color: theme.primary, letterSpacing: "1px" }}>
+//                     <Globe size={20} className="me-2" /> Social Presence
+//                   </h5>
+//                   <div className="row g-3">
+//                     {[
+//                       "facebook",
+//                       "linkedin",
+//                       "youtube",
+//                       "twitter",
+//                       "instagram",
+//                       "whatsappNo",
+//                     ].map((field) => (
+//                       <div className="col-md-4" key={field}>
+//                         <input
+//                           type="text"
+//                           name={field}
+//                           className="form-control border-0 bg-light"
+//                           placeholder={
+//                             field === "whatsappNo"
+//                               ? "WhatsApp Number"
+//                               : `${field.charAt(0).toUpperCase() + field.slice(1)} URL`
+//                           }
+//                           onChange={handleInputChange}
+//                         />
+//                       </div>
+//                     ))}
+//                   </div>
+//                 </div>
+
+//                 <div
+//                   className="mb-5 p-4 rounded-4"
+//                   style={{ backgroundColor: "#f0f4f8" }}>
+//                   <div className="d-flex justify-content-between align-items-center mb-4">
+//                     <h5
+//                       className="text-uppercase fw-bold mb-0"
+//                       style={{ color: theme.primary }}>
+//                       Items & Pricing
+//                     </h5>
+//                     <button
+//                       type="button"
+//                       onClick={addItem}
+//                       className="btn btn-sm text-white px-3"
+//                       style={{ backgroundColor: theme.accent }}>
+//                       <Plus size={16} /> Add More
+//                     </button>
+//                   </div>
+//                   {items.map((item, index) => (
+//                     <div key={index} className="row g-3 mb-3 align-items-end">
+//                       <div className="col-md-7">
+//                         <input
+//                           type="text"
+//                           name="name"
+//                           value={item.name}
+//                           className="form-control border-0 shadow-sm"
+//                           placeholder="Item Name"
+//                           onChange={(e) => handleItemChange(index, e)}
+//                         />
+//                       </div>
+//                       <div className="col-md-3">
+//                         <input
+//                           type="number"
+//                           name="price"
+//                           value={item.price}
+//                           className="form-control border-0 shadow-sm"
+//                           placeholder="Price"
+//                           onChange={(e) => handleItemChange(index, e)}
+//                         />
+//                       </div>
+//                       <div className="col-md-2">
+//                         {items.length > 1 && (
+//                           <button
+//                             type="button"
+//                             onClick={() => removeItem(index)}
+//                             className="btn btn-outline-danger border-0 w-100 shadow-sm">
+//                             <Trash2 size={18} />
+//                           </button>
+//                         )}
+//                       </div>
+//                     </div>
+//                   ))}
+//                 </div>
+
+//                 <div className="text-center mt-5">
+//                   <button
+//                     type="submit"
+//                     disabled={loading}
+//                     className="btn btn-lg text-white px-5 py-3 fw-bold shadow"
+//                     style={{
+//                       backgroundColor: theme.primary,
+//                       borderRadius: "12px",
+//                       width: "100%",
+//                     }}>
+//                     {loading ? (
+//                       <>
+//                         <Loader2 size={20} className="animate-spin me-2" />{" "}
+//                         Publishing...
+//                       </>
+//                     ) : (
+//                       "Publish Listing Now"
+//                     )}
+//                   </button>
+//                 </div>
+//               </form>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Listing;
+
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import {
   Plus,
   Trash2,
   Globe,
-  Image as ImageIcon,
+  ImageIcon,
   MapPin,
   Layers,
   Loader2,
-  ListTree, // Added icon for subcategory
+  Video, // Icon for YouTube Video
 } from "lucide-react";
 import {
   getCategoriesAPI,
   createListingAPI,
-  getAllSubCategoriesApi, // Ensure this is exported from your api.js
+  getAllSubCategoriesApi,
 } from "../services/authService";
+import { getUser } from "../utils/storage"; // Import getUser to get logged-in user ID
 
 const Listing = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
-  const [allSubCategories, setAllSubCategories] = useState([]); // Store raw API data
-  const [filteredSubCats, setFilteredSubCats] = useState([]); // Options for selected category
+  const [allSubCategories, setAllSubCategories] = useState([]);
+  const [filteredSubCats, setFilteredSubCats] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
     category: "",
-    subcategoryId: "", // New Field
+    subcategoryId: "",
     description: "",
     address: "",
     phone: "",
-    youtube: "",
-    linkedin: "",
+    youtubeVideo: "", // NEW PARAMETER
+    ownerId: "", // NEW PARAMETER
     facebook: "",
     twitter: "",
+    linkedin: "",
+    youtube: "", // This is for social link
     instagram: "",
     whatsappNo: "",
   });
@@ -49,7 +474,6 @@ const Listing = () => {
     lightBg: "#f8f9fa",
   };
 
-  // 1. Fetch Categories AND Subcategories on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -60,6 +484,12 @@ const Listing = () => {
 
         if (catRes.success) setCategories(catRes.categories);
         if (subRes.success) setAllSubCategories(subRes.data);
+
+        // ✅ SET OWNER ID FROM LOGGED IN USER
+        const user = getUser();
+        if (user) {
+          setFormData((prev) => ({ ...prev, ownerId: user.id || user._id }));
+        }
       } catch (err) {
         toast.error("Failed to load form data ❌");
       }
@@ -67,7 +497,6 @@ const Listing = () => {
     fetchData();
   }, []);
 
-  // 2. Filter Subcategories whenever the category selection changes
   useEffect(() => {
     if (formData.category) {
       const categoryGroup = allSubCategories.find(
@@ -82,7 +511,6 @@ const Listing = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name === "category") {
-      // Reset subcategory when category changes
       setFormData({ ...formData, category: value, subcategoryId: "" });
     } else {
       setFormData({ ...formData, [name]: value });
@@ -116,20 +544,25 @@ const Listing = () => {
     setLoading(true);
     try {
       const data = new FormData();
+      // ✅ MATCHING YOUR BACKEND PARAMETERS EXACTLY
       data.append("categoryId", formData.category);
-      data.append("subcategoryId", formData.subcategoryId); // Append Subcategory
+      data.append("subCategoryId", formData.subcategoryId);
+      data.append("ownerId", formData.ownerId);
       data.append("title", formData.title);
-      data.append("description", formData.description);
       data.append("address", formData.address);
       data.append("phone", formData.phone);
-      data.append("facebook", formData.facebook);
-      data.append("linkedin", formData.linkedin);
-      data.append("youtube", formData.youtube);
-      data.append("twitter", formData.twitter || "");
-      data.append("instagram", formData.instagram || "");
-      data.append("whatsappNo", formData.whatsappNo || formData.phone);
-      data.append("items", JSON.stringify(items));
+      data.append("youtubeVideo", formData.youtubeVideo);
 
+      // Socials
+      data.append("facebook", formData.facebook);
+      data.append("twitter", formData.twitter);
+      data.append("linkedin", formData.linkedin);
+      data.append("youtube", formData.youtube); // Social Profile
+      data.append("instagram", formData.instagram);
+      data.append("whatsappNo", formData.whatsappNo || formData.phone);
+
+      // Complex Data
+      data.append("items", JSON.stringify(items));
       images.forEach((file) => data.append("images", file));
 
       const res = await createListingAPI(data);
@@ -160,11 +593,12 @@ const Listing = () => {
                 }}>
                 <h2 className="fw-bold mb-2">Create New Listing</h2>
                 <p className="opacity-75">
-                  Fill in the details below to showcase your property or service
+                  Showcase your property or service to the world
                 </p>
               </div>
 
               <form className="p-4 p-md-5" onSubmit={handleSubmit}>
+                {/* 1. BASIC INFO */}
                 <div className="mb-5">
                   <h5
                     className="text-uppercase fw-bold mb-4"
@@ -229,21 +663,61 @@ const Listing = () => {
                         ))}
                       </select>
                     </div>
+                  </div>
+                </div>
 
+                {/* 2. MEDIA (PHOTOS & VIDEO) */}
+                <div className="mb-5">
+                  <h5
+                    className="text-uppercase fw-bold mb-4"
+                    style={{ color: theme.primary, letterSpacing: "1px" }}>
+                    <Video size={20} className="me-2" /> Media & Gallery
+                  </h5>
+                  <div className="row g-4">
                     <div className="col-12">
                       <label className="form-label small fw-bold">
-                        Description
+                        YouTube Video URL
                       </label>
-                      <textarea
-                        name="description"
-                        rows="4"
+                      <input
+                        type="url"
+                        name="youtubeVideo"
                         className="form-control border-0 bg-light"
-                        placeholder="Describe the highlights..."
-                        onChange={handleInputChange}></textarea>
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        value={formData.youtubeVideo}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div className="col-12">
+                      <label className="form-label small fw-bold">
+                        Upload Photos *
+                      </label>
+                      <div
+                        className="upload-box border-dashed p-4 text-center bg-light rounded-4"
+                        style={{ border: "2px dashed #ccc" }}>
+                        <input
+                          type="file"
+                          multiple
+                          className="form-control d-none"
+                          id="imageUpload"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                        />
+                        <label
+                          htmlFor="imageUpload"
+                          style={{ cursor: "pointer" }}>
+                          <div className="btn btn-outline-dark mb-2">
+                            Select Images
+                          </div>
+                          <p className="text-muted small mb-0">
+                            {images.length} files selected
+                          </p>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
 
+                {/* 3. LOCATION & CONTACT */}
                 <div className="mb-5">
                   <h5
                     className="text-uppercase fw-bold mb-4"
@@ -253,59 +727,36 @@ const Listing = () => {
                   <div className="row g-4">
                     <div className="col-md-8">
                       <label className="form-label small fw-bold">
-                        Address
+                        Address *
                       </label>
                       <input
                         type="text"
                         name="address"
+                        required
                         className="form-control border-0 bg-light"
                         placeholder="Full street address"
+                        value={formData.address}
                         onChange={handleInputChange}
                       />
                     </div>
                     <div className="col-md-4">
                       <label className="form-label small fw-bold">
-                        Phone Number
+                        Phone Number *
                       </label>
                       <input
                         type="text"
                         name="phone"
+                        required
                         className="form-control border-0 bg-light"
                         placeholder="+91 ..."
+                        value={formData.phone}
                         onChange={handleInputChange}
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="mb-5">
-                  <h5
-                    className="text-uppercase fw-bold mb-4"
-                    style={{ color: theme.primary, letterSpacing: "1px" }}>
-                    <ImageIcon size={20} className="me-2" /> Gallery *
-                  </h5>
-                  <div
-                    className="upload-box border-dashed p-5 text-center bg-light rounded-4"
-                    style={{ border: "2px dashed #ccc" }}>
-                    <input
-                      type="file"
-                      multiple
-                      className="form-control d-none"
-                      id="imageUpload"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                    />
-                    <label htmlFor="imageUpload" style={{ cursor: "pointer" }}>
-                      <div className="btn btn-outline-dark mb-2">
-                        Upload Images
-                      </div>
-                      <p className="text-muted small mb-0">
-                        {images.length} files selected
-                      </p>
-                    </label>
-                  </div>
-                </div>
-
+                {/* 4. SOCIAL PRESENCE */}
                 <div className="mb-5">
                   <h5
                     className="text-uppercase fw-bold mb-4"
@@ -322,15 +773,15 @@ const Listing = () => {
                       "whatsappNo",
                     ].map((field) => (
                       <div className="col-md-4" key={field}>
+                        <label className="form-label small text-capitalize">
+                          {field}
+                        </label>
                         <input
                           type="text"
                           name={field}
                           className="form-control border-0 bg-light"
-                          placeholder={
-                            field === "whatsappNo"
-                              ? "WhatsApp Number"
-                              : `${field.charAt(0).toUpperCase() + field.slice(1)} URL`
-                          }
+                          placeholder="URL or Number"
+                          value={formData[field]}
                           onChange={handleInputChange}
                         />
                       </div>
@@ -338,6 +789,7 @@ const Listing = () => {
                   </div>
                 </div>
 
+                {/* 5. PRICING ITEMS */}
                 <div
                   className="mb-5 p-4 rounded-4"
                   style={{ backgroundColor: "#f0f4f8" }}>
@@ -352,7 +804,7 @@ const Listing = () => {
                       onClick={addItem}
                       className="btn btn-sm text-white px-3"
                       style={{ backgroundColor: theme.accent }}>
-                      <Plus size={16} /> Add More
+                      <Plus size={16} /> Add Item
                     </button>
                   </div>
                   {items.map((item, index) => (
@@ -363,7 +815,7 @@ const Listing = () => {
                           name="name"
                           value={item.name}
                           className="form-control border-0 shadow-sm"
-                          placeholder="Item Name"
+                          placeholder="Item/Service Name"
                           onChange={(e) => handleItemChange(index, e)}
                         />
                       </div>

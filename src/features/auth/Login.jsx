@@ -607,7 +607,16 @@ const Login = () => {
       const userData = res.payload.auth;
       const token = res.payload.token;
 
-      // Save to localStorage
+      // ✅ CHECK ROLE: Agar role admin hai toh block karein
+      if (userData.role === "admin") {
+        toast.error(
+          "Admins are not allowed to login from the frontend portal.",
+        );
+        // Clear any potential half-logged state if necessary
+        return;
+      }
+
+      // Save to localStorage ONLY for users and owners
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(userData));
 
@@ -1058,6 +1067,6 @@ const Login = () => {
       </div>
     </div>
   );
-};
+};;
 
 export default Login;

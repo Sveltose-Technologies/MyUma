@@ -680,7 +680,18 @@ export default function Navbar() {
                   Contact us
                 </button>
               </li>
-
+              <li className="nav-item">
+               <button
+                    onClick={() => handleNavigation("/browse")}
+                    className="uma-btn-primary btn-sm px-3 text-nowrap w-100 fw-bold border-0"
+                    style={{
+                      fontSize: "13px",
+                      borderRadius: "20px",
+                      padding: "8px 20px",
+                    }}>
+                    Browse Listings
+                  </button>
+                  </li>
               {/* OWNER ONLY SECTION - Logic Unchanged */}
               {token && role === "owner" && (
                 <li className="nav-item d-flex flex-column flex-lg-row align-items-lg-center gap-2 ms-lg-2 mt-2 mt-lg-0">
@@ -733,16 +744,7 @@ export default function Navbar() {
                     }}>
                     New Listing
                   </button>
-                  <button
-                    onClick={() => handleNavigation("/browse")}
-                    className="uma-btn-primary btn-sm px-3 text-nowrap w-100 fw-bold border-0"
-                    style={{
-                      fontSize: "13px",
-                      borderRadius: "20px",
-                      padding: "8px 20px",
-                    }}>
-                    Browse Listings
-                  </button>
+                 
                 </li>
               )}
             </ul>

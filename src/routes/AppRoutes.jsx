@@ -74,10 +74,10 @@ const AppRoutes = () => {
           <Route path="/testimonials" element={<TestimonialPage />} />
           <Route path="/home-search" element={<HomeSearchBar />} />
           <Route path="/browse/:slug" element={<BrowseDetails />} />
+          <Route path="/browse" element={<BrowseListings />} />
 
           {/* --- PROTECTED ROUTES (Sirf Login aur Payment ke baad) --- */}
           <Route element={<ProtectedRoute />}>
-            <Route path="/browse" element={<BrowseListings />} />
             <Route path="/reviews/:slug" element={<ListingReviews />} />
             <Route path="/listing/:slug" element={<ListingDetails />} />
 
