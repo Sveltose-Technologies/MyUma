@@ -163,39 +163,8 @@ const Blog = () => {
           </div>
 
           <div className="col-12 col-lg-9">
-            {/* Featured Banner - Static UI (Kept as requested) */}
-            {!searchQuery && !filterDate && category === "All" && (
-              <div className="mb-5">
-                <div className="card border-0 shadow-lg overflow-hidden rounded-4 bg-navy">
-                  <div className="row g-0">
-                    <div className="col-md-7 col-lg-8">
-                      <img
-                        src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200"
-                        className="img-fluid h-100 w-100 object-fit-cover"
-                        alt="Featured"
-                        style={{ minHeight: "350px" }}
-                      />
-                    </div>
-                    <div className="col-md-5 col-lg-4 d-flex align-items-center">
-                      <div className="p-4 p-lg-5">
-                        <span className="badge bg-tan text-navy mb-3 px-3 py-2 fw-bold">
-                          HOT TOPIC
-                        </span>
-                        <h2 className="text-white fw-800 mb-3 display-6 display-md-5">
-                          Global Real Estate Market Forecast 2025
-                        </h2>
-                        <p className="text-white opacity-75 small">
-                          Analysis of emerging markets and shifts in the coming
-                          year.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+        
 
-            {/* DYNAMIC BLOG LIST */}
             <div className="row g-4">
               {loading ? (
                 <div className="text-center py-5">
