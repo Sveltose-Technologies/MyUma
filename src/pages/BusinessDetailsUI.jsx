@@ -52,8 +52,9 @@ const BusinessDetailsUI = ({
       (rev.userId?._id || rev.userId) === (currentUser?._id || currentUser?.id),
   );
 
+  // FIXED CODE
   const getEmbedUrl = (url) => {
-    if (!url) return null;
+    if (!url || typeof url !== "string") return null;
     const regExp =
       /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = url.match(regExp);
@@ -116,7 +117,7 @@ const BusinessDetailsUI = ({
       )}
 
       {/* VIDEO */}
-      {listing?.youtubeVideo && getEmbedUrl(listing.youtubeVideo) && (
+      {listing?.youtubeVideo && getEmbedUrl(listing.youtubeVideo) ? (
         <div className="bg-white p-4 rounded-4 shadow-sm mb-4 border">
           <h5
             className="fw-bold mb-3 d-flex align-items-center gap-2"
@@ -126,12 +127,13 @@ const BusinessDetailsUI = ({
           <div className="ratio ratio-16x9 rounded-3 overflow-hidden border">
             <iframe
               src={getEmbedUrl(listing.youtubeVideo)}
-              title="Video"
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen></iframe>
           </div>
         </div>
-      )}
-
+      ) : null}
       {/* REVIEW HEADER */}
       <div className="bg-white p-4 rounded-4 shadow-sm mb-4 border d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div
@@ -324,6 +326,6 @@ const BusinessDetailsUI = ({
       <style>{`.cursor-pointer { cursor: pointer; } .animate-spin { animation: spin 1s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   );
-};
+};;
 
 export default BusinessDetailsUI;
