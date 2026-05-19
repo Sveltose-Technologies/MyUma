@@ -455,3 +455,83 @@ export const getAllAuthsAPI = async () => {
   return response.data;
 };
 
+// ==========================================
+// INQUIRE / LEAD API METHODS
+// ==========================================
+
+// 1. Add (Send Inquiry) - Fields: itemId, fullName, email, phoneNo, comment
+export const sendInquireApi = async (data) => {
+  try {
+    const response = await API.post("/inquire/send", data);
+    return response.data;
+  } catch (error) {
+    console.error("Error in sendInquireApi:", error);
+    throw error;
+  }
+};
+
+// 2. Get All Inquiries
+export const getInquiriesApi = async () => {
+  try {
+    const response = await API.get("/inquire/get-all");
+    return response.data; // Returns { success, count, data: [] }
+  } catch (error) {
+    console.error("Error in getInquiriesApi:", error);
+    throw error;
+  }
+};
+
+// 3. Get Inquiry By ID
+export const getInquireByIdApi = async (id) => {
+  try {
+    const response = await API.get(`/inquire/get-by-id/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in getInquireByIdApi:", error);
+    throw error;
+  }
+};
+
+// 4. Update Inquiry - Fields: itemId, fullName, email, phoneNo, comment
+export const updateInquireApi = async (id, data) => {
+  try {
+    const response = await API.put(`/inquire/update/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error in updateInquireApi:", error);
+    throw error;
+  }
+};
+
+// 5. Delete Inquiry
+export const deleteInquireApi = async (id) => {
+  try {
+    const response = await API.delete(`/inquire/delete/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in deleteInquireApi:", error);
+    throw error;
+  }
+};
+
+// 6. Get Inquiries By Owner ID
+export const getInquiriesByOwnerApi = async (ownerId) => {
+  try {
+    const response = await API.get(`/inquire/get-by-owner/${ownerId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in getInquiriesByOwnerApi:", error);
+    throw error;
+  }
+};
+
+// 7. Get Inquiries By Item ID
+export const getInquiriesByItemApi = async (itemId) => {
+  try {
+    const response = await API.get(`/inquire/get-by-item/${itemId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in getInquiriesByItemApi:", error);
+    throw error;
+  }
+};

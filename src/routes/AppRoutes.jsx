@@ -35,6 +35,7 @@ import ContactUs from "../pages/ContactUs";
 import TestimonialPage from "../pages/TestimonialPage";
 import MyBookings from "../pages/MyBookings";
 import HomeSearchBar from "../pages/HomeSearchBar";
+import Inquiry from "../pages/Inquiry";
 
 
 // --- Route Protection Logic ---
@@ -87,6 +88,7 @@ const AppRoutes = () => {
               <Route path="/reviews" element={<Reviews />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/bookmarks" element={<MyBookings />} />
+              <Route path="/inquiries" element={<Inquiry />} />
             </Route>
           </Route>
         </Routes>
