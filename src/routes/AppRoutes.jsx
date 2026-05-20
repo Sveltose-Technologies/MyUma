@@ -14,7 +14,13 @@ import Footer from "../components/common/Footer";
 
 // Pages Imports
 import Home from "../pages/Home";
+// Auth Features Imports
 import Login from "../features/auth/Login";
+import Register from "../features/auth/Register";
+import ForgotPassword from "../features/auth/ForgotPassword";
+import VerifyOtp from "../features/auth/VerifyOtp";
+import ResetPassword from "../features/auth/ResetPassword";
+
 import Pricing from "../pages/Pricing";
 import PaymentSuccess from "../pages/PaymentSuccess";
 import Blog from "../pages/Blog";
@@ -64,6 +70,10 @@ const AppRoutes = () => {
           {/* --- PUBLIC ROUTES --- */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />

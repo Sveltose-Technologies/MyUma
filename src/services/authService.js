@@ -1,6 +1,7 @@
 import API from "./apiClient";
 
-const IMAGE_BASE_URL = "https://node.myuma.net"; // Removed the trailing slash here for cleaner joining
+// const IMAGE_BASE_URL = "https://node.myuma.net"; 
+const IMAGE_BASE_URL = "https://nrislaw.rxchartsquare.com";;
 
 export const getImgURL = (imagePath) => {
   // 1. Handle empty or null paths
