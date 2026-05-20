@@ -9,13 +9,16 @@ const VerifyOtp = () => {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // location.state se email aur type dono nikaalein
   const email = location.state?.email;
+  const type = location.state?.type; // 'signup' ya 'forgot'
 
   useEffect(() => {
-    if (!email) {
+    // Agar email ya type missing hai to wapis login bhej do
+    if (!email || !type) {
       navigate("/login");
     }
-  }, [email, navigate]);
+  }, [email, type, navigate]);
 
   const handleVerify = async (e) => {
     e.preventDefault();
@@ -25,21 +28,29 @@ const VerifyOtp = () => {
     try {
       const res = await verifyOtpAPI({ email, otp });
 
-      // सुरक्षा के लिए यहाँ रोल चेक करें
-      // अगर रिस्पॉन्स में रोल Admin आता है, तो उसे आगे न जाने दें
+      // Admin check logic
       const role = res.role || res.auth?.role;
-
       if (role === "admin") {
-        toast.error("Auth Not Found"); // एडमिन को भी यही मैसेज दें
+        toast.error("Auth Not Found");
         navigate("/login");
         return;
       }
 
-      // सिर्फ User और Owner ही यहाँ पहुँच पाएंगे
-      toast.success("Identity Verified!");
-      navigate("/reset-password", { state: { email } });
+      // --- MAIN LOGIC START ---
+      if (type === "signup") {
+        // Agar naya account banaya hai, to direct login page ya home bhejien
+        toast.success("Account verified successfully! Please login.");
+        navigate("/login");
+      } else if (type === "forgot") {
+        // Agar password bhul gaye hain, tabhi Reset Password par bhejien
+        toast.success("Identity Verified!");
+        navigate("/reset-password", { state: { email } });
+      } else {
+        // Default fallback
+        navigate("/login");
+      }
+      // --- MAIN LOGIC END ---
     } catch (error) {
-      // अगर ओटीपी गलत है या यूजर नहीं मिला
       const status = error.response?.status;
       if (status === 404) {
         toast.error("Auth Not Found");
@@ -58,6 +69,10 @@ const VerifyOtp = () => {
         style={{ maxWidth: "400px", width: "100%", borderRadius: "20px" }}>
         <h4 className="text-center fw-bold mb-2">Verify OTP</h4>
         <p className="text-center text-muted small mb-4">
+          {type === "signup"
+            ? "Verify your new account"
+            : "Reset your password"}{" "}
+          <br />
           Code sent to: <br />
           <span className="text-dark fw-bold">{email}</span>
         </p>
@@ -70,6 +85,7 @@ const VerifyOtp = () => {
               placeholder="Enter Code"
               maxLength="6"
               required
+              value={otp}
               onChange={(e) => setOtp(e.target.value)}
               style={{ letterSpacing: "8px", border: "2px solid #001f3f" }}
             />

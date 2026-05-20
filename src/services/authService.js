@@ -1,18 +1,14 @@
 import API from "./apiClient";
 
-// const IMAGE_BASE_URL = "https://node.myuma.net"; 
-const IMAGE_BASE_URL = "https://nrislaw.rxchartsquare.com";
+const IMAGE_BASE_URL = "https://nrislaw.rxchartsquare.com"; 
 
 export const getImgURL = (imagePath) => {
-  // 1. Handle empty or null paths
   if (!imagePath || imagePath.trim() === "") {
     return "https://placehold.co/400x300?text=No+Image";
   }
 
-  // 2. CRITICAL: Remove the extra space at the end of the string (e.g., ".png " -> ".png")
   const cleanPath = imagePath.trim();
 
-  // 3. If it's already a full URL, return as is
   if (cleanPath.startsWith("http")) {
     return cleanPath;
   }
