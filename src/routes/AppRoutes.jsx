@@ -42,6 +42,7 @@ import TestimonialPage from "../pages/TestimonialPage";
 import MyBookings from "../pages/MyBookings";
 import HomeSearchBar from "../pages/HomeSearchBar";
 import Inquiry from "../pages/Inquiry";
+import UserProfileUpdate from "../pages/UserProfileUpdate";
 
 
 // --- Route Protection Logic ---
@@ -86,6 +87,7 @@ const AppRoutes = () => {
           <Route path="/home-search" element={<HomeSearchBar />} />
           <Route path="/browse/:slug" element={<BrowseDetails />} />
           <Route path="/browse" element={<BrowseListings />} />
+          <Route path="/user-update-profile" element={<UserProfileUpdate />} />
 
           {/* --- PROTECTED ROUTES --- */}
           <Route element={<ProtectedRoute />}>
