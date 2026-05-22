@@ -34,31 +34,36 @@ const UserProfileUpdate = () => {
     }
   };
 
-  const getprofileHandler = async () => {
-    const user = getUser();
-    const userId = user?._id || user?.id;
-    if (!userId) return;
+  // 1. useEffect ke andar function define karne se red line hat jayegi
+  useEffect(() => {
+    const getprofileHandler = async () => {
+      const user = getUser();
+      const userId = user?._id || user?.id;
+      if (!userId) return;
 
-    try {
-      const res = await getProfileAPI(userId);
-      const profile = res?.auth || res?.data || res;
+      try {
+        const res = await getProfileAPI(userId);
+        const profile = res?.auth || res?.data || res;
 
-      if (profile) {
-        setFormData({
-          fullName: profile.fullName || "",
-          email: profile.email || "",
-          address: profile.address || "",
-          contactNo: profile.contactNo || "",
-          city: profile.city || "",
-          country: profile.country || "",
-          status: profile.status || "deactive",
-        });
-        setDbImage(profile.profileImage || "");
+        if (profile) {
+          setFormData({
+            fullName: profile.fullName || "",
+            email: profile.email || "",
+            address: profile.address || "",
+            contactNo: profile.contactNo || "",
+            city: profile.city || "",
+            country: profile.country || "",
+            status: profile.status || "deactive",
+          });
+          setDbImage(profile.profileImage || "");
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
       }
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-    }
-  };
+    };
+
+    getprofileHandler();
+  }, []); 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -85,22 +90,17 @@ const UserProfileUpdate = () => {
       const updatedUser = response?.auth || response?.data || response;
       
       if (updatedUser) {
-        // Dispatch to Redux to update Navbar in real-time
         dispatch(updateUser(updatedUser));
-        
         toast.success("Profile Updated Successfully!");
         setDbImage(updatedUser.profileImage);
         setSelectedFile(null);
         setPreviewImage(null);
       }
     } catch (error) {
+      console.error("Update error:", error);
       toast.error("Failed to update profile");
     }
   };
-
-  useEffect(() => {
-    getprofileHandler();
-  }, []);
   return (
     <div className="page-wrapper bg-light min-vh-100 py-5">
       <div className="container">

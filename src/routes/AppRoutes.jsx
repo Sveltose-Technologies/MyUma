@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  BrowserRouter as Router,
+    HashRouter as Router,
   Routes,
   Route,
   Navigate,
@@ -53,7 +53,6 @@ const ProtectedRoute = () => {
     return <Navigate to="/login" replace />;
   }
 
-  // Agar user deactive hai toh use pricing par bhejo
   if (user && user.status === "deactive") {
     return <Navigate to="/pricing" replace />;
   }

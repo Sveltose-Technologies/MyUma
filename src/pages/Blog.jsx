@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getBLogsApi, getImgURL } from "../features/auth/api";
+import { getBLogsApi, getImgURL } from "../services/authService";
 
 const Blog = () => {
   const [searchQuery, setSearchQuery] = useState("");

@@ -1,6 +1,6 @@
 import API from "./apiClient";
 
-const IMAGE_BASE_URL = "https://nrislaw.rxchartsquare.com"; 
+const IMAGE_BASE_URL = "https://node.myuma.net"; 
 
 export const getImgURL = (imagePath) => {
   if (!imagePath || imagePath.trim() === "") {
