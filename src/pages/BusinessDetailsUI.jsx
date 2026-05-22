@@ -268,6 +268,10 @@
 // };
 
 // export default BusinessDetailsUI;
+
+
+
+
 import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import {
@@ -340,17 +344,23 @@ const slugify = (text) =>
     (r) =>
       (r.userId?._id || r.userId) === (currentUser?._id || currentUser?.id),
   );
+const getEmbedUrl = (url) => {
+  if (!url) return null;
 
-  // Helper for YouTube Embed
-  const getEmbedUrl = (url) => {
-    if (!url) return null;
-    const regExp =
-      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return match && match[2].length === 11
-      ? `https://www.youtube.com/embed/${match[2]}`
-      : null;
-  };
+  // This regex extracts the 11-character ID from any YouTube link format
+  const regExp =
+    /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+
+  if (match && match[2].length === 11) {
+    const videoId = match[2];
+    // IMPORTANT: Always use https and the /embed/ path
+    // ?rel=0 prevents showing related videos from other channels
+    return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&origin=${window.location.origin}`;
+  }
+
+  return null;
+};
 
   // Map Geocoding
   useEffect(() => {
@@ -401,17 +411,21 @@ const slugify = (text) =>
         </p>
       </div>
 
-      {/* 2. VIDEO TOUR */}
+      {/* --- VIDEO TOUR SECTION --- */}
       {getEmbedUrl(listing.video || listing.youtubeVideo) && (
-        <div className="bg-white p-4 rounded-4 shadow-sm mb-4 border">
+        <div className="bg-white p-4 rounded-4 shadow-sm mb-4 border text-start">
           <h5 className="fw-800 mb-3 text-navy d-flex align-items-center gap-2 text-uppercase">
             <PlayCircle size={20} className="text-danger" /> Video Tour
           </h5>
-          <div className="ratio ratio-16x9 rounded-4 overflow-hidden border shadow-sm">
+          <div className="ratio ratio-16x9 rounded-4 overflow-hidden border shadow-sm bg-light">
             <iframe
               src={getEmbedUrl(listing.video || listing.youtubeVideo)}
-              title="Video"
-              allowFullScreen></iframe>
+              title="YouTube Video Player"
+              // These attributes are MANDATORY for production/cPanel builds
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+              style={{ border: 0 }}></iframe>
           </div>
         </div>
       )}
