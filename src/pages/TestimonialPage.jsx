@@ -1,12 +1,19 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { getTestimonialsAPI, getImgURL } from "../services/authService";
+
+// Swiper Components aur Styles import karein
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination, Navigation } from "swiper/modules";
+
+// Swiper CSS import karein
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
 
 const TestimonialPage = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
-  const carouselRef = useRef(null);
 
-  // 1. Fetch the data from API
   useEffect(() => {
     const fetchList = async () => {
       try {
@@ -22,31 +29,6 @@ const TestimonialPage = () => {
     };
     fetchList();
   }, []);
-
-  // 2. Initialize Bootstrap Carousel manually to force automatic sliding
-  useEffect(() => {
-    // Only run if loading is finished and there are testimonials
-    if (!loading && testimonials.length > 0 && carouselRef.current) {
-      const bootstrap = window.bootstrap; // Access global bootstrap from your index.js import
-
-      if (bootstrap) {
-        const carouselInstance = new bootstrap.Carousel(carouselRef.current, {
-          interval: 2000, // 2 seconds
-          ride: "carousel",
-          pause: "hover", // Pauses when user hovers over it
-          wrap: true, // Continuous loop
-        });
-
-        // Explicitly tell it to start cycling
-        carouselInstance.cycle();
-
-        // Cleanup: remove the instance when component unmounts
-        return () => {
-          carouselInstance.dispose();
-        };
-      }
-    }
-  }, [loading, testimonials]);
 
   if (loading) {
     return (
@@ -78,23 +60,33 @@ const TestimonialPage = () => {
             }}></div>
         </div>
 
-        {/* CAROUSEL ELEMENT */}
+        {/* SWIPER CAROUSEL */}
         <div
-          id="testimonialCarousel"
-          ref={carouselRef}
-          className="carousel slide shadow-sm"
+          className="shadow-sm"
           style={{
-            borderRadius: "4px",
+            borderRadius: "8px",
             overflow: "hidden",
             maxWidth: "1100px",
             margin: "0 auto",
+            backgroundColor: "#fff",
           }}>
-          <div className="carousel-inner">
-            {testimonials.map((item, index) => (
-              <div
-                key={item._id}
-                className={`carousel-item ${index === 0 ? "active" : ""}`}>
-                <div className="row g-0 bg-white align-items-stretch">
+          <Swiper
+            modules={[Autoplay, Pagination, Navigation]}
+            spaceBetween={0}
+            slidesPerView={1}
+            loop={true}
+            autoplay={{
+              delay: 3000,
+              disableOnInteraction: false,
+            }}
+            pagination={{ clickable: true }}
+            style={{
+              "--swiper-pagination-color": "#001529",
+              "--swiper-navigation-color": "#001529",
+            }}>
+            {testimonials.map((item) => (
+              <SwiperSlide key={item._id}>
+                <div className="row g-0 align-items-stretch">
                   {/* LEFT SIDE: IMAGE */}
                   <div className="col-md-5">
                     <img
@@ -155,33 +147,9 @@ const TestimonialPage = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </SwiperSlide>
             ))}
-          </div>
-
-          {/* INDICATORS (Dots) */}
-          {testimonials.length > 1 && (
-            <div
-              className="carousel-indicators"
-              style={{ position: "absolute", bottom: "15px" }}>
-              {testimonials.map((_, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  data-bs-target="#testimonialCarousel"
-                  data-bs-slide-to={idx}
-                  className={idx === 0 ? "active" : ""}
-                  style={{
-                    backgroundColor: "#001529",
-                    width: "10px",
-                    height: "10px",
-                    borderRadius: "50%",
-                    border: "none",
-                    margin: "0 5px",
-                  }}></button>
-              ))}
-            </div>
-          )}
+          </Swiper>
         </div>
 
         {!loading && testimonials.length === 0 && (

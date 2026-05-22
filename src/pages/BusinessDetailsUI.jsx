@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import {
-  MapPin,
   Star,
   MessageSquare,
   Calendar,
   Info,
   PlayCircle,
+  MapPin,
 } from "lucide-react";
 import { addRatingAPI } from "../services/authService";
 import { getUser } from "../utils/storage";
@@ -14,15 +14,8 @@ import { toast } from "react-toastify";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
-
-let DefaultIcon = L.icon({
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
+// Block Hindi Regex
+const containsHindi = (text) => /[\u0900-\u097F]/.test(text);
 
 function ChangeView({ center }) {
   const map = useMap();
@@ -32,12 +25,13 @@ function ChangeView({ center }) {
 
 const BusinessDetailsUI = ({
   listing,
-  nearby = [],
+  nearby,
   navigate,
   slugify,
   getImgURL,
-  listingRatings = [],
+  listingRatings,
   refreshData,
+  isOwner,
 }) => {
   const [coords, setCoords] = useState([22.7196, 75.8577]);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -48,13 +42,13 @@ const BusinessDetailsUI = ({
 
   const currentUser = getUser();
   const hasReviewed = listingRatings?.some(
-    (rev) =>
-      (rev.userId?._id || rev.userId) === (currentUser?._id || currentUser?.id),
+    (r) =>
+      (r.userId?._id || r.userId) === (currentUser?._id || currentUser?.id),
   );
 
-  // FIXED CODE
+  // YouTube Error 153 Fix
   const getEmbedUrl = (url) => {
-    if (!url || typeof url !== "string") return null;
+    if (!url) return null;
     const regExp =
       /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = url.match(regExp);
@@ -68,10 +62,9 @@ const BusinessDetailsUI = ({
       fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(listing.address)}`,
       )
-        .then((res) => res.json())
-        .then((data) => {
-          if (data && data.length > 0)
-            setCoords([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+        .then((r) => r.json())
+        .then((d) => {
+          if (d[0]) setCoords([parseFloat(d[0].lat), parseFloat(d[0].lon)]);
         });
     }
   }, [listing?.address]);
@@ -79,16 +72,19 @@ const BusinessDetailsUI = ({
   const handleRatingSubmit = async (e) => {
     e.preventDefault();
     if (!currentUser) return toast.error("Please login to review");
+    if (containsHindi(comment))
+      return toast.error("Hindi reviews are not allowed. Please use English.");
+
     setSubmitting(true);
     try {
       const res = await addRatingAPI({
         userId: currentUser._id || currentUser.id,
         itemId: listing._id,
-        rating: Number(rating),
+        rating,
         comment: comment.trim(),
       });
       if (res.status) {
-        toast.success("Review submitted!");
+        toast.success("Review Added!");
         setShowAddModal(false);
         setComment("");
         refreshData();
@@ -103,216 +99,181 @@ const BusinessDetailsUI = ({
   return (
     <div>
       {/* DESCRIPTION */}
-      {listing?.description && (
-        <div className="bg-white p-4 rounded-4 shadow-sm mb-4 border">
-          <h5
-            className="fw-bold mb-3 d-flex align-items-center gap-2"
-            style={{ color: "#002147" }}>
-            <Info size={20} className="text-primary" /> Description
-          </h5>
-          <p className="text-muted m-0" style={{ lineHeight: "1.6" }}>
-            {listing.description}
-          </p>
-        </div>
-      )}
+      <div className="bg-white p-4 rounded-4 shadow-sm mb-4 border">
+        <h5 className="fw-bold mb-3 text-navy d-flex align-items-center gap-2">
+          <Info size={20} className="text-primary" /> Description
+        </h5>
+        <p className="text-muted m-0 lh-lg">{listing.description}</p>
+      </div>
 
-      {/* VIDEO */}
-      {listing?.youtubeVideo && getEmbedUrl(listing.youtubeVideo) ? (
+      {/* VIDEO TOUR */}
+      {getEmbedUrl(listing.video || listing.youtubeVideo) && (
         <div className="bg-white p-4 rounded-4 shadow-sm mb-4 border">
-          <h5
-            className="fw-bold mb-3 d-flex align-items-center gap-2"
-            style={{ color: "#002147" }}>
+          <h5 className="fw-bold mb-3 text-navy d-flex align-items-center gap-2">
             <PlayCircle size={20} className="text-danger" /> Video Tour
           </h5>
-          <div className="ratio ratio-16x9 rounded-3 overflow-hidden border">
+          <div className="ratio ratio-16x9 rounded-3 overflow-hidden border bg-light">
             <iframe
-              src={getEmbedUrl(listing.youtubeVideo)}
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              src={getEmbedUrl(listing.video || listing.youtubeVideo)}
+              title="Video"
               allowFullScreen></iframe>
           </div>
         </div>
-      ) : null}
-      {/* REVIEW HEADER */}
-      <div className="bg-white p-4 rounded-4 shadow-sm mb-4 border d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div
-          style={{ cursor: "pointer" }}
-          onClick={() => setShowListModal(true)}>
-          <h5 className="fw-bold mb-1" style={{ color: "#002147" }}>
-            Reviews
+      )}
+
+      {/* REVIEWS HEADER */}
+      <div className="bg-white p-4 rounded-4 shadow-sm mb-4 border d-flex justify-content-between align-items-center">
+        <div className="cursor-pointer" onClick={() => setShowListModal(true)}>
+          <h5 className="fw-bold mb-1 text-navy">
+            Reviews ({listingRatings?.length || 0})
           </h5>
-          <p className="text-muted small m-0 text-decoration-underline">
-            <MessageSquare size={14} /> View all {listingRatings?.length || 0}{" "}
-            reviews
-          </p>
+          <small className="text-primary text-decoration-underline">
+            View user reviews
+          </small>
         </div>
-        {hasReviewed ? (
-          <button
-            className="btn btn-outline-secondary rounded-pill px-4 fw-bold shadow-sm"
-            disabled>
-            Submitted
-          </button>
-        ) : (
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">
-            Write Review
-          </button>
-        )}
+        {!isOwner &&
+          (hasReviewed ? (
+            <button className="btn btn-sm btn-outline-secondary rounded-pill disabled px-3">
+              Already Reviewed
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">
+              Write Review
+            </button>
+          ))}
       </div>
 
       {/* MAP */}
       <div className="bg-white p-4 rounded-4 shadow-sm mb-4 border">
-        <h5 className="fw-bold mb-3" style={{ color: "#002147" }}>
-          Location
-        </h5>
+        <h5 className="fw-bold mb-3 text-navy">Location</h5>
         <div
-          className="rounded-3 overflow-hidden border"
-          style={{ height: "350px" }}>
-          <MapContainer
-            center={coords}
-            zoom={13}
-            style={{ height: "100%", width: "100%" }}>
+          style={{ height: "350px" }}
+          className="rounded-3 overflow-hidden border">
+          <MapContainer center={coords} zoom={13} style={{ height: "100%" }}>
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             <ChangeView center={coords} />
-            <Marker position={coords} icon={DefaultIcon} />
+            <Marker
+              position={coords}
+              icon={L.icon({
+                iconUrl:
+                  "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+              })}
+            />
           </MapContainer>
         </div>
       </div>
 
       {/* RELATED LISTINGS */}
-      <div className="row g-4 mt-2">
-        <h4
-          className="fw-bold mb-4 border-bottom pb-3"
-          style={{ color: "#002147" }}>
-          Related Listings
-        </h4>
-        {nearby?.length > 0 ? (
-          nearby.map((item) => (
-            <div
-              key={item._id}
-              className="col-md-6"
-              onClick={() => navigate(`/browse/${slugify(item.title)}`)}
-              style={{ cursor: "pointer" }}>
-              <div className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden bg-white">
-                <div className="ratio ratio-4x3">
-                  <img
-                    src={getImgURL(item.images?.[0])}
-                    className="object-fit-cover w-100 h-100"
-                    alt=""
-                  />
-                </div>
-                <div className="card-body p-4">
-                  <small
-                    className="text-uppercase fw-bold text-muted mb-1 d-block"
-                    style={{ fontSize: "11px" }}>
-                    {item.categoryId?.name}
-                  </small>
-                  <h6 className="fw-bold mb-1">{item.title}</h6>
-                  <p className="text-muted small mb-0">
-                    <MapPin size={14} className="text-danger" /> {item.address}
-                  </p>
-                </div>
+      <div className="row g-3">
+        <h5 className="fw-bold text-navy mt-2">Related Listings</h5>
+        {nearby.slice(0, 4).map((item) => (
+          <div
+            key={item._id}
+            className="col-md-6"
+            onClick={() => navigate(`/browse/${slugify(item.title)}`)}>
+            <div className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden bg-white cursor-pointer">
+              <div className="ratio ratio-4x3">
+                <img
+                  src={getImgURL(item.images?.[0])}
+                  className="object-fit-cover"
+                  alt=""
+                />
+              </div>
+              <div className="p-3">
+                <h6 className="fw-bold mb-1 text-truncate">{item.title}</h6>
+                <small className="text-muted">
+                  <MapPin size={12} /> {item.address}
+                </small>
               </div>
             </div>
-          ))
-        ) : (
-          <div className="col-12">
-            <p className="text-muted">No related listings.</p>
           </div>
-        )}
+        ))}
       </div>
 
-      {/* MODALS (ADD & LIST) */}
+      {/* ADD REVIEW MODAL */}
       {showAddModal && (
         <div
           className="modal show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.6)", zIndex: 1050 }}>
+          style={{ backgroundColor: "rgba(0,0,0,0.6)", zIndex: 12000 }}>
           <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content border-0 rounded-4">
+            <div className="modal-content rounded-4 border-0">
               <div className="modal-header border-0">
                 <h5 className="fw-bold">Write a Review</h5>
                 <button
                   className="btn-close"
                   onClick={() => setShowAddModal(false)}></button>
               </div>
-              <form onSubmit={handleRatingSubmit}>
-                <div className="modal-body text-center">
-                  <div className="d-flex justify-content-center gap-2 mb-4">
-                    {[1, 2, 3, 4, 5].map((num) => (
-                      <Star
-                        key={num}
-                        size={35}
-                        className="cursor-pointer"
-                        fill={num <= rating ? "#ffc107" : "none"}
-                        stroke={num <= rating ? "#ffc107" : "#ccc"}
-                        onClick={() => setRating(num)}
-                      />
-                    ))}
-                  </div>
-                  <textarea
-                    className="form-control rounded-3 bg-light p-3"
-                    rows="4"
-                    placeholder="Comment..."
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    required
-                  />
+              <form
+                onSubmit={handleRatingSubmit}
+                className="modal-body text-center">
+                <div className="d-flex justify-content-center gap-2 mb-3 mt-3">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Star
+                      key={n}
+                      className="cursor-pointer"
+                      size={30}
+                      fill={n <= rating ? "#ffc107" : "none"}
+                      stroke={n <= rating ? "#ffc107" : "#ccc"}
+                      onClick={() => setRating(n)}
+                    />
+                  ))}
                 </div>
-                <div className="modal-footer border-0">
-                  <button
-                    type="button"
-                    className="btn btn-light rounded-pill"
-                    onClick={() => setShowAddModal(false)}>
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn btn-danger rounded-pill fw-bold"
-                    disabled={submitting}>
-                    {submitting ? "..." : "Submit"}
-                  </button>
-                </div>
+                <textarea
+                  className="form-control rounded-3"
+                  rows="4"
+                  placeholder="How was your experience? (English only)..."
+                  required
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="btn btn-danger w-100 mt-4 rounded-pill fw-bold py-2 shadow">
+                  {submitting ? "SUBMITTING..." : "SUBMIT REVIEW"}
+                </button>
               </form>
             </div>
           </div>
         </div>
       )}
 
+      {/* LIST REVIEWS MODAL */}
       {showListModal && (
         <div
           className="modal show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.6)", zIndex: 1060 }}>
+          style={{ backgroundColor: "rgba(0,0,0,0.6)", zIndex: 12000 }}>
           <div className="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-            <div className="modal-content border-0 rounded-4">
-              <div className="modal-header bg-light border-0">
+            <div className="modal-content rounded-4 border-0">
+              <div className="modal-header bg-light">
                 <h5 className="fw-bold">Reviews</h5>
                 <button
                   className="btn-close"
                   onClick={() => setShowListModal(false)}></button>
               </div>
               <div className="modal-body p-4">
-                {listingRatings?.length > 0 ? (
-                  listingRatings.map((rev) => (
-                    <div key={rev._id} className="pb-3 mb-3 border-bottom">
-                      <div className="d-flex justify-content-between mb-2">
-                        <div className="text-warning d-flex gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              size={14}
-                              fill={i < rev.rating ? "currentColor" : "none"}
-                              stroke="currentColor"
-                            />
+                {listingRatings.length > 0 ? (
+                  listingRatings.map((r) => (
+                    <div key={r._id} className="border-bottom pb-3 mb-3">
+                      <div className="d-flex justify-content-between mb-1">
+                        <div className="text-warning">
+                          {[...Array(r.rating)].map((_, i) => (
+                            <Star key={i} size={14} fill="currentColor" />
                           ))}
                         </div>
                         <small className="text-muted">
                           <Calendar size={12} />{" "}
-                          {new Date(rev.createdAt).toLocaleDateString()}
+                          {new Date(r.createdAt).toLocaleDateString()}
                         </small>
                       </div>
-                      <p className="m-0 small">{rev.comment}</p>
+                      <p className="m-0 small">{r.comment}</p>
+                      <small className="fw-bold text-navy">
+                        - {r.userId?.fullName || "Verified User"}
+                      </small>
                     </div>
                   ))
                 ) : (
@@ -323,9 +284,8 @@ const BusinessDetailsUI = ({
           </div>
         </div>
       )}
-      <style>{`.cursor-pointer { cursor: pointer; } .animate-spin { animation: spin 1s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   );
-};;
+};
 
 export default BusinessDetailsUI;
