@@ -15,9 +15,10 @@ const Sidebar = () => {
     { name: "My Listing", icon: "bi-file-earmark-text", path: "/listing" },
     { name: "Messages", icon: "bi-chat-left-text", path: "/messages" },
     { name: "Reviews", icon: "bi-star", path: "/reviews" },
-    { name: "Bookmarks", icon: "bi-bookmark", path: "/bookmarks" },
+    { name: "Booking", icon: "bi-bookmark", path: "/booking" },
     { name: "Inquiries", icon: "bi-person", path: "/inquiries" },
     { name: "My Profile", icon: "bi-person", path: "/profile" },
+
   ];
 
   return (
