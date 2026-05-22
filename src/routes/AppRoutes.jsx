@@ -87,6 +87,7 @@ const AppRoutes = () => {
           <Route path="/browse/:slug" element={<BrowseDetails />} />
           <Route path="/browse" element={<BrowseListings />} />
           <Route path="/user-update-profile" element={<UserProfileUpdate />} />
+          
 
           {/* --- PROTECTED ROUTES --- */}
           <Route element={<ProtectedRoute />}>

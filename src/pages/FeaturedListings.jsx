@@ -999,7 +999,7 @@ const FeaturedListings = () => {
       if (existingFav) {
         await deleteFavoriteAPI(existingFav._id);
         setFavorites(favorites.filter((fav) => fav._id !== existingFav._id));
-        toast.info("Removed from bookmarks");
+        toast.info("Removed from favorites");
       } else {
         const payload = {
           userId: currentUser._id || currentUser.id,
@@ -1008,11 +1008,11 @@ const FeaturedListings = () => {
         const res = await addFavoriteAPI(payload);
         if (res.success) {
           setFavorites([...favorites, res.data]);
-          toast.success("Added to bookmarks");
+          toast.success("Added to favorites");
         }
       }
     } catch (error) {
-      toast.error("Failed to update bookmark");
+      toast.error("Failed to update favorite");
     }
   };
 

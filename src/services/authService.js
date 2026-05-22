@@ -263,7 +263,17 @@ export const getReviewsAPI = async () => {
 // ==========================================
 // BOOK NOW API METHODS
 // ==========================================
-
+export const getBookingByUserAPI = async (userId) => {
+  try {
+    // 1. Removed BASE_URL (using the API instance's internal config)
+    const response = await API.get(`/booknow/get-by-user/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in getBookingByUserAPI:", error);
+    // 2. Add a check to prevent "reading data of undefined"
+    throw error?.response?.data || error.message || "An error occurred";
+  }
+};
 export const createBookingAPI = async (data) => {
   try {
     const response = await API.post("/booknow/add", data);
