@@ -151,7 +151,7 @@ export default function Navbar() {
                       <>
                         <li><button className="dropdown-item py-2" onClick={() => handleNavigation("/listing")}>My Listing</button></li>
                         <li><button className="dropdown-item py-2" onClick={() => handleNavigation("/reviews")}>Reviews</button></li>
-                        <li><button className="dropdown-item py-2" onClick={() => handleNavigation("/bookmarks")}>Bookmarks</button></li>
+                        <li><button className="dropdown-item py-2" onClick={() => handleNavigation("/booking")}>Bookmarks</button></li>
                         <li><button className="dropdown-item py-2" onClick={() => handleNavigation("/profile")}>My Profile</button></li>
                         <li><hr className="dropdown-divider" /></li>
                       </>

@@ -58,13 +58,9 @@ const Register = () => {
       address,
       city,
       country,
-      profileImage,
     } = registerData;
 
-    if (!profileImage) {
-      toast.error("Please upload a profile image");
-      return false;
-    }
+ 
     if (fullName.length < 3) {
       toast.error("Full Name must be at least 3 characters");
       return false;

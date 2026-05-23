@@ -38,7 +38,17 @@ export const verifyOtpAPI = async (data) => {
   const response = await API.post("/auth/verify-otp", data);
   return response.data;
 };
-
+// Method to resend OTP
+export const resendOtpAPI = async (data) => {
+  try {
+    // data should contain { email, role }
+    const response = await API.post("/auth/resend-otp", data);
+    return response.data;
+  } catch (error) {
+    console.error("Error in resendOtpAPI:", error);
+    throw error;
+  }
+};
 export const forgotPasswordAPI = async (data) => {
   const response = await API.post("/auth/forgot-password", data);
   return response.data;
@@ -372,6 +382,17 @@ export const getAllCommentsAPI = async () => {
     console.error("Error in getAllCommentsAPI:", error);
     throw error;
   }
+};
+
+export const updateCommentAPI = async (id, data) => {
+  const response = await API.put(`/comment/update/${id}`, data);
+  return response.data;
+};
+
+// Delete a comment
+export const deleteCommentAPI = async (id) => {
+  const response = await API.delete(`/comment/delete/${id}`);
+  return response.data;
 };
 
 // ... other imports

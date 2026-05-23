@@ -6,12 +6,14 @@ import {
   X,
   Layers,
   Phone,
-  Globe,
   Video,
-  Tag,
+  User,
+  Image as ImageIcon,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
-// सोशल आइकन्स
 import {
   FaFacebook,
   FaInstagram,
@@ -39,9 +41,15 @@ const ManageListings = () => {
   const [loading, setLoading] = useState(true);
   const [editItem, setEditItem] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
-
-  // State to track category selection in the modal for dynamic subcategories
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // State for image handling
+  const [newImages, setNewImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
 
   const currentUser = getUser();
   const ownerId = currentUser?._id || currentUser?.id;
@@ -61,8 +69,6 @@ const ManageListings = () => {
 
       setListings(myData || []);
       setCategories(catRes?.categories || []);
-
-      // Based on your JSON structure, subcategories are likely in subCatRes.data
       setSubCategories(subCatRes?.data || subCatRes?.subcategories || []);
     } catch (error) {
       console.error("Fetch Error:", error);
@@ -76,6 +82,72 @@ const ManageListings = () => {
     if (ownerId) fetchData();
   }, [ownerId]);
 
+  // Pagination Logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = listings.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(listings.length / itemsPerPage);
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 5) {
+      toast.error("You can only upload up to 5 images");
+      e.target.value = "";
+      return;
+    }
+    setNewImages(files);
+    const previews = files.map((file) => URL.createObjectURL(file));
+    setImagePreviews(previews);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this listing?"))
+      return;
+    try {
+      const res = await deleteListingAPI(id);
+      // Fixed: Showing toast based on successful response
+      if (res) {
+        toast.success("Listing Deleted Successfully!");
+        setListings(listings.filter((l) => l._id !== id));
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Delete failed");
+    }
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    formData.append("ownerId", ownerId);
+
+    if (newImages.length > 0) {
+      newImages.forEach((file) => {
+        formData.append("images", file);
+      });
+    }
+
+    try {
+      const res = await updateListingAPI(editItem._id, formData);
+      // Fixed: Showing toast based on successful response
+      if (res) {
+        toast.success("Listing Updated Successfully!");
+        setEditItem(null);
+        setNewImages([]);
+        setImagePreviews([]);
+        fetchData();
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Update failed");
+    }
+  };
+
+  const handleEditClick = (item) => {
+    setEditItem(item);
+    setSelectedCategoryId(item.categoryId?._id || "");
+    setNewImages([]);
+    setImagePreviews([]);
+  };
+
   const truncate = (text, limit = 3) => {
     if (!text) return "";
     const words = text.split(" ");
@@ -84,42 +156,6 @@ const ManageListings = () => {
       : text;
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("क्या आप इस लिस्टिंग को डिलीट करना चाहते हैं?")) return;
-    try {
-      const res = await deleteListingAPI(id);
-      if (res.status) {
-        toast.success("Deleted Successfully!");
-        setListings(listings.filter((l) => l._id !== id));
-      }
-    } catch (err) {
-      toast.error("Delete failed");
-    }
-  };
-
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-
-    try {
-      const res = await updateListingAPI(editItem._id, formData);
-      if (res.status) {
-        toast.success("Updated Successfully!");
-        setEditItem(null);
-        fetchData();
-      }
-    } catch (err) {
-      toast.error("Update failed");
-    }
-  };
-
-  // Helper to open edit modal and set initial category
-  const handleEditClick = (item) => {
-    setEditItem(item);
-    setSelectedCategoryId(item.categoryId?._id || "");
-  };
-
-  // Filter subcategories based on the selected category in the modal
   const filteredSubCategories =
     subCategories.find(
       (item) =>
@@ -136,36 +172,39 @@ const ManageListings = () => {
         <div className="badge bg-dark px-3 py-2">Total: {listings.length}</div>
       </div>
 
-      <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
+      <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
         <div className="table-responsive">
           <table className="table table-hover align-middle mb-0">
             <thead className="bg-white border-bottom">
               <tr>
-                <th className="px-4 py-3 small fw-bold">BUSINESS DETAILS</th>
+                <th className="px-4 py-3 small fw-bold">BUSINESS & OWNER</th>
                 <th className="px-4 py-3 small fw-bold">CONTACT & INFO</th>
                 <th className="px-4 py-3 small fw-bold">PRICE/ITEM</th>
                 <th className="px-4 py-3 small fw-bold text-center">ACTIONS</th>
               </tr>
             </thead>
             <tbody>
-              {listings.map((item) => (
+              {currentItems.map((item) => (
                 <tr key={item._id}>
                   <td className="px-4">
                     <div className="d-flex align-items-center gap-3">
-                      <img
-                        src={getImgURL(item.images?.[0])}
-                        width="60"
-                        height="50"
-                        className="rounded border object-fit-cover"
-                        alt=""
-                      />
+                      <div className="position-relative">
+                        <img
+                          src={getImgURL(item.images?.[0])}
+                          width="70"
+                          height="60"
+                          className="rounded border object-fit-cover shadow-sm"
+                          alt="Listing"
+                        />
+                      </div>
                       <div>
                         <div className="fw-bold text-primary">{item.title}</div>
                         <small className="text-muted d-block">
-                          <Layers size={12} /> {item.categoryId?.name}{" "}
-                          {item.subCategoryId?.subcategoryName
-                            ? `> ${item.subCategoryId.subcategoryName}`
-                            : ""}
+                          <Layers size={12} /> {item.categoryId?.name}
+                        </small>
+                        <small className="text-dark d-block fw-semibold">
+                          <User size={12} className="text-secondary" />{" "}
+                          {item.ownerId?.fullName || "Owner"}
                         </small>
                       </div>
                     </div>
@@ -199,12 +238,12 @@ const ManageListings = () => {
                     <div className="d-flex justify-content-center gap-2">
                       <button
                         onClick={() => handleEditClick(item)}
-                        className="btn btn-sm btn-outline-primary rounded-circle shadow-sm">
+                        className="btn btn-sm btn-outline-primary rounded-circle">
                         <Edit size={16} />
                       </button>
                       <button
                         onClick={() => handleDelete(item._id)}
-                        className="btn btn-sm btn-outline-danger rounded-circle shadow-sm">
+                        className="btn btn-sm btn-outline-danger rounded-circle">
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -216,6 +255,27 @@ const ManageListings = () => {
         </div>
       </div>
 
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="d-flex justify-content-center align-items-center gap-3">
+          <button
+            className="btn btn-white btn-sm shadow-sm rounded-circle border"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}>
+            <ChevronLeft size={20} />
+          </button>
+          <span className="fw-bold small">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="btn btn-white btn-sm shadow-sm rounded-circle border"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(currentPage + 1)}>
+            <ChevronRight size={20} />
+          </button>
+        </div>
+      )}
+
       {/* UPDATE MODAL */}
       {editItem && (
         <div
@@ -226,7 +286,7 @@ const ManageListings = () => {
               onSubmit={handleUpdate}
               className="modal-content rounded-4 border-0 shadow-lg">
               <div className="modal-header border-bottom p-4 bg-dark text-white">
-                <h5 className="m-0 fw-bold">Edit Business Listing</h5>
+                <h5 className="m-0 fw-bold">Update Listing Information</h5>
                 <X
                   className="cursor-pointer"
                   onClick={() => setEditItem(null)}
@@ -234,15 +294,15 @@ const ManageListings = () => {
               </div>
               <div className="modal-body p-4">
                 <div className="row g-4">
-                  {/* Basic Info Section */}
+                  {/* Basic Identity */}
                   <div className="col-12">
                     <h6 className="fw-bold border-bottom pb-2">
-                      Basic Information
+                      Business Identity
                     </h6>
                   </div>
                   <div className="col-md-4">
                     <label className="form-label small fw-bold">
-                      Business Title
+                      Listing Title
                     </label>
                     <input
                       name="title"
@@ -252,9 +312,7 @@ const ManageListings = () => {
                     />
                   </div>
                   <div className="col-md-4">
-                    <label className="form-label small fw-bold">
-                      Phone Number
-                    </label>
+                    <label className="form-label small fw-bold">Phone</label>
                     <input
                       name="phone"
                       defaultValue={editItem.phone}
@@ -263,7 +321,7 @@ const ManageListings = () => {
                   </div>
                   <div className="col-md-4">
                     <label className="form-label small fw-bold">
-                      WhatsApp Number
+                      WhatsApp No
                     </label>
                     <input
                       name="whatsappNo"
@@ -280,7 +338,6 @@ const ManageListings = () => {
                       className="form-select"
                       value={selectedCategoryId}
                       onChange={(e) => setSelectedCategoryId(e.target.value)}>
-                      <option value="">Select Category</option>
                       {categories.map((cat) => (
                         <option key={cat._id} value={cat._id}>
                           {cat.name}
@@ -296,7 +353,6 @@ const ManageListings = () => {
                       name="subCategoryId"
                       className="form-select"
                       defaultValue={editItem.subCategoryId?._id}>
-                      <option value="">Select Sub-Category</option>
                       {filteredSubCategories.map((sub) => (
                         <option key={sub._id} value={sub._id}>
                           {sub.subcategoryName}
@@ -305,21 +361,15 @@ const ManageListings = () => {
                     </select>
                   </div>
 
-                  {/* Items/Pricing */}
-                  <div className="col-12">
-                    <h6 className="fw-bold border-bottom pb-2 mt-3">
-                      Pricing & Items
-                    </h6>
-                  </div>
+                  {/* Pricing */}
                   <div className="col-md-6">
                     <label className="form-label small fw-bold">
-                      Primary Item Name
+                      Item Name
                     </label>
                     <input
                       name="itemName"
                       defaultValue={editItem.items?.[0]?.name}
                       className="form-control"
-                      placeholder="e.g. Service Fee"
                     />
                   </div>
                   <div className="col-md-6">
@@ -334,7 +384,69 @@ const ManageListings = () => {
                     />
                   </div>
 
+                  {/* Images */}
+                  <div className="col-12">
+                    <h6 className="fw-bold border-bottom pb-2 mt-3">
+                      Business Gallery (Max 5 Images)
+                    </h6>
+                  </div>
                   <div className="col-md-12">
+                    <div className="border rounded p-3 bg-light">
+                      <div className="d-flex flex-wrap gap-2 mb-3">
+                        {editItem.images?.map((img, idx) => (
+                          <div key={idx} className="position-relative">
+                            <img
+                              src={getImgURL(img)}
+                              width="80"
+                              height="80"
+                              className="rounded border object-fit-cover"
+                              alt="current"
+                            />
+                            <span className="badge bg-dark position-absolute top-0 start-0 m-1">
+                              Saved
+                            </span>
+                          </div>
+                        ))}
+                        {imagePreviews.map((preview, idx) => (
+                          <div key={idx} className="position-relative">
+                            <img
+                              src={preview}
+                              width="80"
+                              height="80"
+                              className="rounded border border-primary object-fit-cover shadow-sm"
+                              alt="new"
+                            />
+                            <span className="badge bg-primary position-absolute top-0 start-0 m-1">
+                              New
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <label className="btn btn-outline-dark btn-sm">
+                        <Plus size={16} /> Choose New Images
+                        <input
+                          type="file"
+                          hidden
+                          multiple
+                          accept="image/*"
+                          onChange={handleImageChange}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="col-md-12">
+                    <label className="form-label small fw-bold">
+                      YouTube Video URL
+                    </label>
+                    <input
+                      name="youtubeVideo"
+                      defaultValue={editItem.youtubeVideo}
+                      className="form-control"
+                    />
+                  </div>
+
+                  <div className="col-12">
                     <label className="form-label small fw-bold">Address</label>
                     <textarea
                       name="address"
@@ -342,15 +454,25 @@ const ManageListings = () => {
                       className="form-control"
                       rows="2"></textarea>
                   </div>
+                  <div className="col-12">
+                    <label className="form-label small fw-bold">
+                      Description
+                    </label>
+                    <textarea
+                      name="description"
+                      defaultValue={editItem.description}
+                      className="form-control"
+                      rows="3"></textarea>
+                  </div>
 
-                  {/* Media & Links */}
+                  {/* Socials */}
                   <div className="col-12">
                     <h6 className="fw-bold border-bottom pb-2 mt-3">
-                      Social & Media Links
+                      Social Media Links
                     </h6>
                   </div>
                   <div className="col-md-4">
-                    <label className="form-label small fw-bold">
+                    <label className="small fw-bold mb-1">
                       <FaFacebook className="text-primary" /> Facebook
                     </label>
                     <input
@@ -360,7 +482,7 @@ const ManageListings = () => {
                     />
                   </div>
                   <div className="col-md-4">
-                    <label className="form-label small fw-bold">
+                    <label className="small fw-bold mb-1">
                       <FaInstagram className="text-danger" /> Instagram
                     </label>
                     <input
@@ -370,7 +492,7 @@ const ManageListings = () => {
                     />
                   </div>
                   <div className="col-md-4">
-                    <label className="form-label small fw-bold">
+                    <label className="small fw-bold mb-1">
                       <FaTwitter className="text-info" /> Twitter
                     </label>
                     <input
@@ -379,8 +501,8 @@ const ManageListings = () => {
                       className="form-control"
                     />
                   </div>
-                  <div className="col-md-4">
-                    <label className="form-label small fw-bold">
+                  <div className="col-md-6">
+                    <label className="small fw-bold mb-1">
                       <FaLinkedin className="text-primary" /> LinkedIn
                     </label>
                     <input
@@ -389,8 +511,8 @@ const ManageListings = () => {
                       className="form-control"
                     />
                   </div>
-                  <div className="col-md-4">
-                    <label className="form-label small fw-bold">
+                  <div className="col-md-6">
+                    <label className="small fw-bold mb-1">
                       <FaYoutube className="text-danger" /> YouTube Channel
                     </label>
                     <input
@@ -398,28 +520,6 @@ const ManageListings = () => {
                       defaultValue={editItem.youtube}
                       className="form-control"
                     />
-                  </div>
-                  <div className="col-md-4">
-                    <label className="form-label small fw-bold">
-                      <Video className="text-secondary" /> YouTube Video URL
-                    </label>
-                    <input
-                      name="youtubeVideo"
-                      defaultValue={editItem.youtubeVideo}
-                      className="form-control"
-                      placeholder="Embed link"
-                    />
-                  </div>
-
-                  <div className="col-12">
-                    <label className="form-label small fw-bold">
-                      Description
-                    </label>
-                    <textarea
-                      name="description"
-                      defaultValue={editItem.description}
-                      className="form-control"
-                      rows="4"></textarea>
                   </div>
                 </div>
               </div>
@@ -431,7 +531,7 @@ const ManageListings = () => {
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-dark px-5 shadow">
-                  Save Changes
+                  Save All Changes
                 </button>
               </div>
             </form>
