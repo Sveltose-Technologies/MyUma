@@ -13,6 +13,7 @@ const Sidebar = () => {
 
   const menuItems = [
     { name: "My Listing", icon: "bi-file-earmark-text", path: "/listing" },
+    {name: "Listing Manage", icon: "bi-gear", path: "/manage-listings"},
     { name: "Messages", icon: "bi-chat-left-text", path: "/messages" },
     { name: "Reviews", icon: "bi-star", path: "/reviews" },
     { name: "Bookmarks", icon: "bi-bookmark", path: "/bookmarks" },

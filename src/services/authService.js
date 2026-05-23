@@ -110,6 +110,29 @@ export const getAllListingsApi = async () => {
   return response.data;
 };
 // About us api
+// --- Update Listing (Handles Multipart for images) ---
+export const updateListingAPI = async (id, formData) => {
+  try {
+    const response = await API.put(`/newListing/update/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error in updateListingAPI:", error);
+    throw error;
+  }
+};
+
+// --- Delete Listing ---
+export const deleteListingAPI = async (id) => {
+  try {
+    const response = await API.delete(`/newListing/delete/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in deleteListingAPI:", error);
+    throw error;
+  }
+};
 
 export const getAboutUsAPI = async () => {
   try {

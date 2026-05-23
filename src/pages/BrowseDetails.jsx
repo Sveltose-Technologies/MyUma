@@ -588,7 +588,7 @@ const BrowseDetails = () => {
     );
 
   return (
-    <div className="bg-light min-vh-100 pt-5 pb-5">
+    <div className="bg-light min-vh-100 pb-5">
       {/* HEADER */}
       <div className="bg-white border-bottom py-4 shadow-sm mt-4">
         <div className="container">
