@@ -1,40 +1,43 @@
-// import React, { useEffect, useState } from "react";
+// import React, { useState, useEffect } from "react";
 // import { toast } from "react-toastify";
 // import { useNavigate } from "react-router-dom";
 // import {
 //   Plus,
 //   Trash2,
 //   Globe,
-//   Image as ImageIcon,
+//   ImageIcon,
 //   MapPin,
 //   Layers,
 //   Loader2,
-//   ListTree, // Added icon for subcategory
+//   Video, // Icon for YouTube Video
 // } from "lucide-react";
 // import {
 //   getCategoriesAPI,
 //   createListingAPI,
-//   getAllSubCategoriesApi, // Ensure this is exported from your api.js
+//   getAllSubCategoriesApi,
 // } from "../services/authService";
+// import { getUser } from "../utils/storage"; // Import getUser to get logged-in user ID
 
 // const Listing = () => {
 //   const navigate = useNavigate();
 //   const [categories, setCategories] = useState([]);
-//   const [allSubCategories, setAllSubCategories] = useState([]); // Store raw API data
-//   const [filteredSubCats, setFilteredSubCats] = useState([]); // Options for selected category
+//   const [allSubCategories, setAllSubCategories] = useState([]);
+//   const [filteredSubCats, setFilteredSubCats] = useState([]);
 //   const [loading, setLoading] = useState(false);
 
 //   const [formData, setFormData] = useState({
 //     title: "",
 //     category: "",
-//     subcategoryId: "", // New Field
+//     subcategoryId: "",
 //     description: "",
 //     address: "",
 //     phone: "",
-//     youtube: "",
-//     linkedin: "",
+//     youtubeVideo: "", // NEW PARAMETER
+//     ownerId: "", // NEW PARAMETER
 //     facebook: "",
 //     twitter: "",
+//     linkedin: "",
+//     youtube: "", // This is for social link
 //     instagram: "",
 //     whatsappNo: "",
 //   });
@@ -48,7 +51,6 @@
 //     lightBg: "#f8f9fa",
 //   };
 
-//   // 1. Fetch Categories AND Subcategories on mount
 //   useEffect(() => {
 //     const fetchData = async () => {
 //       try {
@@ -59,6 +61,12 @@
 
 //         if (catRes.success) setCategories(catRes.categories);
 //         if (subRes.success) setAllSubCategories(subRes.data);
+
+//         // ✅ SET OWNER ID FROM LOGGED IN USER
+//         const user = getUser();
+//         if (user) {
+//           setFormData((prev) => ({ ...prev, ownerId: user.id || user._id }));
+//         }
 //       } catch (err) {
 //         toast.error("Failed to load form data ❌");
 //       }
@@ -66,7 +74,6 @@
 //     fetchData();
 //   }, []);
 
-//   // 2. Filter Subcategories whenever the category selection changes
 //   useEffect(() => {
 //     if (formData.category) {
 //       const categoryGroup = allSubCategories.find(
@@ -81,7 +88,6 @@
 //   const handleInputChange = (e) => {
 //     const { name, value } = e.target;
 //     if (name === "category") {
-//       // Reset subcategory when category changes
 //       setFormData({ ...formData, category: value, subcategoryId: "" });
 //     } else {
 //       setFormData({ ...formData, [name]: value });
@@ -115,20 +121,25 @@
 //     setLoading(true);
 //     try {
 //       const data = new FormData();
+//       // ✅ MATCHING YOUR BACKEND PARAMETERS EXACTLY
 //       data.append("categoryId", formData.category);
-//       data.append("subcategoryId", formData.subcategoryId); // Append Subcategory
+//       data.append("subCategoryId", formData.subcategoryId);
+//       data.append("ownerId", formData.ownerId);
 //       data.append("title", formData.title);
-//       data.append("description", formData.description);
 //       data.append("address", formData.address);
 //       data.append("phone", formData.phone);
-//       data.append("facebook", formData.facebook);
-//       data.append("linkedin", formData.linkedin);
-//       data.append("youtube", formData.youtube);
-//       data.append("twitter", formData.twitter || "");
-//       data.append("instagram", formData.instagram || "");
-//       data.append("whatsappNo", formData.whatsappNo || formData.phone);
-//       data.append("items", JSON.stringify(items));
+//       data.append("youtubeVideo", formData.youtubeVideo);
 
+//       // Socials
+//       data.append("facebook", formData.facebook);
+//       data.append("twitter", formData.twitter);
+//       data.append("linkedin", formData.linkedin);
+//       data.append("youtube", formData.youtube); // Social Profile
+//       data.append("instagram", formData.instagram);
+//       data.append("whatsappNo", formData.whatsappNo || formData.phone);
+
+//       // Complex Data
+//       data.append("items", JSON.stringify(items));
 //       images.forEach((file) => data.append("images", file));
 
 //       const res = await createListingAPI(data);
@@ -159,11 +170,12 @@
 //                 }}>
 //                 <h2 className="fw-bold mb-2">Create New Listing</h2>
 //                 <p className="opacity-75">
-//                   Fill in the details below to showcase your property or service
+//                   Showcase your property or service to the world
 //                 </p>
 //               </div>
 
 //               <form className="p-4 p-md-5" onSubmit={handleSubmit}>
+//                 {/* 1. BASIC INFO */}
 //                 <div className="mb-5">
 //                   <h5
 //                     className="text-uppercase fw-bold mb-4"
@@ -228,21 +240,61 @@
 //                         ))}
 //                       </select>
 //                     </div>
+//                   </div>
+//                 </div>
 
+//                 {/* 2. MEDIA (PHOTOS & VIDEO) */}
+//                 <div className="mb-5">
+//                   <h5
+//                     className="text-uppercase fw-bold mb-4"
+//                     style={{ color: theme.primary, letterSpacing: "1px" }}>
+//                     <Video size={20} className="me-2" /> Media & Gallery
+//                   </h5>
+//                   <div className="row g-4">
 //                     <div className="col-12">
 //                       <label className="form-label small fw-bold">
-//                         Description
+//                         YouTube Video URL
 //                       </label>
-//                       <textarea
-//                         name="description"
-//                         rows="4"
+//                       <input
+//                         type="url"
+//                         name="youtubeVideo"
 //                         className="form-control border-0 bg-light"
-//                         placeholder="Describe the highlights..."
-//                         onChange={handleInputChange}></textarea>
+//                         placeholder="https://www.youtube.com/watch?v=..."
+//                         value={formData.youtubeVideo}
+//                         onChange={handleInputChange}
+//                       />
+//                     </div>
+//                     <div className="col-12">
+//                       <label className="form-label small fw-bold">
+//                         Upload Photos *
+//                       </label>
+//                       <div
+//                         className="upload-box border-dashed p-4 text-center bg-light rounded-4"
+//                         style={{ border: "2px dashed #ccc" }}>
+//                         <input
+//                           type="file"
+//                           multiple
+//                           className="form-control d-none"
+//                           id="imageUpload"
+//                           accept="image/*"
+//                           onChange={handleImageChange}
+//                         />
+//                         <label
+//                           htmlFor="imageUpload"
+//                           style={{ cursor: "pointer" }}>
+//                           <div className="btn btn-outline-dark mb-2">
+//                             Select Images
+//                           </div>
+//                           <p className="text-muted small mb-0">
+//                             {images.length} files selected
+//                           </p>
+//                         </label>
+//                       </div>
 //                     </div>
 //                   </div>
 //                 </div>
 
+//                 {/* 3. LOCATION & CONTACT */}
 //                 <div className="mb-5">
 //                   <h5
 //                     className="text-uppercase fw-bold mb-4"
@@ -252,59 +304,36 @@
 //                   <div className="row g-4">
 //                     <div className="col-md-8">
 //                       <label className="form-label small fw-bold">
-//                         Address
+//                         Address *
 //                       </label>
 //                       <input
 //                         type="text"
 //                         name="address"
+//                         required
 //                         className="form-control border-0 bg-light"
 //                         placeholder="Full street address"
+//                         value={formData.address}
 //                         onChange={handleInputChange}
 //                       />
 //                     </div>
 //                     <div className="col-md-4">
 //                       <label className="form-label small fw-bold">
-//                         Phone Number
+//                         Phone Number *
 //                       </label>
 //                       <input
 //                         type="text"
 //                         name="phone"
+//                         required
 //                         className="form-control border-0 bg-light"
 //                         placeholder="+91 ..."
+//                         value={formData.phone}
 //                         onChange={handleInputChange}
 //                       />
 //                     </div>
 //                   </div>
 //                 </div>
 
-//                 <div className="mb-5">
-//                   <h5
-//                     className="text-uppercase fw-bold mb-4"
-//                     style={{ color: theme.primary, letterSpacing: "1px" }}>
-//                     <ImageIcon size={20} className="me-2" /> Gallery *
-//                   </h5>
-//                   <div
-//                     className="upload-box border-dashed p-5 text-center bg-light rounded-4"
-//                     style={{ border: "2px dashed #ccc" }}>
-//                     <input
-//                       type="file"
-//                       multiple
-//                       className="form-control d-none"
-//                       id="imageUpload"
-//                       accept="image/*"
-//                       onChange={handleImageChange}
-//                     />
-//                     <label htmlFor="imageUpload" style={{ cursor: "pointer" }}>
-//                       <div className="btn btn-outline-dark mb-2">
-//                         Upload Images
-//                       </div>
-//                       <p className="text-muted small mb-0">
-//                         {images.length} files selected
-//                       </p>
-//                     </label>
-//                   </div>
-//                 </div>
-
+//                 {/* 4. SOCIAL PRESENCE */}
 //                 <div className="mb-5">
 //                   <h5
 //                     className="text-uppercase fw-bold mb-4"
@@ -321,15 +350,15 @@
 //                       "whatsappNo",
 //                     ].map((field) => (
 //                       <div className="col-md-4" key={field}>
+//                         <label className="form-label small text-capitalize">
+//                           {field}
+//                         </label>
 //                         <input
 //                           type="text"
 //                           name={field}
 //                           className="form-control border-0 bg-light"
-//                           placeholder={
-//                             field === "whatsappNo"
-//                               ? "WhatsApp Number"
-//                               : `${field.charAt(0).toUpperCase() + field.slice(1)} URL`
-//                           }
+//                           placeholder="URL or Number"
+//                           value={formData[field]}
 //                           onChange={handleInputChange}
 //                         />
 //                       </div>
@@ -337,6 +366,7 @@
 //                   </div>
 //                 </div>
 
+//                 {/* 5. PRICING ITEMS */}
 //                 <div
 //                   className="mb-5 p-4 rounded-4"
 //                   style={{ backgroundColor: "#f0f4f8" }}>
@@ -351,7 +381,7 @@
 //                       onClick={addItem}
 //                       className="btn btn-sm text-white px-3"
 //                       style={{ backgroundColor: theme.accent }}>
-//                       <Plus size={16} /> Add More
+//                       <Plus size={16} /> Add Item
 //                     </button>
 //                   </div>
 //                   {items.map((item, index) => (
@@ -362,7 +392,7 @@
 //                           name="name"
 //                           value={item.name}
 //                           className="form-control border-0 shadow-sm"
-//                           placeholder="Item Name"
+//                           placeholder="Item/Service Name"
 //                           onChange={(e) => handleItemChange(index, e)}
 //                         />
 //                       </div>
@@ -428,18 +458,17 @@ import {
   Plus,
   Trash2,
   Globe,
-  ImageIcon,
   MapPin,
   Layers,
   Loader2,
-  Video, // Icon for YouTube Video
+  Video,
 } from "lucide-react";
 import {
   getCategoriesAPI,
   createListingAPI,
   getAllSubCategoriesApi,
 } from "../services/authService";
-import { getUser } from "../utils/storage"; // Import getUser to get logged-in user ID
+import { getUser } from "../utils/storage";
 
 const Listing = () => {
   const navigate = useNavigate();
@@ -450,17 +479,17 @@ const Listing = () => {
 
   const [formData, setFormData] = useState({
     title: "",
-    category: "",
-    subcategoryId: "",
+    categoryId: "",
+    subCategoryId: "",
     description: "",
     address: "",
     phone: "",
-    youtubeVideo: "", // NEW PARAMETER
-    ownerId: "", // NEW PARAMETER
+    youtubeVideo: "",
+    ownerId: "",
     facebook: "",
     twitter: "",
     linkedin: "",
-    youtube: "", // This is for social link
+    youtube: "",
     instagram: "",
     whatsappNo: "",
   });
@@ -485,33 +514,32 @@ const Listing = () => {
         if (catRes.success) setCategories(catRes.categories);
         if (subRes.success) setAllSubCategories(subRes.data);
 
-        // ✅ SET OWNER ID FROM LOGGED IN USER
         const user = getUser();
         if (user) {
           setFormData((prev) => ({ ...prev, ownerId: user.id || user._id }));
         }
       } catch (err) {
-        toast.error("Failed to load form data ❌");
+        toast.error("Failed to load categories! ❌");
       }
     };
     fetchData();
   }, []);
 
   useEffect(() => {
-    if (formData.category) {
+    if (formData.categoryId) {
       const categoryGroup = allSubCategories.find(
-        (group) => group.categoryId._id === formData.category,
+        (group) => group.categoryId?._id === formData.categoryId,
       );
       setFilteredSubCats(categoryGroup ? categoryGroup.subcategories : []);
     } else {
       setFilteredSubCats([]);
     }
-  }, [formData.category, allSubCategories]);
+  }, [formData.categoryId, allSubCategories]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    if (name === "category") {
-      setFormData({ ...formData, category: value, subcategoryId: "" });
+    if (name === "categoryId") {
+      setFormData({ ...formData, categoryId: value, subCategoryId: "" });
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -525,53 +553,60 @@ const Listing = () => {
 
   const addItem = () => setItems([...items, { name: "", price: "" }]);
   const removeItem = (index) => setItems(items.filter((_, i) => i !== index));
-  const handleImageChange = (e) => setImages(Array.from(e.target.files));
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setImages(files);
+    toast.info(`${files.length} images selected 📸`);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !formData.category ||
-      !formData.subcategoryId ||
-      !formData.title ||
-      images.length === 0
-    ) {
-      return toast.warn(
-        "Please select category, subcategory and upload images.",
-      );
-    }
+    // ✅ VALIDATION TOASTS
+    if (!formData.title) return toast.warn("Please enter a Business Title ⚠️");
+    if (!formData.categoryId) return toast.warn("Please select a Category ⚠️");
+    if (!formData.subCategoryId)
+      return toast.warn("Please select a Sub-Category ⚠️");
+    if (images.length === 0)
+      return toast.warn("Please upload at least one image ⚠️");
+    if (!formData.address) return toast.warn("Address is required ⚠️");
+    if (!formData.phone) return toast.warn("Phone number is required ⚠️");
 
     setLoading(true);
     try {
       const data = new FormData();
-      // ✅ MATCHING YOUR BACKEND PARAMETERS EXACTLY
-      data.append("categoryId", formData.category);
-      data.append("subCategoryId", formData.subcategoryId);
+
+      // All Parameters included
+      data.append("categoryId", formData.categoryId);
+      data.append("subCategoryId", formData.subCategoryId);
       data.append("ownerId", formData.ownerId);
       data.append("title", formData.title);
+      data.append("description", formData.description);
       data.append("address", formData.address);
       data.append("phone", formData.phone);
       data.append("youtubeVideo", formData.youtubeVideo);
-
-      // Socials
-      data.append("facebook", formData.facebook);
       data.append("twitter", formData.twitter);
+      data.append("facebook", formData.facebook);
       data.append("linkedin", formData.linkedin);
-      data.append("youtube", formData.youtube); // Social Profile
+      data.append("youtube", formData.youtube);
       data.append("instagram", formData.instagram);
-      data.append("whatsappNo", formData.whatsappNo || formData.phone);
+      data.append("whatsappNo", formData.whatsappNo);
 
-      // Complex Data
       data.append("items", JSON.stringify(items));
       images.forEach((file) => data.append("images", file));
 
       const res = await createListingAPI(data);
-      if (res.success) {
-        toast.success("Listing published successfully! 🎉");
+
+      // ✅ SUCCESS TOAST
+      if (res.success || res.status) {
+        toast.success("Listing Published Successfully! 🎉");
         navigate("/browse");
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to create listing");
+      // ✅ ERROR TOAST
+      const errorMsg =
+        err.response?.data?.message || "Failed to create listing ❌";
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -592,17 +627,15 @@ const Listing = () => {
                   borderRadius: "20px 20px 0 0",
                 }}>
                 <h2 className="fw-bold mb-2">Create New Listing</h2>
-                <p className="opacity-75">
-                  Showcase your property or service to the world
-                </p>
+                <p className="opacity-75">Submit your business details</p>
               </div>
 
               <form className="p-4 p-md-5" onSubmit={handleSubmit}>
-                {/* 1. BASIC INFO */}
+                {/* Basic Info */}
                 <div className="mb-5">
                   <h5
                     className="text-uppercase fw-bold mb-4"
-                    style={{ color: theme.primary, letterSpacing: "1px" }}>
+                    style={{ color: theme.primary }}>
                     <Layers size={20} className="me-2" /> Basic Information
                   </h5>
                   <div className="row g-4">
@@ -613,23 +646,20 @@ const Listing = () => {
                       <input
                         type="text"
                         name="title"
-                        required
                         className="form-control form-control-lg border-0 bg-light"
-                        placeholder="e.g. Modern 3BHK Apartment"
+                        placeholder="Business Name"
                         value={formData.title}
                         onChange={handleInputChange}
                       />
                     </div>
-
                     <div className="col-md-6">
                       <label className="form-label small fw-bold">
                         Category *
                       </label>
                       <select
-                        name="category"
-                        required
-                        className="form-select form-control-lg border-0 bg-light"
-                        value={formData.category}
+                        name="categoryId"
+                        className="form-select border-0 bg-light"
+                        value={formData.categoryId}
                         onChange={handleInputChange}>
                         <option value="">Select Category...</option>
                         {categories.map((cat) => (
@@ -639,23 +669,17 @@ const Listing = () => {
                         ))}
                       </select>
                     </div>
-
                     <div className="col-md-6">
                       <label className="form-label small fw-bold">
                         Subcategory *
                       </label>
                       <select
-                        name="subcategoryId"
-                        required
-                        className="form-select form-control-lg border-0 bg-light"
-                        value={formData.subcategoryId}
+                        name="subCategoryId"
+                        className="form-select border-0 bg-light"
+                        value={formData.subCategoryId}
                         onChange={handleInputChange}
-                        disabled={!formData.category}>
-                        <option value="">
-                          {formData.category
-                            ? "Select Subcategory..."
-                            : "Choose Category First"}
-                        </option>
+                        disabled={!formData.categoryId}>
+                        <option value="">Select Sub-Category...</option>
                         {filteredSubCats.map((sub) => (
                           <option key={sub._id} value={sub._id}>
                             {sub.subcategoryName}
@@ -663,66 +687,63 @@ const Listing = () => {
                         ))}
                       </select>
                     </div>
+                    <div className="col-12">
+                      <label className="form-label small fw-bold">
+                        Description
+                      </label>
+                      <textarea
+                        name="description"
+                        className="form-control border-0 bg-light"
+                        rows="3"
+                        placeholder="Tell us about your business..."
+                        value={formData.description}
+                        onChange={handleInputChange}></textarea>
+                    </div>
                   </div>
                 </div>
 
-                {/* 2. MEDIA (PHOTOS & VIDEO) */}
+                {/* Media */}
                 <div className="mb-5">
                   <h5
                     className="text-uppercase fw-bold mb-4"
-                    style={{ color: theme.primary, letterSpacing: "1px" }}>
-                    <Video size={20} className="me-2" /> Media & Gallery
+                    style={{ color: theme.primary }}>
+                    <Video size={20} className="me-2" /> Media Gallery
                   </h5>
                   <div className="row g-4">
                     <div className="col-12">
                       <label className="form-label small fw-bold">
-                        YouTube Video URL
+                        YouTube Link
                       </label>
                       <input
                         type="url"
                         name="youtubeVideo"
                         className="form-control border-0 bg-light"
-                        placeholder="https://www.youtube.com/watch?v=..."
+                        placeholder="https://youtube.com/..."
                         value={formData.youtubeVideo}
                         onChange={handleInputChange}
                       />
                     </div>
                     <div className="col-12">
                       <label className="form-label small fw-bold">
-                        Upload Photos *
+                        Images *
                       </label>
-                      <div
-                        className="upload-box border-dashed p-4 text-center bg-light rounded-4"
-                        style={{ border: "2px dashed #ccc" }}>
-                        <input
-                          type="file"
-                          multiple
-                          className="form-control d-none"
-                          id="imageUpload"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                        />
-                        <label
-                          htmlFor="imageUpload"
-                          style={{ cursor: "pointer" }}>
-                          <div className="btn btn-outline-dark mb-2">
-                            Select Images
-                          </div>
-                          <p className="text-muted small mb-0">
-                            {images.length} files selected
-                          </p>
-                        </label>
-                      </div>
+                      <input
+                        type="file"
+                        multiple
+                        className="form-control border-0 bg-light"
+                        onChange={handleImageChange}
+                        accept="image/*"
+                      />
                     </div>
                   </div>
                 </div>
 
-                {/* 3. LOCATION & CONTACT */}
+                {/* Contact */}
                 <div className="mb-5">
                   <h5
                     className="text-uppercase fw-bold mb-4"
-                    style={{ color: theme.primary, letterSpacing: "1px" }}>
-                    <MapPin size={20} className="me-2" /> Location & Contact
+                    style={{ color: theme.primary }}>
+                    <MapPin size={20} className="me-2" /> Address & Contact
                   </h5>
                   <div className="row g-4">
                     <div className="col-md-8">
@@ -732,45 +753,52 @@ const Listing = () => {
                       <input
                         type="text"
                         name="address"
-                        required
                         className="form-control border-0 bg-light"
-                        placeholder="Full street address"
                         value={formData.address}
                         onChange={handleInputChange}
                       />
                     </div>
                     <div className="col-md-4">
                       <label className="form-label small fw-bold">
-                        Phone Number *
+                        Phone *
                       </label>
                       <input
                         type="text"
                         name="phone"
-                        required
                         className="form-control border-0 bg-light"
-                        placeholder="+91 ..."
                         value={formData.phone}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label small fw-bold">
+                        WhatsApp
+                      </label>
+                      <input
+                        type="text"
+                        name="whatsappNo"
+                        className="form-control border-0 bg-light"
+                        value={formData.whatsappNo}
                         onChange={handleInputChange}
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* 4. SOCIAL PRESENCE */}
+                {/* Socials */}
                 <div className="mb-5">
                   <h5
                     className="text-uppercase fw-bold mb-4"
-                    style={{ color: theme.primary, letterSpacing: "1px" }}>
-                    <Globe size={20} className="me-2" /> Social Presence
+                    style={{ color: theme.primary }}>
+                    <Globe size={20} className="me-2" /> Social Media
                   </h5>
                   <div className="row g-3">
                     {[
                       "facebook",
+                      "twitter",
                       "linkedin",
                       "youtube",
-                      "twitter",
                       "instagram",
-                      "whatsappNo",
                     ].map((field) => (
                       <div className="col-md-4" key={field}>
                         <label className="form-label small text-capitalize">
@@ -780,7 +808,6 @@ const Listing = () => {
                           type="text"
                           name={field}
                           className="form-control border-0 bg-light"
-                          placeholder="URL or Number"
                           value={formData[field]}
                           onChange={handleInputChange}
                         />
@@ -789,52 +816,47 @@ const Listing = () => {
                   </div>
                 </div>
 
-                {/* 5. PRICING ITEMS */}
+                {/* Items */}
                 <div
                   className="mb-5 p-4 rounded-4"
                   style={{ backgroundColor: "#f0f4f8" }}>
-                  <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h5
-                      className="text-uppercase fw-bold mb-0"
-                      style={{ color: theme.primary }}>
-                      Items & Pricing
-                    </h5>
+                  <div className="d-flex justify-content-between mb-3">
+                    <h6 className="fw-bold">Items & Pricing</h6>
                     <button
                       type="button"
                       onClick={addItem}
-                      className="btn btn-sm text-white px-3"
-                      style={{ backgroundColor: theme.accent }}>
-                      <Plus size={16} /> Add Item
+                      className="btn btn-sm btn-dark px-3">
+                      <Plus size={16} /> Add
                     </button>
                   </div>
                   {items.map((item, index) => (
-                    <div key={index} className="row g-3 mb-3 align-items-end">
-                      <div className="col-md-7">
+                    <div key={index} className="row g-2 mb-2">
+                      <div className="col-7">
                         <input
                           type="text"
                           name="name"
+                          className="form-control border-0"
+                          placeholder="Item name"
                           value={item.name}
-                          className="form-control border-0 shadow-sm"
-                          placeholder="Item/Service Name"
                           onChange={(e) => handleItemChange(index, e)}
                         />
                       </div>
-                      <div className="col-md-3">
+                      <div className="col-3">
                         <input
                           type="number"
                           name="price"
-                          value={item.price}
-                          className="form-control border-0 shadow-sm"
+                          className="form-control border-0"
                           placeholder="Price"
+                          value={item.price}
                           onChange={(e) => handleItemChange(index, e)}
                         />
                       </div>
-                      <div className="col-md-2">
+                      <div className="col-2">
                         {items.length > 1 && (
                           <button
                             type="button"
                             onClick={() => removeItem(index)}
-                            className="btn btn-outline-danger border-0 w-100 shadow-sm">
+                            className="btn btn-outline-danger border-0">
                             <Trash2 size={18} />
                           </button>
                         )}
@@ -843,26 +865,26 @@ const Listing = () => {
                   ))}
                 </div>
 
-                <div className="text-center mt-5">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="btn btn-lg text-white px-5 py-3 fw-bold shadow"
-                    style={{
-                      backgroundColor: theme.primary,
-                      borderRadius: "12px",
-                      width: "100%",
-                    }}>
-                    {loading ? (
-                      <>
-                        <Loader2 size={20} className="animate-spin me-2" />{" "}
-                        Publishing...
-                      </>
-                    ) : (
-                      "Publish Listing Now"
-                    )}
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn btn-lg text-white w-100 fw-bold shadow py-3"
+                  style={{
+                    backgroundColor: theme.primary,
+                    borderRadius: "12px",
+                  }}>
+                  {loading ? (
+                    <>
+                      <Loader2
+                        size={20}
+                        className="spinner-border spinner-border-sm me-2"
+                      />{" "}
+                      Publishing...
+                    </>
+                  ) : (
+                    "Publish Listing"
+                  )}
+                </button>
               </form>
             </div>
           </div>
