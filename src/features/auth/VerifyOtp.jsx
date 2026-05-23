@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { verifyOtpAPI, forgotPasswordAPI } from "../../services/authService";
+import { verifyOtpAPI, resendOtpAPI } from "../../services/authService";
 import { toast } from "react-toastify";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -9,16 +9,14 @@ const VerifyOtp = () => {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Timer State
+  // Timer State: 120 seconds = 2 minutes
   const [timeLeft, setTimeLeft] = useState(120);
   const [canResend, setCanResend] = useState(false);
 
-  // Get data from navigation state
   const email = location.state?.email;
-  const type = location.state?.type;
-  // IMPORTANT: Capture the role here. If no role is passed, default to "owner"
-  const role = location.state?.role || "owner";
+  const type = location.state?.type; // 'signup' or 'forgot'
 
+  // Countdown Logic
   useEffect(() => {
     let timer;
     if (timeLeft > 0) {
@@ -26,7 +24,7 @@ const VerifyOtp = () => {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
     } else {
-      setCanResend(true);
+      setCanResend(true); // Enable resend button when time is up
       clearInterval(timer);
     }
     return () => clearInterval(timer);
@@ -46,54 +44,49 @@ const VerifyOtp = () => {
 
   const handleVerify = async (e) => {
     e.preventDefault();
-    if (timeLeft === 0) return toast.error("OTP expired! Resend code.");
-    if (otp.length < 4) return toast.error("Enter valid code");
+
+    if (timeLeft === 0) {
+      return toast.error("OTP has expired. Please resend a new code.");
+    }
+
+    if (otp.length < 4) return toast.error("Please enter a valid code");
 
     setLoading(true);
     try {
       const res = await verifyOtpAPI({ email, otp });
-      if (type === "signup") {
-        toast.success("Verified! Please login.");
-        navigate("/login");
-      } else if (type === "forgot") {
-        toast.success("Verified!");
-        // Send email to reset page
-        navigate("/reset-password", { state: { email } });
+
+      if (res) {
+        toast.success("Verification Successful!");
+        if (type === "signup") {
+          navigate("/login");
+        } else if (type === "forgot") {
+          navigate("/reset-password", { state: { email } });
+        }
       }
     } catch (error) {
-      toast.error("Invalid OTP");
+      toast.error(error.response?.data?.message || "Invalid OTP");
     } finally {
       setLoading(false);
     }
   };
 
+  // RESEND OTP METHOD
   const handleResend = async () => {
-    // 1. Start loading state
     setLoading(true);
-
     try {
-      // 2. Prepare payload (Email and Role are usually required)
-      const payload = {
-        email: email,
-        role: location.state?.role || "owner",
-      };
-
-      // 3. Call the new resend-otp endpoint
-      const res = await resendOtpAPI(payload);
+      // Calling endpoint: /auth/resend-otp with { email }
+      const res = await resendOtpAPI({ email });
 
       if (res) {
-        // 4. Show success message
-        toast.success("A new OTP has been sent to your email!");
+        toast.success("A new verification code has been sent!");
 
-        // 5. Reset UI and Timer functionality
-        setTimeLeft(120); // Restart 2-minute countdown
+        // RESET TIMER LOGIC
+        setTimeLeft(120); // Start 2-minute timer again
         setCanResend(false); // Disable resend button
-        setOtp(""); // Clear the OTP input field
+        setOtp(""); // Clear input field
       }
     } catch (error) {
-      // 6. Handle errors and show toast
-      const errorMsg = error.response?.data?.message || "Failed to resend OTP";
-      toast.error(errorMsg);
+      toast.error(error.response?.data?.message || "Failed to resend OTP");
     } finally {
       setLoading(false);
     }
@@ -106,14 +99,15 @@ const VerifyOtp = () => {
         style={{ maxWidth: "400px", width: "100%", borderRadius: "20px" }}>
         <h4 className="text-center fw-bold mb-2">Verify OTP</h4>
         <p className="text-center text-muted small mb-4">
-          Code sent to: <span className="text-dark fw-bold">{email}</span>
+          Code sent to: <br />
+          <span className="text-dark fw-bold">{email}</span>
         </p>
 
         <form onSubmit={handleVerify}>
           <div className="mb-2 text-center">
             <input
               type="text"
-              className="form-control form-control-lg text-center fw-bold"
+              className={`form-control form-control-lg text-center fw-bold ${timeLeft === 0 ? "is-invalid" : ""}`}
               placeholder="000000"
               maxLength="6"
               required
@@ -123,28 +117,39 @@ const VerifyOtp = () => {
               style={{ letterSpacing: "8px", border: "2px solid #001f3f" }}
             />
           </div>
+
           <div className="text-center mb-4">
-            <small
-              className={timeLeft === 0 ? "text-danger fw-bold" : "text-muted"}>
-              {timeLeft > 0 ? `Expires in: ${formatTime(timeLeft)}` : "Expired"}
-            </small>
+            {timeLeft > 0 ? (
+              <small className="text-muted">
+                Expires in:{" "}
+                <span className="text-danger fw-bold">
+                  {formatTime(timeLeft)}
+                </span>
+              </small>
+            ) : (
+              <small className="text-danger fw-bold">OTP Expired</small>
+            )}
           </div>
+
           <button
             className="btn btn-lg w-100 text-white shadow mb-3"
-            style={{ backgroundColor: "#001f3f" }}
+            style={{ backgroundColor: "#001f3f", borderRadius: "10px" }}
             disabled={loading || timeLeft === 0}>
             {loading ? "Checking..." : "Confirm"}
           </button>
         </form>
 
         <div className="text-center">
-          <button
-            onClick={handleResend}
-            disabled={!canResend || loading}
-            className="btn btn-link btn-sm p-0 fw-bold text-decoration-none"
-            style={{ color: canResend ? "#001f3f" : "#ccc" }}>
-            Resend Code
-          </button>
+          <p className="small text-muted">
+            Didn't receive the code?{" "}
+            <button
+              onClick={handleResend}
+              disabled={!canResend || loading}
+              className="btn btn-link btn-sm p-0 fw-bold text-decoration-none"
+              style={{ color: canResend ? "#001f3f" : "#ccc" }}>
+              Resend Code
+            </button>
+          </p>
         </div>
       </div>
     </div>
