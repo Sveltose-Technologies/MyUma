@@ -45,8 +45,8 @@ import Inquiry from "../pages/Inquiry";
 import UserProfileUpdate from "../pages/UserProfileUpdate";
 import ManageListings from "../pages/ManageListings";
 import BlogComments from "../pages/BlogComments";
-
-// --- Route Protection Logic ---
+import UserBookmarks from "../pages/UserBookmarks";// --- Route Protection Logic ---
+import UserFavorites from "../pages/UserFavorites";
 const ProtectedRoute = () => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
@@ -87,7 +87,6 @@ const AppRoutes = () => {
           <Route path="/home-search" element={<HomeSearchBar />} />
           <Route path="/browse/:slug" element={<BrowseDetails />} />
           <Route path="/browse" element={<BrowseListings />} />
-          <Route path="/user-update-profile" element={<UserProfileUpdate />} />
 
           {/* --- PROTECTED ROUTES --- */}
           <Route element={<ProtectedRoute />}>
@@ -103,6 +102,12 @@ const AppRoutes = () => {
               <Route path="/inquiries" element={<Inquiry />} />
               <Route path="/manage-listings" element={<ManageListings />} />
               <Route path="/blog-comments" element={<BlogComments />} />
+              <Route
+                path="/user-update-profile"
+                element={<UserProfileUpdate />}
+              />
+              <Route path="/user-bookmarks" element={<UserBookmarks />} />
+              <Route path="/user-favorites" element={<UserFavorites />} />
             </Route>
           </Route>
         </Routes>

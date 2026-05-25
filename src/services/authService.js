@@ -320,6 +320,7 @@ export const createBookingAPI = async (data) => {
 export const getAllBookingsAPI = async () => {
   try {
     const response = await API.get("/booknow/get-all");
+    console.log("getAllBookingsAPI response:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error in getAllBookingsAPI:", error);
