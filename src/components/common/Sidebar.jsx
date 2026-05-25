@@ -127,7 +127,8 @@ const Sidebar = () => {
       icon: "bi-bookmark-heart",
       path: "/user-bookmarks",
     },
-    // { name: "My Reviews", icon: "bi-star", path: "/user-reviews" },
+    { name: "My Reviews", icon: "bi-star", path: "/user-reviews" },
+    { name: "My Inquiries", icon: "bi-question-circle", path: "/user-inquiries" },
     { name: "My Favorites", icon: "bi-heart", path: "/user-favorites" },
 
   ];
@@ -162,17 +163,6 @@ const Sidebar = () => {
         ))}
       </ul>
 
-      <div className="mt-4 p-4 border-top border-secondary border-opacity-25">
-        <h6 className="text-uppercase small fw-bold opacity-50 mb-3">
-          Account
-        </h6>
-        <button
-          onClick={handleLogout}
-          className="btn btn-link text-white text-decoration-none d-flex align-items-center gap-3 p-0 opacity-75 hover-opacity-100">
-          <i className="bi bi-box-arrow-right fs-5"></i>
-          <span>Logout</span>
-        </button>
-      </div>
 
       {/* Same CSS as you provided */}
       <style jsx="true">{`

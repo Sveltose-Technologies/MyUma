@@ -47,6 +47,8 @@ import ManageListings from "../pages/ManageListings";
 import BlogComments from "../pages/BlogComments";
 import UserBookmarks from "../pages/UserBookmarks";// --- Route Protection Logic ---
 import UserFavorites from "../pages/UserFavorites";
+import UserReviews from "../pages/UserReviews";
+import UserInquiry from "../pages/UserInquiry";
 const ProtectedRoute = () => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
@@ -108,6 +110,8 @@ const AppRoutes = () => {
               />
               <Route path="/user-bookmarks" element={<UserBookmarks />} />
               <Route path="/user-favorites" element={<UserFavorites />} />
+              <Route path="/user-reviews" element={<UserReviews />} />
+              <Route path="/user-inquiries" element={<UserInquiry />} />
             </Route>
           </Route>
         </Routes>

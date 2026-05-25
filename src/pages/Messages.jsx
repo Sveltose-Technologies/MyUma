@@ -417,7 +417,6 @@ const Messages = () => {
             
               </div>
             </div>
-            <MoreVertical size={18} className="text-muted" />
           </div>
 
           {userRole === "owner" && (
