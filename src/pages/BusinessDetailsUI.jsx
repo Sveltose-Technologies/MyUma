@@ -767,18 +767,22 @@ const BusinessDetailsUI = ({
     return reviewUserId?.toString() === currentUserId?.toString();
   });
 
-  // Fixed YouTube Embed Logic
-  const getEmbedUrl = (url) => {
-    if (!url) return null;
-    const regExp =
-      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    if (match && match[2].length === 11) {
-      return `https://www.youtube.com/embed/${match[2]}`;
-    }
-    return null;
-  };
+const getEmbedUrl = (url) => {
+  if (!url) return null;
 
+  // Regex to capture ID from standard, shorts, or mobile links
+  const regExp =
+    /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+
+  if (match && match[2].length === 11) {
+    const videoId = match[2];
+    // Use clean HTTPS embed link without extra parameters that cause Error 153
+    return `https://www.youtube.com/embed/${videoId}`;
+  }
+
+  return null;
+};
   useEffect(() => {
     if (listing?.address) {
       fetch(
@@ -825,7 +829,6 @@ const BusinessDetailsUI = ({
           {listing.description || "No description provided."}
         </p>
       </div>
-
       {getEmbedUrl(listing.video || listing.youtubeVideo) && (
         <div className="bg-white p-4 rounded-4 shadow-sm mb-4 border">
           <h5 className="fw-800 mb-3 text-navy d-flex align-items-center gap-2 text-uppercase">
@@ -835,6 +838,9 @@ const BusinessDetailsUI = ({
             <iframe
               src={getEmbedUrl(listing.video || listing.youtubeVideo)}
               title="Video Player"
+              // Add these attributes specifically for cPanel/Production
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
               style={{ border: 0 }}></iframe>
           </div>
