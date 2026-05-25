@@ -674,10 +674,10 @@ const HomeSearchBar = () => {
 
               <button
                 className="uma-btn-navy rounded-pill px-4 ms-2 d-flex align-items-center justify-content-center gap-2 border-0 shadow-sm"
-                style={{ height: "48px", minWidth: "130px" }}
+                style={{ height: "40px", minWidth: "120px" }}
                 onClick={() => handleSearch()}
               >
-                <Search size={18} /> <span className="fw-800 ls-1">SEARCH</span>
+                <Search size={15} /> <span className="fw-800 ls-1">SEARCH</span>
               </button>
 
               {/* DROPDOWN MENU */}

@@ -127,10 +127,9 @@ const Sidebar = () => {
       icon: "bi-bookmark-heart",
       path: "/user-bookmarks",
     },
-    { name: "My Reviews", icon: "bi-star", path: "/user-reviews" },
+    // { name: "My Reviews", icon: "bi-star", path: "/user-reviews" },
     { name: "My Favorites", icon: "bi-heart", path: "/user-favorites" },
 
-    { name: "Settings", icon: "bi-gear", path: "/user-settings" },
   ];
 
   // Role ke basis par decide karna ki kaunsa menu dikhana hai
