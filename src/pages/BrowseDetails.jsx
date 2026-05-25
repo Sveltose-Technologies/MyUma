@@ -862,7 +862,6 @@
 // };
 
 // export default BrowseDetails;
-
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -974,6 +973,7 @@ const BrowseDetails = () => {
               .replace(/[\s_-]+/g, "-")
               .replace(/^-+|-+$/g, "")
           : "";
+
       const found = res?.listings?.find((i) => slugify(i.title) === slug);
 
       if (found) {
@@ -986,7 +986,6 @@ const BrowseDetails = () => {
           ),
         );
 
-        // Fetch and filter ratings for this specific item
         const ratRes = await getRatingsAPI();
         if (ratRes.status) {
           const filtered = ratRes.data.filter((r) => {
@@ -999,7 +998,6 @@ const BrowseDetails = () => {
         if (isLoggedIn && currentId) {
           const bRes = await getBookingByUserAPI(currentId);
           if (bRes.status) setUserBookings(bRes.bookings || []);
-
           const favRes = await getFavoritesByUserAPI(currentId);
           if (favRes.success) setFavorites(favRes.data || []);
         }
@@ -1182,7 +1180,6 @@ const BrowseDetails = () => {
                 )}
               </div>
             </div>
-
             <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border text-start">
               <h6 className="fw-800 mb-3 text-navy d-flex align-items-center">
                 <Clock size={18} className="text-warning me-2" /> BUSINESS HOURS
@@ -1207,7 +1204,6 @@ const BrowseDetails = () => {
                 ))}
               </div>
             </div>
-
             <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border text-start">
               <h6 className="fw-800 mb-3 text-navy text-uppercase">
                 Connect with Business
@@ -1263,7 +1259,6 @@ const BrowseDetails = () => {
                 )}
               </div>
             </div>
-
             <div className="card border-0 shadow-sm rounded-4 p-4 text-center bg-white border">
               <img
                 src={getImgURL(listing.ownerId?.profileImage)}
@@ -1307,7 +1302,6 @@ const BrowseDetails = () => {
         isOwner={isOwner}
         currentId={currentId}
       />
-
       <style>{`.thumbs-swiper .swiper-slide-thumb-active .border { border: 2px solid #ff4d4d !important; } .cursor-pointer { cursor: pointer; } .animate-spin { animation: spin 1s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   );
