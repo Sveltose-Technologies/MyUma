@@ -1,197 +1,10 @@
-// import React, { useEffect, useState } from "react";
-// import {
-//   getRatingsAPI, // Using Rating API instead of Review API
-//   getAllAuthsAPI,
-//   getAllListingsApi,
-//   deleteRatingAPI,
-// } from "../services/authService";
-// import { toast } from "react-toastify";
-// import { Trash2, ChevronLeft, ChevronRight, Star } from "lucide-react";
-
-// const Reviews = () => {
-//   const [ratings, setRatings] = useState([]);
-//   const [users, setUsers] = useState([]);
-//   const [listings, setListings] = useState([]);
-//   const [loading, setLoading] = useState(true);
-
-//   // Pagination State
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const itemsPerPage = 5;
-
-//   const fetchData = async () => {
-//     try {
-//       setLoading(true);
-//       const [ratingRes, userRes, listingRes] = await Promise.all([
-//         getRatingsAPI(),
-//         getAllAuthsAPI(),
-//         getAllListingsApi(),
-//       ]);
-
-//       // According to your JSON, ratings are in ratingRes.data
-//       setRatings(ratingRes?.data || []);
-//       setUsers(userRes?.auths || []);
-//       setListings(listingRes?.listings || []);
-//     } catch (error) {
-//       console.error("Error fetching data:", error);
-//       toast.error("Failed to load ratings");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchData();
-//   }, []);
-
-//   // Helper: Find User Name
-//   const getUserName = (userId) => {
-//     const id = userId?._id || userId;
-//     const found = users.find((u) => String(u._id) === String(id));
-//     return found ? found.fullName : "Unknown User";
-//   };
-
-//   // Helper: Find Listing Title
-//   const getItemTitle = (itemId) => {
-//     const id = itemId?._id || itemId;
-//     const found = listings.find((l) => String(l._id) === String(id));
-//     return found ? found.title : "Unknown Listing";
-//   };
-
-//   const handleDelete = async (id) => {
-//     if (!window.confirm("Are you sure you want to delete this rating?")) return;
-//     try {
-//       const res = await deleteRatingAPI(id);
-//       if (res.status) {
-//         toast.success("Rating deleted");
-//         setRatings(ratings.filter((r) => r._id !== id));
-//       }
-//     } catch (error) {
-//       toast.error("Delete failed");
-//     }
-//   };
-
-//   // Star Rating Component
-//   const renderStars = (score) => {
-//     return (
-//       <div className="d-flex justify-content-center gap-1">
-//         {[...Array(5)].map((_, i) => (
-//           <Star
-//             key={i}
-//             size={16}
-//             fill={i < score ? "#ffc107" : "none"}
-//             color={i < score ? "#ffc107" : "#dee2e6"}
-//           />
-//         ))}
-//       </div>
-//     );
-//   };
-
-//   // Pagination Logic
-//   const indexOfLastItem = currentPage * itemsPerPage;
-//   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-//   const currentRatings = ratings.slice(indexOfFirstItem, indexOfLastItem);
-//   const totalPages = Math.ceil(ratings.length / itemsPerPage);
-
-//   if (loading)
-//     return <div className="text-center py-5 fw-bold">Loading Ratings...</div>;
-
-//   return (
-//     <div className="container-fluid py-4 bg-light min-vh-100">
-//       <div className="d-flex justify-content-between align-items-center mb-4">
-//         <h4 className="fw-bold text-dark m-0">USER RATINGS & COMMENTS</h4>
-//         <div className="badge bg-dark px-3 py-2">Total: {ratings.length}</div>
-//       </div>
-
-//       <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
-//         <div className="table-responsive">
-//           <table className="table table-hover align-middle mb-0">
-//             <thead className="bg-white border-bottom">
-//               <tr>
-//                 <th className="px-4 py-3 small fw-bold">S.NO</th>
-//                 <th className="px-4 py-3 small fw-bold">USER NAME</th>
-//                 <th className="px-4 py-3 small fw-bold">LISTING TITLE</th>
-//                 <th className="px-4 py-3 small fw-bold">COMMENT</th>
-//                 <th className="px-4 py-3 small fw-bold text-center">RATING</th>
-//                 <th className="px-4 py-3 small fw-bold text-center">ACTIONS</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {currentRatings.length > 0 ? (
-//                 currentRatings.map((item, index) => (
-//                   <tr key={item._id}>
-//                     <td className="px-4 py-3 text-muted">
-//                       {indexOfFirstItem + index + 1}
-//                     </td>
-//                     <td className="px-4 py-3 fw-bold text-primary">
-//                       {getUserName(item.userId)}
-//                     </td>
-//                     <td className="px-4 py-3">
-//                       <span className="small fw-semibold text-dark">
-//                         {getItemTitle(item.itemId)}
-//                       </span>
-//                     </td>
-//                     <td
-//                       className="px-4 py-3 text-muted small"
-//                       style={{ maxWidth: "250px" }}>
-//                       {item.comment || (
-//                         <em className="opacity-50">No comment provided</em>
-//                       )}
-//                     </td>
-//                     <td className="px-4 py-3 text-center">
-//                       {renderStars(item.rating)}
-//                     </td>
-//                     <td className="px-4 py-3 text-center">
-//                       <button
-//                         onClick={() => handleDelete(item._id)}
-//                         className="btn btn-sm btn-outline-danger rounded-circle p-2">
-//                         <Trash2 size={14} />
-//                       </button>
-//                     </td>
-//                   </tr>
-//                 ))
-//               ) : (
-//                 <tr>
-//                   <td colSpan="6" className="text-center py-5 text-muted">
-//                     No ratings found.
-//                   </td>
-//                 </tr>
-//               )}
-//             </tbody>
-//           </table>
-//         </div>
-//       </div>
-
-//       {/* Pagination Controls */}
-//       {totalPages > 1 && (
-//         <div className="d-flex justify-content-center align-items-center mt-4 gap-3">
-//           <button
-//             className="btn btn-white shadow-sm border rounded-circle p-2"
-//             disabled={currentPage === 1}
-//             onClick={() => setCurrentPage(currentPage - 1)}>
-//             <ChevronLeft size={20} />
-//           </button>
-//           <span className="fw-bold small">
-//             Page {currentPage} of {totalPages}
-//           </span>
-//           <button
-//             className="btn btn-white shadow-sm border rounded-circle p-2"
-//             disabled={currentPage === totalPages}
-//             onClick={() => setCurrentPage(currentPage + 1)}>
-//             <ChevronRight size={20} />
-//           </button>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Reviews;
 import React, { useState, useEffect } from "react";
 import {
   getRatingsAPI,
   deleteRatingAPI,
   getImgURL,
 } from "../services/authService";
+import { toast } from "react-toastify";
 import {
   Star,
   User,
@@ -204,7 +17,7 @@ import {
   MapPin,
   Search,
 } from "lucide-react";
-import { toast } from "react-toastify";
+import Pagination from "../components/common/Pagination";
 
 const ReviewPage = () => {
   const [reviews, setReviews] = useState([]);
@@ -214,6 +27,10 @@ const ReviewPage = () => {
   // Modal State
   const [selectedReview, setSelectedReview] = useState(null);
   const [showModal, setShowModal] = useState(false);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   const fetchReviews = async () => {
     try {
@@ -241,6 +58,10 @@ const ReviewPage = () => {
       if (res.status) {
         toast.success("Review deleted successfully! 🗑️");
         setReviews(reviews.filter((r) => r._id !== id));
+        // Reset to previous page if current page becomes empty
+        if (currentReviews.length === 1 && currentPage > 1) {
+          setCurrentPage(currentPage - 1);
+        }
       }
     } catch (error) {
       toast.error("Failed to delete review");
@@ -274,11 +95,18 @@ const ReviewPage = () => {
     );
   };
 
-  const filteredReviews = reviews.filter(
+  // Filter Logic
+  const filteredData = reviews.filter(
     (r) =>
       r.itemId?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.userId?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentReviews = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
   if (loading)
     return (
@@ -289,19 +117,22 @@ const ReviewPage = () => {
 
   return (
     <div className="container-fluid py-4 bg-light min-vh-100">
-      {/* HEADER SECTION */}
+      {/* HEADER & SEARCH */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
-        <h4 className="fw-800 text-navy m-0 text-uppercase">Reviews</h4>
-       
+        <h4 className="fw-800 text-navy m-0 text-uppercase">
+          Review List
+        </h4>
+        
       </div>
 
-      {/* LIST TABLE */}
+      {/* DATA TABLE */}
       <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div className="table-responsive">
           <table className="table table-hover align-middle mb-0">
             <thead className="bg-white border-bottom">
               <tr>
-                <th className="px-4 py-3 small fw-bold text-navy">USER</th>
+                <th className="px-4 py-3 small fw-bold text-navy">S.NO</th>
+                <th className="py-3 small fw-bold text-navy">USER</th>
                 <th className="py-3 small fw-bold text-navy">LISTING</th>
                 <th className="py-3 small fw-bold text-navy">RATING</th>
                 <th className="py-3 small fw-bold text-navy">COMMENT</th>
@@ -311,25 +142,28 @@ const ReviewPage = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredReviews.length > 0 ? (
-                filteredReviews.map((item) => (
+              {currentReviews.length > 0 ? (
+                currentReviews.map((item, index) => (
                   <tr key={item._id} className="text-start">
-                    <td className="px-4">
+                    <td className="px-4 text-muted small">
+                      {indexOfFirstItem + index + 1}
+                    </td>
+                    <td>
                       <div className="d-flex align-items-center gap-2">
                         {item.userId?.profileImage ? (
                           <img
                             src={getImgURL(item.userId.profileImage)}
                             className="rounded-circle"
                             style={{
-                              width: "35px",
-                              height: "35px",
+                              width: "32px",
+                              height: "32px",
                               objectFit: "cover",
                             }}
                             alt="u"
                           />
                         ) : (
-                          <div className="bg-light rounded-circle p-2">
-                            <User size={18} />
+                          <div className="bg-light rounded-circle p-1">
+                            <User size={16} />
                           </div>
                         )}
                         <span className="fw-bold small">
@@ -362,8 +196,8 @@ const ReviewPage = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="text-center py-5">
-                    No reviews found.
+                  <td colSpan="6" className="text-center py-5">
+                    No feedback entries found.
                   </td>
                 </tr>
               )}
@@ -371,6 +205,13 @@ const ReviewPage = () => {
           </table>
         </div>
       </div>
+
+      {/* PAGINATION COMPONENT */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={(page) => setCurrentPage(page)}
+      />
 
       {/* --- VIEW POPUP MODAL --- */}
       {showModal && selectedReview && (
@@ -382,29 +223,29 @@ const ReviewPage = () => {
               <div
                 className="modal-header border-0 bg-navy text-white p-4"
                 style={{ backgroundColor: "#001f3f" }}>
-                <h5 className="m-0 fw-bold">Review Details</h5>
+                <h5 className="m-0 fw-bold">Full Feedback Details</h5>
                 <X
                   className="cursor-pointer"
                   onClick={() => setShowModal(false)}
                 />
               </div>
               <div className="modal-body p-4 text-start">
-                {/* Reviewer Details */}
+                {/* User Section */}
                 <div className="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded-3">
                   {selectedReview.userId?.profileImage ? (
                     <img
                       src={getImgURL(selectedReview.userId.profileImage)}
                       className="rounded-circle border"
                       style={{
-                        width: "60px",
-                        height: "60px",
+                        width: "55px",
+                        height: "55px",
                         objectFit: "cover",
                       }}
                       alt="u"
                     />
                   ) : (
                     <div className="bg-white rounded-circle p-3">
-                      <User size={30} />
+                      <User size={25} />
                     </div>
                   )}
                   <div>
@@ -412,15 +253,17 @@ const ReviewPage = () => {
                       {selectedReview.userId?.fullName || "Anonymous User"}
                     </h6>
                     <small className="text-muted">
-                      {selectedReview.userId?.email || "No Email Provided"}
+                      {selectedReview.userId?.email || "No email available"}
                     </small>
                   </div>
                 </div>
 
+                {/* Details Grid */}
                 <div className="row g-3 mb-4">
                   <div className="col-6">
                     <small className="text-muted d-block">
-                      <Tag size={14} /> Listing
+                      <Tag size={14} className="me-1" />
+                      Listing Title
                     </small>
                     <span className="fw-bold small">
                       {selectedReview.itemId?.title || "N/A"}
@@ -428,7 +271,8 @@ const ReviewPage = () => {
                   </div>
                   <div className="col-6">
                     <small className="text-muted d-block">
-                      <Calendar size={14} /> Date
+                      <Calendar size={14} className="me-1" />
+                      Date Posted
                     </small>
                     <span className="fw-bold small">
                       {new Date(selectedReview.createdAt).toLocaleDateString()}
@@ -436,25 +280,26 @@ const ReviewPage = () => {
                   </div>
                   <div className="col-12">
                     <small className="text-muted d-block">
-                      <MapPin size={14} /> Business Address
+                      <MapPin size={14} className="me-1" />
+                      Location
                     </small>
                     <span className="fw-bold small">
-                      {selectedReview.itemId?.address || "N/A"}
+                      {selectedReview.itemId?.address || "Address not provided"}
                     </span>
                   </div>
                 </div>
 
-                {/* Rating & Full Comment */}
+                {/* Comment & Rating */}
                 <div className="border-top pt-3">
-                  <div className="d-flex align-items-center justify-content-between mb-3">
-                    <h6 className="fw-bold m-0">Rating & Feedback</h6>
+                  <div className="d-flex align-items-center justify-content-between mb-2">
+                    <h6 className="fw-bold m-0">Rating Score</h6>
                     {renderStars(selectedReview.rating)}
                   </div>
-                  <div className="bg-light p-3 rounded-3 border-start border-4 border-primary shadow-sm">
+                  <div className="bg-light p-3 rounded-3 border-start border-4 border-primary mt-3">
                     <p className="m-0 text-dark small font-italic">
                       <MessageCircle size={14} className="me-2 text-primary" />"
                       {selectedReview.comment ||
-                        "The user gave a rating without a comment."}
+                        "Rating only, no text provided."}
                       "
                     </p>
                   </div>
