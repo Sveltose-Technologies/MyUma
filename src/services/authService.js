@@ -206,12 +206,12 @@ export const getBLogsApi = async () => {
     throw error;
   }
 };
+// -----------------------------------------------------------
+// RATING API METHODS
+// -----------------------------------------------------------
 
-// ==========================================
-// RATING / REVIEWS API METHODS
-// ==========================================
-
-// 1. Add Rating
+// 1. Add Rating (POST)
+// Params: userId, itemId, rating, comment
 export const addRatingAPI = async (data) => {
   try {
     const response = await API.post("/rating/add", data);
@@ -222,12 +222,10 @@ export const addRatingAPI = async (data) => {
   }
 };
 
-// 2. Get All Ratings
+// 2. Get All Ratings (GET)
 export const getRatingsAPI = async () => {
   try {
-    console.log("API CALL: /rating/get-all");
     const response = await API.get("/rating/get-all");
-    console.log("API RESPONSE: /rating/get-all | Data:", response.data);
     return response.data; // Returns { status, count, data: [] }
   } catch (error) {
     console.error("Error in getRatingsAPI:", error);
@@ -235,7 +233,30 @@ export const getRatingsAPI = async () => {
   }
 };
 
-// 3. Delete Rating
+// 3. Get Rating By ID (GET)
+export const getRatingByIdAPI = async (id) => {
+  try {
+    const response = await API.get(`/rating/get-by-id/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in getRatingByIdAPI:", error);
+    throw error;
+  }
+};
+
+// 4. Update Rating (PUT)
+// Params: userId, itemId, rating, comment
+export const updateRatingAPI = async (id, data) => {
+  try {
+    const response = await API.put(`/rating/update/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error in updateRatingAPI:", error);
+    throw error;
+  }
+};
+
+// 5. Delete Rating (DELETE)
 export const deleteRatingAPI = async (id) => {
   try {
     const response = await API.delete(`/rating/delete/${id}`);
@@ -246,6 +267,17 @@ export const deleteRatingAPI = async (id) => {
   }
 };
 
+// 6. Get Ratings By Item ID (GET)
+// Useful for showing all reviews of a specific product/listing
+export const getRatingByItemIdAPI = async (itemId) => {
+  try {
+    const response = await API.get(`/rating/get-by-item/${itemId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in getRatingByItemIdAPI:", error);
+    throw error;
+  }
+};
 // ✅ SEND CONTACT MESSAGE
 export const sendContactAPI = async (contactData) => {
   try {

@@ -5,21 +5,14 @@ import {
   getImgURL,
 } from "../services/authService";
 import { toast } from "react-toastify";
-import {
-  Trash2,
-  MapPin,
-  X,
-  Calendar,
-  Bookmark,
-  Eye,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { Trash2, MapPin, X, Calendar, Bookmark, Eye } from "lucide-react";
+// Pagination Import
+import Pagination from "../components/common/Pagination";
 
 const MyBookmarks = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedBookmark, setSelectedBookmark] = useState(null); // For View Popup
+  const [selectedBookmark, setSelectedBookmark] = useState(null);
 
   // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,12 +49,10 @@ const MyBookmarks = () => {
   }, [currentUserId]);
 
   // --- Pagination Logic ---
+  const totalPages = Math.ceil(bookings.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = bookings.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(bookings.length / itemsPerPage);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Remove this bookmark?")) return;
@@ -69,9 +60,14 @@ const MyBookmarks = () => {
       const res = await deleteBookingAPI(id);
       if (res) {
         toast.success("Removed successfully");
-        setBookings((prev) => prev.filter((item) => item._id !== id));
-        if (currentItems.length === 1 && currentPage > 1)
-          setCurrentPage(currentPage - 1);
+        const updatedList = bookings.filter((item) => item._id !== id);
+        setBookings(updatedList);
+
+        // Agar delete ke baad current page empty ho jaye toh pichle page pe bhejo
+        const newTotalPages = Math.ceil(updatedList.length / itemsPerPage);
+        if (currentPage > newTotalPages && newTotalPages > 0) {
+          setCurrentPage(newTotalPages);
+        }
       }
     } catch (err) {
       toast.error("Delete failed");
@@ -98,7 +94,10 @@ const MyBookmarks = () => {
   return (
     <div className="container-fluid py-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4 className="fw-bold text-navy">My Bookmarks</h4>
+        <div>
+          <h4 className="fw-bold text-navy mb-0">My Bookmarks</h4>
+          <p className="text-muted small">Items you have bookmarked</p>
+        </div>
         <span className="badge bg-danger rounded-pill px-3 py-2">
           {bookings.length} Items
         </span>
@@ -126,17 +125,23 @@ const MyBookmarks = () => {
                     <td className="px-4 py-3">
                       <img
                         src={getImgURL(item.itemId?.images?.[0])}
-                        className="rounded"
+                        className="rounded shadow-sm border"
                         style={{
                           width: "45px",
                           height: "40px",
                           objectFit: "cover",
                         }}
                         alt=""
+                        onError={(e) =>
+                          (e.target.src =
+                            "https://via.placeholder.com/45x40?text=No+Img")
+                        }
                       />
                     </td>
-                    <td className="px-4 py-3 fw-bold small">
-                      {item.itemId?.title || "N/A"}
+                    <td className="px-4 py-3">
+                      <div className="fw-bold text-navy small">
+                        {item.itemId?.title || "N/A"}
+                      </div>
                     </td>
                     <td className="px-4 py-3 small text-muted">
                       {formatDate(item.createdAt)}
@@ -145,12 +150,12 @@ const MyBookmarks = () => {
                       <div className="d-flex justify-content-center gap-2">
                         <button
                           onClick={() => setSelectedBookmark(item)}
-                          className="btn btn-sm btn-outline-primary border-0 rounded-circle p-2">
+                          className="btn btn-sm btn-outline-primary border-0 rounded-circle p-2 shadow-none">
                           <Eye size={18} />
                         </button>
                         <button
                           onClick={() => handleDelete(item._id)}
-                          className="btn btn-sm btn-outline-danger border-0 rounded-circle p-2">
+                          className="btn btn-sm btn-outline-danger border-0 rounded-circle p-2 shadow-none">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -159,8 +164,12 @@ const MyBookmarks = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="text-center py-5 text-muted">
-                    No bookmarks found.
+                  <td colSpan="5" className="text-center py-5">
+                    <Bookmark
+                      size={40}
+                      className="text-muted opacity-25 mb-2"
+                    />
+                    <p className="text-muted">No bookmarks found.</p>
                   </td>
                 </tr>
               )}
@@ -169,30 +178,13 @@ const MyBookmarks = () => {
         </div>
       </div>
 
-      {/* Pagination Controls */}
-      {bookings.length > itemsPerPage && (
-        <div className="d-flex justify-content-center align-items-center mt-4 gap-2">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => paginate(currentPage - 1)}
-            className="btn btn-light btn-sm rounded-circle shadow-sm">
-            <ChevronLeft size={20} />
-          </button>
-          {[...Array(totalPages)].map((_, i) => (
-            <button
-              key={i}
-              onClick={() => paginate(i + 1)}
-              className={`btn btn-sm rounded-circle px-3 ${currentPage === i + 1 ? "btn-danger shadow" : "btn-light"}`}>
-              {i + 1}
-            </button>
-          ))}
-          <button
-            disabled={currentPage === totalPages}
-            onClick={() => paginate(currentPage + 1)}
-            className="btn btn-light btn-sm rounded-circle shadow-sm">
-            <ChevronRight size={20} />
-          </button>
-        </div>
+      {/* Pagination Component - Shows if at least 1 item exists */}
+      {bookings.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       )}
 
       {/* VIEW MODAL (Popup) */}

@@ -5,28 +5,18 @@ import {
   getImgURL,
 } from "../services/authService";
 import { toast } from "react-toastify";
-import {
-  Trash2,
-  MapPin,
-  X,
-  Eye,
-  Heart,
-  ChevronLeft,
-  ChevronRight,
-  Phone,
-  MessageCircle,
-} from "lucide-react";
+import { Trash2, MapPin, X, Eye, Heart } from "lucide-react";
+import Pagination from "../components/common/Pagination";
 
 const UserFavorites = () => {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedFav, setSelectedFav] = useState(null); // For View Popup
+  const [selectedFav, setSelectedFav] = useState(null);
 
   // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Get current user ID (Aapke data me "id" key hai)
   const userStr = localStorage.getItem("user");
   const currentUser = userStr ? JSON.parse(userStr) : null;
   const currentUserId = currentUser?.id || currentUser?._id;
@@ -35,8 +25,6 @@ const UserFavorites = () => {
     try {
       setLoading(true);
       const res = await getFavoritesByUserAPI(currentUserId);
-
-      // Aapke JSON ke according: { success: true, data: [...] }
       if (res.success) {
         setFavorites(res.data || []);
       }
@@ -54,10 +42,10 @@ const UserFavorites = () => {
   }, [currentUserId]);
 
   // --- Pagination Logic ---
+  const totalPages = Math.ceil(favorites.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = favorites.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(favorites.length / itemsPerPage);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Remove this from your favorites?")) return;
@@ -65,9 +53,14 @@ const UserFavorites = () => {
       const res = await deleteFavoriteAPI(id);
       if (res.success || res) {
         toast.success("Removed from favorites ❤️");
-        setFavorites((prev) => prev.filter((item) => item._id !== id));
-        if (currentItems.length === 1 && currentPage > 1)
-          setCurrentPage(currentPage - 1);
+        const updatedList = favorites.filter((item) => item._id !== id);
+        setFavorites(updatedList);
+
+        // Agar current page empty ho jaye delete ke baad, toh pichle page pe jao
+        const newTotalPages = Math.ceil(updatedList.length / itemsPerPage);
+        if (currentPage > newTotalPages && newTotalPages > 0) {
+          setCurrentPage(newTotalPages);
+        }
       }
     } catch (err) {
       toast.error("Failed to remove favorite");
@@ -144,12 +137,12 @@ const UserFavorites = () => {
                       <div className="d-flex justify-content-center gap-2">
                         <button
                           onClick={() => setSelectedFav(item)}
-                          className="btn btn-sm btn-outline-primary border-0 rounded-circle p-2 shadow-none">
+                          className="btn btn-sm btn-outline-primary border-0 rounded-circle p-2">
                           <Eye size={18} />
                         </button>
                         <button
                           onClick={() => handleDelete(item._id)}
-                          className="btn btn-sm btn-outline-danger border-0 rounded-circle p-2 shadow-none">
+                          className="btn btn-sm btn-outline-danger border-0 rounded-circle p-2">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -160,9 +153,7 @@ const UserFavorites = () => {
                 <tr>
                   <td colSpan="5" className="text-center py-5">
                     <Heart size={40} className="text-muted opacity-25 mb-2" />
-                    <p className="text-muted">
-                      You haven't added any favorites yet.
-                    </p>
+                    <p className="text-muted">No favorites found.</p>
                   </td>
                 </tr>
               )}
@@ -171,30 +162,13 @@ const UserFavorites = () => {
         </div>
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="d-flex justify-content-center align-items-center mt-4 gap-2">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(currentPage - 1)}
-            className="btn btn-light btn-sm rounded-circle shadow-sm">
-            <ChevronLeft size={20} />
-          </button>
-          {[...Array(totalPages)].map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`btn btn-sm rounded-circle px-3 ${currentPage === i + 1 ? "btn-danger shadow" : "btn-light"}`}>
-              {i + 1}
-            </button>
-          ))}
-          <button
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(currentPage + 1)}
-            className="btn btn-light btn-sm rounded-circle shadow-sm">
-            <ChevronRight size={20} />
-          </button>
-        </div>
+      {/* Reusable Pagination Component */}
+      {favorites.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       )}
 
       {/* VIEW POPUP */}
@@ -226,9 +200,6 @@ const UserFavorites = () => {
                 <MapPin size={14} className="text-danger" />{" "}
                 {selectedFav.itemId?.address}
               </p>
-
-          
-
               <button
                 onClick={() => setSelectedFav(null)}
                 className="btn btn-navy w-100 rounded-pill text-white fw-bold py-2 shadow-none"
