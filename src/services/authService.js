@@ -414,7 +414,7 @@ export const createListingAPI = async (formData) => {
         "Content-Type": "multipart/form-data",
       },
     });
-
+    console.log("create listing response", response.data);
     return response.data;
   } catch (error) {
     console.error("Error in createListingAPI:", error);

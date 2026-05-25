@@ -558,60 +558,68 @@ const Listing = () => {
     setImages(files);
     toast.info(`${files.length} images selected 📸`);
   };
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // 1. Validations
+  if (!formData.title) return toast.warn("Business Title is required! ⚠️");
+  if (!formData.categoryId) return toast.warn("Please select a Category! ⚠️");
+  if (images.length === 0)
+    return toast.warn("Please upload at least one image! 📸");
 
-    // ✅ VALIDATION TOASTS
-    if (!formData.title) return toast.warn("Please enter a Business Title ⚠️");
-    if (!formData.categoryId) return toast.warn("Please select a Category ⚠️");
-    if (!formData.subCategoryId)
-      return toast.warn("Please select a Sub-Category ⚠️");
-    if (images.length === 0)
-      return toast.warn("Please upload at least one image ⚠️");
-    if (!formData.address) return toast.warn("Address is required ⚠️");
-    if (!formData.phone) return toast.warn("Phone number is required ⚠️");
+  setLoading(true);
+  const toastId = toast.loading("Publishing your listing... ⏳");
 
-    setLoading(true);
-    try {
-      const data = new FormData();
+  try {
+    const data = new FormData();
+    data.append("categoryId", formData.categoryId);
+    data.append("subCategoryId", formData.subCategoryId);
+    data.append("ownerId", formData.ownerId);
+    data.append("title", formData.title);
+    data.append("description", formData.description);
+    data.append("address", formData.address);
+    data.append("phone", formData.phone);
+    data.append("youtubeVideo", formData.youtubeVideo);
+    data.append("whatsappNo", formData.whatsappNo);
+    data.append("items", JSON.stringify(items));
+    images.forEach((file) => data.append("images", file));
 
-      // All Parameters included
-      data.append("categoryId", formData.categoryId);
-      data.append("subCategoryId", formData.subCategoryId);
-      data.append("ownerId", formData.ownerId);
-      data.append("title", formData.title);
-      data.append("description", formData.description);
-      data.append("address", formData.address);
-      data.append("phone", formData.phone);
-      data.append("youtubeVideo", formData.youtubeVideo);
-      data.append("twitter", formData.twitter);
-      data.append("facebook", formData.facebook);
-      data.append("linkedin", formData.linkedin);
-      data.append("youtube", formData.youtube);
-      data.append("instagram", formData.instagram);
-      data.append("whatsappNo", formData.whatsappNo);
+    const res = await createListingAPI(data);
 
-      data.append("items", JSON.stringify(items));
-      images.forEach((file) => data.append("images", file));
+    // ✅ SUCCESS CHECK (As per your JSON: {message: "Listing created successfully"})
+    if (res.listing || res.message?.includes("successfully")) {
+      // 1. Pehle Toast Update hoga (Isse GREEN dikhega)
+      toast.update(toastId, {
+        render: "Listing Created Successfully! 🎉",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000, // 3 second tak toast dikhega
+      });
 
-      const res = await createListingAPI(data);
+      // 2. Redirect ko 3 second baad rakha hai taaki aap toast dekh sakein
+      // Agar aapko redirect NAHI chahiye, toh niche wali 3 lines delete kar dein
 
-      // ✅ SUCCESS TOAST
-      if (res.success || res.status) {
-        toast.success("Listing Published Successfully! 🎉");
-        navigate("/browse");
-      }
-    } catch (err) {
-      // ✅ ERROR TOAST
-      const errorMsg =
-        err.response?.data?.message || "Failed to create listing ❌";
-      toast.error(errorMsg);
-    } finally {
-      setLoading(false);
+    } else {
+      // ❌ Error Case
+      toast.update(toastId, {
+        render: res.message || "Failed to create listing ❌",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+      });
     }
-  };
-
+  } catch (err) {
+    // ❌ Network Error
+    toast.update(toastId, {
+      render: err.response?.data?.message || "Something went wrong! ❌",
+      type: "error",
+      isLoading: false,
+      autoClose: 3000,
+    });
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="min-vh-100 py-5" style={{ backgroundColor: theme.lightBg }}>
       <div className="container">
@@ -646,7 +654,7 @@ const Listing = () => {
                       <input
                         type="text"
                         name="title"
-                        className="form-control form-control-lg border-0 bg-light"
+                        className="form-control form-control-lg border-1 bg-light"
                         placeholder="Business Name"
                         value={formData.title}
                         onChange={handleInputChange}
@@ -658,7 +666,7 @@ const Listing = () => {
                       </label>
                       <select
                         name="categoryId"
-                        className="form-select border-0 bg-light"
+                        className="form-select border-1 bg-light"
                         value={formData.categoryId}
                         onChange={handleInputChange}>
                         <option value="">Select Category...</option>
@@ -675,7 +683,7 @@ const Listing = () => {
                       </label>
                       <select
                         name="subCategoryId"
-                        className="form-select border-0 bg-light"
+                        className="form-select border-1 bg-light"
                         value={formData.subCategoryId}
                         onChange={handleInputChange}
                         disabled={!formData.categoryId}>
@@ -693,7 +701,7 @@ const Listing = () => {
                       </label>
                       <textarea
                         name="description"
-                        className="form-control border-0 bg-light"
+                        className="form-control border-1 bg-light"
                         rows="3"
                         placeholder="Tell us about your business..."
                         value={formData.description}
@@ -717,7 +725,7 @@ const Listing = () => {
                       <input
                         type="url"
                         name="youtubeVideo"
-                        className="form-control border-0 bg-light"
+                        className="form-control border-1 bg-light"
                         placeholder="https://youtube.com/..."
                         value={formData.youtubeVideo}
                         onChange={handleInputChange}
@@ -730,7 +738,7 @@ const Listing = () => {
                       <input
                         type="file"
                         multiple
-                        className="form-control border-0 bg-light"
+                        className="form-control border-1 bg-light"
                         onChange={handleImageChange}
                         accept="image/*"
                       />
@@ -753,7 +761,7 @@ const Listing = () => {
                       <input
                         type="text"
                         name="address"
-                        className="form-control border-0 bg-light"
+                        className="form-control border-1 bg-light"
                         value={formData.address}
                         onChange={handleInputChange}
                       />
@@ -765,7 +773,7 @@ const Listing = () => {
                       <input
                         type="text"
                         name="phone"
-                        className="form-control border-0 bg-light"
+                        className="form-control border-1 bg-light"
                         value={formData.phone}
                         onChange={handleInputChange}
                       />
@@ -777,7 +785,7 @@ const Listing = () => {
                       <input
                         type="text"
                         name="whatsappNo"
-                        className="form-control border-0 bg-light"
+                        className="form-control border-1 bg-light"
                         value={formData.whatsappNo}
                         onChange={handleInputChange}
                       />
@@ -807,7 +815,7 @@ const Listing = () => {
                         <input
                           type="text"
                           name={field}
-                          className="form-control border-0 bg-light"
+                          className="form-control border-1 bg-light"
                           value={formData[field]}
                           onChange={handleInputChange}
                         />
