@@ -862,6 +862,9 @@
 // };
 
 // export default BrowseDetails;
+
+
+
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -1014,8 +1017,11 @@ const BrowseDetails = () => {
     window.scrollTo(0, 0);
   }, [fetchData]);
 
+ 
   const isOwner =
-    isLoggedIn && currentId?.toString() === listing?.ownerId?._id?.toString();
+    isLoggedIn &&
+    (currentUser?.role === "owner" ||
+      currentId?.toString() === listing?.ownerId?._id?.toString());
   const isBooked = userBookings.some((b) => b.itemId?._id === listing?._id);
 
   const handleBook = async () => {
@@ -1305,6 +1311,6 @@ const BrowseDetails = () => {
       <style>{`.thumbs-swiper .swiper-slide-thumb-active .border { border: 2px solid #ff4d4d !important; } .cursor-pointer { cursor: pointer; } .animate-spin { animation: spin 1s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   );
-};
+};;
 
 export default BrowseDetails;
