@@ -46,8 +46,8 @@ const Sidebar = () => {
     },
     { name: "My Reviews", icon: "bi-star", path: "/user-reviews" },
     { name: "My Inquiries", icon: "bi-question-circle", path: "/user-inquiries" },
-    // { name: "My Blog Comments", icon: "bi-chat-left-text", path: "/user-blog-comments" },
-    // { name: "My Favorites", icon: "bi-heart", path: "/user-favorites" },
+    { name: "My Blog Comments", icon: "bi-chat-left-text", path: "/user-blog-comments" },
+    { name: "My Favorites", icon: "bi-heart", path: "/user-favorites" },
 
   ];
 
