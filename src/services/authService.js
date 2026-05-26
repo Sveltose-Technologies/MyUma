@@ -337,6 +337,28 @@ export const getBookingByUserAPI = async (userId) => {
     throw error?.response?.data || error.message || "An error occurred";
   }
 };
+// Pehle galti thi: Api.get (Case sensitive error)
+// Ab theek hai: API.get
+
+export const getBookingsByUserAPI = async (id) => {
+  try {
+    const response = await API.get(`/booknow/get-by-user/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in getBookingsByUserAPI:", error);
+    throw error;
+  }
+};
+
+export const getBookingsByOwnerAPI = async (id) => {
+  try {
+    const response = await API.get(`/booknow/get-by-owner/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in getBookingsByOwnerAPI:", error);
+    throw error;
+  }
+};
 export const createBookingAPI = async (data) => {
   try {
     const response = await API.post("/booknow/add", data);

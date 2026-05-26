@@ -1062,7 +1062,7 @@ const BrowseDetails = () => {
                 <Link
                   to="/login"
                   className="btn btn-outline-danger rounded-pill px-4 fw-bold shadow-sm">
-                  <LogIn size={18} className="me-2" /> Login to Book Now
+                  <LogIn size={18} className="me-2" /> Login to Bookmark
                 </Link>
               ) : (
                 !isOwner && (
@@ -1075,7 +1075,7 @@ const BrowseDetails = () => {
                     ) : (
                       <CalendarCheck size={18} className="me-2" />
                     )}
-                    {isBooked ? "Already Booked" : "Book Now"}
+                    {isBooked ? "Already Bookmarked" : "Bookmark Now"}
                   </button>
                 )
               )}

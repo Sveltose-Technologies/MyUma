@@ -1722,10 +1722,10 @@ const Messages = () => {
               style={{ objectFit: "cover" }}
               alt="me"
             />
-            <div className="d-flex gap-3 text-secondary">
+            {/* <div className="d-flex gap-3 text-secondary">
               <Smile size={20} className="cursor-pointer" />
               <MoreVertical size={20} className="cursor-pointer" />
-            </div>
+            </div> */}
           </div>
 
           <div className="p-2 border-bottom shadow-sm">
@@ -1811,7 +1811,7 @@ const Messages = () => {
                     </small>
                   </div>
                 </div>
-                <MoreVertical size={20} className="text-muted cursor-pointer" />
+                {/* <MoreVertical size={20} className="text-muted cursor-pointer" /> */}
               </div>
 
               {/* Messages Area (SCROLLABLE) */}
