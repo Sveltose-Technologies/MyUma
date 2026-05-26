@@ -39,7 +39,7 @@ import Reviews from "../pages/Reviews";
 import ListingReviews from "../pages/ListingReviews";
 import ContactUs from "../pages/ContactUs";
 import TestimonialPage from "../pages/TestimonialPage";
-import Booking from "../pages/Booking";
+import OwnerBookmarks from "../pages/OwnerBookmarks";
 import HomeSearchBar from "../pages/HomeSearchBar";
 import Inquiry from "../pages/Inquiry";
 import UserProfileUpdate from "../pages/UserProfileUpdate";
@@ -101,7 +101,7 @@ const AppRoutes = () => {
               <Route path="/profile" element={<ProfileUpdate />} />
               <Route path="/reviews" element={<Reviews />} />
               <Route path="/messages" element={<Messages />} />
-              <Route path="/booking" element={<Booking />} />
+              <Route path="/bookmarks" element={<OwnerBookmarks />} />
               <Route path="/inquiries" element={<Inquiry />} />
               <Route path="/manage-listings" element={<ManageListings />} />
               <Route path="/blog-comments" element={<BlogComments />} />

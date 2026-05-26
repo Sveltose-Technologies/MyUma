@@ -19,7 +19,7 @@ import {
 // Pagination Component Import
 import Pagination from "../components/common/Pagination";
 
-const Bookmarks = () => {
+const OwnerBookmarks = () => {
   const [bookmarks, setBookmarks] = useState([]); // State name changed to bookmarks
   const [loading, setLoading] = useState(true);
 
@@ -352,4 +352,4 @@ const Bookmarks = () => {
   );
 };
 
-export default Bookmarks;
+export default OwnerBookmarks;

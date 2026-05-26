@@ -23,7 +23,7 @@ const Sidebar = () => {
     { name: "Listing Manage", icon: "bi-gear", path: "/manage-listings" },
     { name: "Messages", icon: "bi-chat-left-text", path: "/messages" },
     { name: "Reviews", icon: "bi-star", path: "/reviews" },
-    { name: "Bookmarks", icon: "bi-bookmark", path: "/booking" },
+    { name: "Bookmarks", icon: "bi-bookmark", path: "/bookmarks" },
     {
       name: "Blog Comments",
       icon: "bi-chat-left-text",
@@ -45,7 +45,7 @@ const Sidebar = () => {
       path: "/user-bookmarks",
     },
     { name: "My Reviews", icon: "bi-star", path: "/user-reviews" },
-    // { name: "My Inquiries", icon: "bi-question-circle", path: "/user-inquiries" },
+    { name: "My Inquiries", icon: "bi-question-circle", path: "/user-inquiries" },
     // { name: "My Blog Comments", icon: "bi-chat-left-text", path: "/user-blog-comments" },
     // { name: "My Favorites", icon: "bi-heart", path: "/user-favorites" },
 
