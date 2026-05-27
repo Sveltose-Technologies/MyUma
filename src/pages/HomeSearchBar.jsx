@@ -84,7 +84,7 @@ const HomeSearchBar = () => {
     setLoadingLocation(true);
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${query}&addressdetails=1&limit=5`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${query}&addressdetails=1&limit=5`,
       );
       const data = await response.json();
       const results = data.map((item) => item.display_name);
@@ -107,9 +107,37 @@ const HomeSearchBar = () => {
   }, [searchState.location]);
 
   // --- SEARCH LOGIC ---
+  // const handleSearch = (overrideCategory) => {
+  //   const categoryToSearch = overrideCategory || searchState.category;
+  //   const { keyword, location } = searchState;
+
+  //   setShowKeywordSug(false);
+  //   setShowLocationSug(false);
+  //   setIsDropdownOpen(false);
+
+  //   navigate("/browse", {
+  //     state: {
+  //       keyword: keyword.trim(),
+  //       category: categoryToSearch === "All Categories" ? "All" : categoryToSearch,
+  //       location: location.trim(),
+  //     },
+  //   });
+  // };
+  // --- SEARCH LOGIC ---
   const handleSearch = (overrideCategory) => {
     const categoryToSearch = overrideCategory || searchState.category;
     const { keyword, location } = searchState;
+
+    // 🛑 VALIDATION: Check if all fields are empty/default
+    const isKeywordEmpty = !keyword.trim();
+    const isLocationEmpty = !location.trim();
+    const isCategoryDefault = categoryToSearch === "All Categories";
+
+    if (isKeywordEmpty && isLocationEmpty && isCategoryDefault) {
+      // Optional: You can add a toast notification here if you use react-toastify
+      // toast.warn("Please enter a keyword, location, or select a category to search.");
+      return; // Stop the function from navigating
+    }
 
     setShowKeywordSug(false);
     setShowLocationSug(false);
@@ -118,12 +146,12 @@ const HomeSearchBar = () => {
     navigate("/browse", {
       state: {
         keyword: keyword.trim(),
-        category: categoryToSearch === "All Categories" ? "All" : categoryToSearch,
+        category:
+          categoryToSearch === "All Categories" ? "All" : categoryToSearch,
         location: location.trim(),
       },
     });
   };
-
   const handleKeyDown = (e) => {
     if (e.key === "Enter") handleSearch();
   };
@@ -132,7 +160,7 @@ const HomeSearchBar = () => {
     .filter(
       (cat) =>
         cat.favoriteCategories === true &&
-        cat.name?.toLowerCase() !== "business directory"
+        cat.name?.toLowerCase() !== "business directory",
     )
     .slice(-2);
 
@@ -160,7 +188,9 @@ const HomeSearchBar = () => {
                 }}
               />
               {showKeywordSug && (
-                <div className="position-absolute start-0 top-100 mt-2 w-100 bg-white shadow-lg rounded-4 border overflow-hidden" style={{ zIndex: 1100 }}>
+                <div
+                  className="position-absolute start-0 top-100 mt-2 w-100 bg-white shadow-lg rounded-4 border overflow-hidden"
+                  style={{ zIndex: 1100 }}>
                   {keywordSuggestions.map((s, i) => (
                     <div
                       key={i}
@@ -169,17 +199,22 @@ const HomeSearchBar = () => {
                       onClick={() => {
                         setSearchState({ ...searchState, keyword: s.name });
                         setShowKeywordSug(false);
-                      }}
-                    >
+                      }}>
                       <span className="text-black fw-bold small">{s.name}</span>
-                      <span className="badge bg-light text-muted fw-normal" style={{ fontSize: "9px" }}>{s.type}</span>
+                      <span
+                        className="badge bg-light text-muted fw-normal"
+                        style={{ fontSize: "9px" }}>
+                        {s.type}
+                      </span>
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            <div className="vr d-none d-lg-block mx-1 my-2 opacity-25" style={{ height: "30px" }}></div>
+            <div
+              className="vr d-none d-lg-block mx-1 my-2 opacity-25"
+              style={{ height: "30px" }}></div>
 
             {/* 2. LOCATION SECTION */}
             <div className="position-relative flex-grow-1 border-bottom border-lg-0 px-3 px-lg-4 py-2 py-lg-0 d-flex align-items-center">
@@ -194,7 +229,9 @@ const HomeSearchBar = () => {
                 style={{ fontSize: "14px", height: "45px" }}
                 placeholder="Location..."
                 value={searchState.location}
-                onChange={(e) => setSearchState({ ...searchState, location: e.target.value })}
+                onChange={(e) =>
+                  setSearchState({ ...searchState, location: e.target.value })
+                }
                 onKeyDown={handleKeyDown}
                 onFocus={() => {
                   setShowKeywordSug(false);
@@ -203,7 +240,9 @@ const HomeSearchBar = () => {
                 }}
               />
               {showLocationSug && (
-                <div className="position-absolute start-0 top-100 mt-2 w-100 bg-white shadow-lg rounded-4 border overflow-hidden" style={{ zIndex: 1100 }}>
+                <div
+                  className="position-absolute start-0 top-100 mt-2 w-100 bg-white shadow-lg rounded-4 border overflow-hidden"
+                  style={{ zIndex: 1100 }}>
                   {locationSuggestions.map((loc, i) => (
                     <div
                       key={i}
@@ -212,17 +251,23 @@ const HomeSearchBar = () => {
                       onClick={() => {
                         setSearchState({ ...searchState, location: loc });
                         setShowLocationSug(false);
-                      }}
-                    >
-                      <MapPin size={14} className="text-tan mt-1 flex-shrink-0" />
-                      <span className="text-black small text-start fw-semibold">{loc}</span>
+                      }}>
+                      <MapPin
+                        size={14}
+                        className="text-tan mt-1 flex-shrink-0"
+                      />
+                      <span className="text-black small text-start fw-semibold">
+                        {loc}
+                      </span>
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            <div className="vr d-none d-lg-block mx-1 my-2 opacity-25" style={{ height: "30px" }}></div>
+            <div
+              className="vr d-none d-lg-block mx-1 my-2 opacity-25"
+              style={{ height: "30px" }}></div>
 
             {/* 3. CATEGORY & SEARCH BUTTON */}
             <div className="position-relative flex-grow-1 px-3 px-lg-4 py-2 py-lg-0 d-flex align-items-center justify-content-between">
@@ -233,50 +278,69 @@ const HomeSearchBar = () => {
                   setIsDropdownOpen(!isDropdownOpen);
                   setShowKeywordSug(false);
                   setShowLocationSug(false);
-                }}
-              >
-                <span className={`text-truncate small fw-800 ${searchState.category === "All Categories" ? "text-muted" : "text-black"}`}>
+                }}>
+                <span
+                  className={`text-truncate small fw-800 ${searchState.category === "All Categories" ? "text-muted" : "text-black"}`}>
                   {searchState.category}
                 </span>
-                <ChevronDown size={18} className="text-muted ms-auto flex-shrink-0" />
+                <ChevronDown
+                  size={18}
+                  className="text-muted ms-auto flex-shrink-0"
+                />
               </div>
 
               <button
                 className="uma-btn-navy rounded-pill px-4 ms-2 d-flex align-items-center justify-content-center gap-2 border-0 shadow-sm"
                 style={{ height: "40px", minWidth: "120px" }}
-                onClick={() => handleSearch()}
-              >
+                onClick={() => handleSearch()}>
                 <Search size={15} /> <span className="fw-800 ls-1">SEARCH</span>
               </button>
 
               {/* DROPDOWN MENU */}
               {isDropdownOpen && (
-                <div className="position-absolute end-0 top-100 mt-2 w-100 bg-white shadow-lg rounded-4 border overflow-hidden" style={{ zIndex: 1100, minWidth: "280px" }}>
+                <div
+                  className="position-absolute end-0 top-100 mt-2 w-100 bg-white shadow-lg rounded-4 border overflow-hidden"
+                  style={{ zIndex: 1100, minWidth: "280px" }}>
                   {currentView === "categories" ? (
                     <div style={{ maxHeight: "350px", overflowY: "auto" }}>
                       <div className="p-3 bg-light d-flex justify-content-between align-items-center border-bottom">
-                        <span className="fw-800 text-uppercase text-muted ls-1" style={{ fontSize: "10px" }}>Filter by Category</span>
-                        <X size={16} className="text-muted cursor-pointer" onClick={() => setIsDropdownOpen(false)} />
+                        <span
+                          className="fw-800 text-uppercase text-muted ls-1"
+                          style={{ fontSize: "10px" }}>
+                          Filter by Category
+                        </span>
+                        <X
+                          size={16}
+                          className="text-muted cursor-pointer"
+                          onClick={() => setIsDropdownOpen(false)}
+                        />
                       </div>
                       <div
                         className="px-4 py-3 border-bottom small fw-bold text-black"
                         style={{ cursor: "pointer" }}
                         onClick={() => {
-                          setSearchState({ ...searchState, category: "All Categories" });
+                          setSearchState({
+                            ...searchState,
+                            category: "All Categories",
+                          });
                           setIsDropdownOpen(false);
-                        }}
-                      >
+                        }}>
                         All Categories
                       </div>
                       {dropdownData.map((item) => (
-                        <div key={item.categoryId?._id} className="px-4 py-3 border-bottom d-flex justify-content-between align-items-center" style={{ cursor: "pointer" }}>
+                        <div
+                          key={item.categoryId?._id}
+                          className="px-4 py-3 border-bottom d-flex justify-content-between align-items-center"
+                          style={{ cursor: "pointer" }}>
                           <div
                             className="small fw-bold text-black flex-grow-1"
                             onClick={() => {
-                              setSearchState({ ...searchState, category: item.categoryId?.name });
+                              setSearchState({
+                                ...searchState,
+                                category: item.categoryId?.name,
+                              });
                               setIsDropdownOpen(false);
-                            }}
-                          >
+                            }}>
                             {item.categoryId?.name}
                           </div>
                           {item.subcategories?.length > 0 && (
@@ -296,9 +360,14 @@ const HomeSearchBar = () => {
                     </div>
                   ) : (
                     <div>
-                      <div className="bg-navy p-3 text-white d-flex align-items-center" style={{ cursor: "pointer" }} onClick={() => setCurrentView("categories")}>
+                      <div
+                        className="bg-navy p-3 text-white d-flex align-items-center"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => setCurrentView("categories")}>
                         <ArrowLeft size={18} className="me-2" />
-                        <span className="small fw-800 ls-1 text-uppercase">{activeCategory?.categoryId?.name}</span>
+                        <span className="small fw-800 ls-1 text-uppercase">
+                          {activeCategory?.categoryId?.name}
+                        </span>
                       </div>
                       <div style={{ maxHeight: "300px", overflowY: "auto" }}>
                         {activeCategory?.subcategories.map((sub) => (
@@ -307,11 +376,13 @@ const HomeSearchBar = () => {
                             className="px-4 py-3 border-bottom small fw-bold text-black"
                             style={{ cursor: "pointer" }}
                             onClick={() => {
-                              setSearchState({ ...searchState, category: sub.subcategoryName });
+                              setSearchState({
+                                ...searchState,
+                                category: sub.subcategoryName,
+                              });
                               setIsDropdownOpen(false);
                               setCurrentView("categories");
-                            }}
-                          >
+                            }}>
                             {sub.subcategoryName}
                           </div>
                         ))}
@@ -329,8 +400,7 @@ const HomeSearchBar = () => {
             <button
               onClick={() => navigate("/browse")}
               className="uma-btn-primary btn-sm px-4 rounded-pill fw-bold border-0 shadow-sm"
-              style={{ height: "38px" }}
-            >
+              style={{ height: "38px" }}>
               BUSINESS DIRECTORY
             </button>
 
@@ -339,9 +409,12 @@ const HomeSearchBar = () => {
               <div
                 key={item._id}
                 className="bg-white border-gold px-4 py-2 rounded-pill d-flex align-items-center gap-2 shadow-sm transition-hover"
-                style={{ cursor: "pointer", borderWidth: "1px", borderStyle: "solid" }}
-                onClick={() => handleSearch(item.name)}
-              >
+                style={{
+                  cursor: "pointer",
+                  borderWidth: "1px",
+                  borderStyle: "solid",
+                }}
+                onClick={() => handleSearch(item.name)}>
                 <Star size={15} className="text-tan" />
                 <span className="text-navy extra-small fw-800 ls-1">
                   {item.name.toUpperCase()}
@@ -364,6 +437,6 @@ const HomeSearchBar = () => {
       `}</style>
     </div>
   );
-};
+};;
 
 export default HomeSearchBar;
