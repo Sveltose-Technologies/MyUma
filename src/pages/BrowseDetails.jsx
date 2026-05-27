@@ -963,7 +963,39 @@ const BrowseDetails = () => {
       toast.error("Favorite action failed");
     }
   };
+ const isFavorited = favorites.some((fav) => {
+   const favId = typeof fav.itemId === "object" ? fav.itemId._id : fav.itemId;
+   return favId?.toString() === listing?._id?.toString();
+ });
 
+ const handleFavoriteToggle = async (e) => {
+   e.stopPropagation();
+
+   // Safety check (though button is hidden for guests, this prevents errors)
+   if (!isLoggedIn || currentUser?.role !== "user") return;
+
+   const existingFav = favorites.find((fav) => {
+     const favId = typeof fav.itemId === "object" ? fav.itemId._id : fav.itemId;
+     return favId?.toString() === listing?._id?.toString();
+   });
+
+   try {
+     if (existingFav) {
+       await deleteFavoriteAPI(existingFav._id);
+       setFavorites(favorites.filter((fav) => fav._id !== existingFav._id));
+       toast.info("Removed from favorites");
+     } else {
+       const payload = { userId: currentId, itemId: listing._id };
+       const res = await addFavoriteAPI(payload);
+       if (res.success) {
+         setFavorites([...favorites, res.data]);
+         toast.success("Added to favorites! ❤️");
+       }
+     }
+   } catch (error) {
+     toast.error("Action failed");
+   }
+ };
   const fetchData = useCallback(async () => {
     try {
       const res = await getAllListingsApi();
@@ -1017,7 +1049,6 @@ const BrowseDetails = () => {
     window.scrollTo(0, 0);
   }, [fetchData]);
 
- 
   const isOwner =
     isLoggedIn &&
     (currentUser?.role === "owner" ||
@@ -1063,15 +1094,18 @@ const BrowseDetails = () => {
                 <p className="text-muted m-0 small">{listing.address}</p>
               </div>
             </div>
-            <div className="col-md-4 text-md-end">
+            {/* <div className="col-md-4 text-md-end">
+            
               {!isLoggedIn ? (
                 <Link
                   to="/login"
                   className="btn btn-outline-danger rounded-pill px-4 fw-bold shadow-sm">
                   <LogIn size={18} className="me-2" /> Login to Bookmark
                 </Link>
+                
               ) : (
                 !isOwner && (
+                  
                   <button
                     onClick={handleBook}
                     disabled={bookLoading || isBooked}
@@ -1083,8 +1117,55 @@ const BrowseDetails = () => {
                     )}
                     {isBooked ? "Already Bookmarked" : "Bookmark Now"}
                   </button>
+                  
                 )
               )}
+            </div> */}
+            <div className="col-md-4 text-md-end">
+              {/* Flex container to keep buttons side-by-side */}
+              <div className="d-flex justify-content-md-end align-items-center gap-2">
+                {/* 1. Favorite Button (Shows only for User role) */}
+                {isLoggedIn && currentUser?.role === "user" && (
+                  <button
+                    onClick={handleFavoriteToggle}
+                    className="btn btn-white border shadow-sm rounded-circle p-2 d-flex align-items-center justify-content-center"
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      backgroundColor: "white",
+                      border: "1px solid #ddd",
+                    }}>
+                    <Heart
+                      size={22}
+                      color={isFavorited ? "#ff4d4d" : "#666"}
+                      fill={isFavorited ? "#ff4d4d" : "none"}
+                    />
+                  </button>
+                )}
+
+                {/* 2. Login or Bookmark Now Button */}
+                {!isLoggedIn ? (
+                  <Link
+                    to="/login"
+                    className="btn btn-outline-danger rounded-pill px-4 fw-bold shadow-sm">
+                    <LogIn size={18} className="me-2" /> Login to Bookmark
+                  </Link>
+                ) : (
+                  !isOwner && (
+                    <button
+                      onClick={handleBook}
+                      disabled={bookLoading || isBooked}
+                      className={`btn rounded-pill px-4 fw-bold shadow-sm ${isBooked ? "btn-secondary" : "btn-danger"}`}>
+                      {bookLoading ? (
+                        <Loader2 size={18} className="animate-spin" />
+                      ) : (
+                        <CalendarCheck size={18} className="me-2" />
+                      )}
+                      {isBooked ? "Already Bookmarked" : "Bookmark Now"}
+                    </button>
+                  )
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -1311,6 +1392,6 @@ const BrowseDetails = () => {
       <style>{`.thumbs-swiper .swiper-slide-thumb-active .border { border: 2px solid #ff4d4d !important; } .cursor-pointer { cursor: pointer; } .animate-spin { animation: spin 1s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   );
-};;
+};;;
 
 export default BrowseDetails;

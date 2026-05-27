@@ -2322,7 +2322,7 @@ import {
   ArrowLeft,
   Trash2,
   Search,
-  Settings,
+
   ShieldCheck,
 } from "lucide-react";
 
@@ -2479,7 +2479,6 @@ const Messages = () => {
                 <small className="opacity-75 text-uppercase" style={{ fontSize: "9px" }}>{myRole}</small>
               </div>
             </div>
-            <Settings size={18} className="opacity-50 cursor-pointer" />
           </div>
 
           {myRole === "owner" && (
