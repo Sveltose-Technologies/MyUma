@@ -1104,28 +1104,33 @@ const handleLogin = async (e) => {
     const res = await dispatch(loginUser(loginData));
 
     if (res.meta.requestStatus === "fulfilled") {
-      const userData = res.payload.auth;
+      // ⭐ FIX: payload structure changed from .auth to .user
+      const userData = res.payload.user;
 
-      // 🛑 ADMIN BLOCK: Frontend में Admin Allow नहीं है
+      // 🛑 ADMIN BLOCK
       if (userData.role === "admin") {
         toast.error(
           "Unauthorized: Admin cannot login from here. Use Admin Panel.",
         );
-        dispatch(logout()); // Redux state साफ़ करें
+        dispatch(logout());
         setLoading(false);
-        return; // यहाँ से आगे नहीं बढ़ेगा
+        return;
       }
 
-      // ✅ Only for User and Owner
-      localStorage.setItem("token", res.payload.token);
-      localStorage.setItem("user", JSON.stringify(userData));
+      // ✅ SUCCESS
+      // Note: We don't need manual localStorage.setItem here anymore
+      // because authSlice + storage.js is already doing it!
+
       toast.success(`Welcome, ${userData.fullName}`);
+      startSession();
       navigate("/");
     } else {
-      // अगर यूजर नहीं मिला तो (Auth Not Found)
+      // Error from thunk rejectWithValue
       toast.error(res.payload || "Authentication failed");
     }
   } catch (error) {
+    // This catches actual code crashes
+    console.error("Login Error:", error);
     toast.error("An unexpected error occurred");
   } finally {
     setLoading(false);

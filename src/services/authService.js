@@ -1,22 +1,16 @@
 import API from "./apiClient";
+// services/authService.js
 
 const IMAGE_BASE_URL = "https://node.myuma.net"; 
 
 export const getImgURL = (imagePath) => {
-  if (!imagePath || imagePath.trim() === "") {
-    return "https://placehold.co/400x300?text=No+Image";
-  }
+  if (!imagePath || imagePath === "null")
+    return "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
-  const cleanPath = imagePath.trim();
+  const cleanPath = imagePath.toString().trim(); // Removes the hidden space
+  if (cleanPath.startsWith("http")) return cleanPath;
 
-  if (cleanPath.startsWith("http")) {
-    return cleanPath;
-  }
-
-  // 4. Ensure path starts with a single "/"
   const formattedPath = cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`;
-
-  // 5. Combine: https://nrislaw.rxchartsquare.com + /uploads/...
   return `${IMAGE_BASE_URL}${formattedPath}`;
 };
 // --- Auth APIs ---
@@ -34,9 +28,15 @@ export const registerAPI = async (userData) => {
   return response.data;
 };
 
+// services/authService.js
 export const verifyOtpAPI = async (data) => {
-  const response = await API.post("/auth/verify-otp", data);
-  return response.data;
+  try {
+    const response = await API.post("/auth/verify-otp", data);
+    return response.data; // Component receives this in 'res'
+  } catch (error) {
+    // This is vital: throw the error so the .jsx catch block triggers
+    throw error; 
+  }
 };
 // Method to resend OTP
 export const resendOtpAPI = async (data) => {

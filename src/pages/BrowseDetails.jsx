@@ -1159,7 +1159,7 @@ const BrowseDetails = () => {
                 <div className="text-end">
                   <small className="text-muted d-block">Price</small>
                   <h4 className="fw-800 text-navy">
-                    ₹{listing.items?.[0]?.price || 0}
+                    ${listing.items?.[0]?.price || 0}
                   </h4>
                 </div>
               </div>

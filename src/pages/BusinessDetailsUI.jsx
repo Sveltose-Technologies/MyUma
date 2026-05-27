@@ -935,7 +935,7 @@ const getEmbedUrl = (url) => {
                           className="position-absolute top-0 start-0 w-100 d-flex justify-content-between align-items-start p-3"
                           style={{ zIndex: 10 }}>
                           <span className="badge bg-white text-navy shadow-sm fw-800 px-3 py-2 rounded-3">
-                            ₹{item.items?.[0]?.price?.toLocaleString() || 0}
+                            ${item.items?.[0]?.price?.toLocaleString() || 0}
                           </span>
                           <button
                             className="btn btn-white rounded-circle shadow-sm d-flex align-items-center justify-content-center"
