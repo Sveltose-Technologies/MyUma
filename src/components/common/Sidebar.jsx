@@ -19,6 +19,7 @@ const Sidebar = () => {
 
   // 1. Owner ke liye menu items
   const ownerMenuItems = [
+    {name : "Dashboard" , icon: "bi-file-earmark-text", path: "/owner-dashboard" },
     { name: "My Listing", icon: "bi-file-earmark-text", path: "/listing" },
     { name: "Listing Manage", icon: "bi-gear", path: "/manage-listings" },
     { name: "Messages", icon: "bi-chat-left-text", path: "/messages" },
