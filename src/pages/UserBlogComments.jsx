@@ -41,7 +41,6 @@ const UserBlogComments = () => {
       setLoading(true);
       const res = await getAllCommentsAPI();
       if (res?.comments) {
-        // केवल वही कमेंट्स फिल्टर करें जो लॉगिन यूजर ने किए हैं
         const filtered = res.comments.filter(
           (c) => (c.userId?._id || c.userId) === currentUserId,
         );

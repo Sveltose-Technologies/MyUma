@@ -66,7 +66,7 @@ const UserProfileUpdate = () => {
     };
 
     getprofileHandler();
-  }, [dispatch]); // Always keep 'dispatch' here to prevent the Hook error
+  }, [dispatch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

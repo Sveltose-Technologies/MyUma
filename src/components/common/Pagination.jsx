@@ -4,7 +4,6 @@ import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
-  // Agar zero pages hain toh kuch mat dikhao
   if (totalPages <= 0) return null;
 
   return (

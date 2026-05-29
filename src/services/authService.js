@@ -542,96 +542,138 @@ export const getAllAuthsAPI = async () => {
   const response = await API.get("/auth/get-all");
   return response.data;
 };
-
 // ==========================================
-// INQUIRE / LEAD API METHODS
+// ALL INQUIRY / LEAD API METHODS (WITH CONSOLE LOGS)
 // ==========================================
 
-// 1. Add (Send Inquiry) - Fields: itemId, fullName, email, phoneNo, comment
+// 1. ADD (Send Inquiry)
+// Fields: itemId, userId, fullName, email, phoneNo, comment
 export const sendInquireApi = async (data) => {
   try {
+    console.log("📡 SENDING NEW INQUIRY. Data:", data);
     const response = await API.post("/inquire/send", data);
+    console.log("✅ SEND SUCCESS. Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error in sendInquireApi:", error);
+    console.error("❌ ERROR in sendInquireApi:", error.response?.data || error.message);
     throw error;
   }
 };
 
-// 2. Get All Inquiries
+// 2. GET ALL (Fetch every inquiry in the database)
 export const getInquiriesApi = async () => {
   try {
+    console.log("📡 FETCHING ALL INQUIRIES FROM DB...");
     const response = await API.get("/inquire/get-all");
-    return response.data; // Returns { success, count, data: [] }
+    console.log("✅ FETCH ALL SUCCESS. Count:", response.data?.count, "Data:", response.data);
+    return response.data;
   } catch (error) {
-    console.error("Error in getInquiriesApi:", error);
+    console.error("❌ ERROR in getInquiriesApi:", error.response?.data || error.message);
     throw error;
   }
 };
 
-// 3. Get Inquiry By ID
+// 3. GET BY ID (Fetch one specific inquiry)
 export const getInquireByIdApi = async (id) => {
   try {
+    console.log(`📡 FETCHING INQUIRY BY ID: ${id}`);
     const response = await API.get(`/inquire/get-by-id/${id}`);
+    console.log("✅ FETCH BY ID SUCCESS:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error in getInquireByIdApi:", error);
+    console.error("❌ ERROR in getInquireByIdApi:", error.response?.data || error.message);
     throw error;
   }
 };
 
-// 4. Update Inquiry - Fields: itemId, fullName, email, phoneNo, comment
+// 4. UPDATE (Modify an existing inquiry)
 export const updateInquireApi = async (id, data) => {
   try {
+    console.log(`📡 UPDATING INQUIRY ID: ${id}. New Data:`, data);
     const response = await API.put(`/inquire/update/${id}`, data);
+    console.log("✅ UPDATE SUCCESS:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error in updateInquireApi:", error);
+    console.error("❌ ERROR in updateInquireApi:", error.response?.data || error.message);
     throw error;
   }
 };
 
-// 5. Delete Inquiry
+// 5. DELETE (Remove an inquiry)
 export const deleteInquireApi = async (id) => {
   try {
+    console.log(`📡 DELETING INQUIRY ID: ${id}`);
     const response = await API.delete(`/inquire/delete/${id}`);
+    console.log("✅ DELETE SUCCESS:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error in deleteInquireApi:", error);
+    console.error("❌ ERROR in deleteInquireApi:", error.response?.data || error.message);
     throw error;
   }
 };
 
-// 6. Get Inquiries By Owner ID
+// 6. GET BY OWNER ID (For Owner Dashboard - SHOWS LEADS RECEIVED)
 export const getInquiriesByOwnerApi = async (ownerId) => {
   try {
+    console.log(`📡 FETCHING LEADS FOR OWNER ID: ${ownerId}`);
     const response = await API.get(`/inquire/get-by-owner/${ownerId}`);
+    console.log("✅ FETCH BY OWNER SUCCESS. Data:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error in getInquiriesByOwnerApi:", error);
+    console.error("❌ ERROR in getInquiriesByOwnerApi:", error.response?.data || error.message);
     throw error;
   }
 };
 
-// 7. Get Inquiries By Item ID
+// 7. GET BY ITEM ID (Fetch leads for a specific listing/product)
 export const getInquiriesByItemApi = async (itemId) => {
   try {
+    console.log(`📡 FETCHING LEADS FOR ITEM ID: ${itemId}`);
     const response = await API.get(`/inquire/get-by-item/${itemId}`);
+    console.log("✅ FETCH BY ITEM SUCCESS:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error in getInquiriesByItemApi:", error);
+    console.error("❌ ERROR in getInquiriesByItemApi:", error.response?.data || error.message);
     throw error;
   }
 };
 
+// 8. GET BY USER ID (For User Dashboard - SHOWS LEADS SENT BY USER)
+export const getInquireByUserIdApi = async (userId) => {
+  try {
+    console.log(`📡 FETCHING LEADS SENT BY USER ID: ${userId}`);
+    const response = await API.get(`/inquire/get-by-user/${userId}`);
+    console.log("✅ FETCH BY USER SUCCESS:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ ERROR in getInquireByUserIdApi:", error.response?.data || error.message);
+    throw error;
+  }
+};
 // ==========================================
 // PAYMENT API METHODS
 // ==========================================
 
 /**
- * Initiate Checkout
- * @param {Object} data - { planId, userId, email }
+ * Get Active Subscription by User ID
+ * Filters the payment list to find a successful, active subscription
  */
+export const getMySubscriptionAPI = async (userId) => {
+  try {
+    const response = await API.get(`/payment/get-by-userId/${userId}`);
+    if (response.data.success && response.data.payments.length > 0) {
+      // Find the most recent successful and active subscription
+      const activeSubscription = response.data.payments.find(
+        (p) => p.status === "success" && p.subscriptionStatus === "active"
+      );
+      return { success: true, data: activeSubscription };
+    }
+    return { success: true, data: null };
+  } catch (error) {
+    console.error("Error in getMySubscriptionAPI:", error);
+    throw error;
+  }
+};
 export const checkoutAPI = async (data) => {
   try {
     const response = await API.post("/payment/checkout", data);
