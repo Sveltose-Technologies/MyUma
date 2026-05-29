@@ -390,35 +390,19 @@ export const deleteBookingAPI = async (id) => {
   }
 };
 
-export const checkoutAPI = async (data) => {
-  try {
-    console.log("checkout request data:", data);
-
-    const response = await API.post("/payment/checkout", data);
-
-    console.log("checkout full response:", response);
-    console.log("checkout response data:", response.data);
-
-    return response.data;
-  } catch (error) {
-    console.log("checkout API error:", error);
-    throw error;
-  }
-};
-
+// Get all pricing plans
 export const getPlansAPI = async () => {
   try {
     const response = await API.get("/pricing/get-all");
-
-    console.log("plans full response:", response);
-    console.log("plans response data:", response.data);
-
+    // This will return the structure: { status: true, data: [ { bannerText, plan: [...] } ] }
     return response.data;
   } catch (error) {
-    console.log("get plans API error:", error);
+    console.error("get plans API error:", error);
     throw error;
   }
 };
+
+
 
 // ==========================================
 // COMMENT API METHODS
@@ -636,6 +620,79 @@ export const getInquiriesByItemApi = async (itemId) => {
     return response.data;
   } catch (error) {
     console.error("Error in getInquiriesByItemApi:", error);
+    throw error;
+  }
+};
+
+// ==========================================
+// PAYMENT API METHODS
+// ==========================================
+
+/**
+ * Initiate Checkout
+ * @param {Object} data - { planId, userId, email }
+ */
+export const checkoutAPI = async (data) => {
+  try {
+    const response = await API.post("/payment/checkout", data);
+    console.log("Checkout Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error in checkoutAPI:", error);
+    throw error;
+  }
+};
+
+/**
+ * Webhook (Status update)
+ * Note: Webhooks are usually handled automatically by the backend, 
+ * but if you need to call it manually:
+ */
+export const paymentWebhookAPI = async () => {
+  try {
+    const response = await API.post("/payment/webhook");
+    return response.data;
+  } catch (error) {
+    console.error("Error in paymentWebhookAPI:", error);
+    throw error;
+  }
+};
+
+/**
+ * Get All Payments
+ */
+export const getAllPaymentsAPI = async () => {
+  try {
+    const response = await API.get("/payment/get-all");
+    return response.data;
+  } catch (error) {
+    console.error("Error in getAllPaymentsAPI:", error);
+    throw error;
+  }
+};
+
+/**
+ * Get Payment By ID
+ */
+export const getPaymentByIdAPI = async (id) => {
+  try {
+    const response = await API.get(`/payment/get-by-id/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in getPaymentByIdAPI:", error);
+    throw error;
+  }
+};
+
+/**
+ * Get Payments By User ID
+ */
+export const getPaymentsByUserIdAPI = async (userId) => {
+  try {
+    const response = await API.get(`/payment/get-by-userId/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in getPaymentsByUserIdAPI:", error);
     throw error;
   }
 };

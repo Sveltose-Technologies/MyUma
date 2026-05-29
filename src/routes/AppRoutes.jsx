@@ -51,6 +51,7 @@ import UserReviews from "../pages/UserReviews";
 import UserInquiry from "../pages/UserInquiry";
 import UserBlogComments from "../pages/UserBlogComments";
 import OwnerDashboard from "../pages/OwnerDashboard";
+import CheckoutPage from "../pages/CheckoutPage";
 const ProtectedRoute = () => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
@@ -58,6 +59,9 @@ const ProtectedRoute = () => {
     return <Navigate to="/login" replace />;
   }
 
+  // ONLY redirect to pricing if they are active/deactive and NOT verifying OTP
+  // However, since /verify-otp is PUBLIC, it won't hit this logic.
+  // The issue is likely the user being auto-logged in.
   if (user && user.status === "deactive") {
     return <Navigate to="/pricing" replace />;
   }
@@ -91,7 +95,7 @@ const AppRoutes = () => {
           <Route path="/home-search" element={<HomeSearchBar />} />
           <Route path="/browse/:slug" element={<BrowseDetails />} />
           <Route path="/browse" element={<BrowseListings />} />
-
+          <Route path="/checkout-details" element={<CheckoutPage />} />
           {/* --- PROTECTED ROUTES --- */}
           <Route element={<ProtectedRoute />}>
             <Route path="/reviews/:slug" element={<ListingReviews />} />
@@ -114,8 +118,11 @@ const AppRoutes = () => {
               <Route path="/user-favorites" element={<UserFavorites />} />
               <Route path="/user-reviews" element={<UserReviews />} />
               <Route path="/user-inquiries" element={<UserInquiry />} />
-              <Route path="/user-blog-comments" element={<UserBlogComments />} />
-              <Route path="/owner-dashboard" element={<OwnerDashboard/>}/>
+              <Route
+                path="/user-blog-comments"
+                element={<UserBlogComments />}
+              />
+              <Route path="/owner-dashboard" element={<OwnerDashboard />} />
             </Route>
           </Route>
         </Routes>
