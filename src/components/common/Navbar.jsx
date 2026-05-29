@@ -9,8 +9,9 @@
 //   const location = useLocation();
 //   const dispatch = useDispatch();
 
+//   // Get Auth State from Redux
 //   const { token, user: userData } = useSelector((state) => state.auth);
-
+// console.log("Navbar User Data:", userData);
 //   const [logoUrl, setLogoUrl] = useState("");
 //   const [imageError, setImageError] = useState(false);
 
@@ -21,11 +22,12 @@
 
 //   const isActive = (path) => location.pathname === path;
 
-//   // Reset image error state when profile image changes to allow real-time update
+//   // Reset image error state when profile path changes
 //   useEffect(() => {
 //     setImageError(false);
 //   }, [profileImgPath]);
 
+//   // Fetch Brand Logo
 //   useEffect(() => {
 //     const fetchLogo = async () => {
 //       try {
@@ -44,7 +46,8 @@
 //     navigate(path);
 //     const offcanvasElement = document.getElementById("navbarOffcanvas");
 //     if (offcanvasElement) {
-//       const bsOffcanvas = window.bootstrap?.Offcanvas.getInstance(offcanvasElement);
+//       const bsOffcanvas =
+//         window.bootstrap?.Offcanvas.getInstance(offcanvasElement);
 //       if (bsOffcanvas) bsOffcanvas.hide();
 //     }
 //   };
@@ -57,6 +60,7 @@
 //   return (
 //     <nav className="navbar navbar-expand-lg bg-white fixed-top shadow-sm w-100 border-0 py-2">
 //       <div className="container px-4">
+//         {/* LOGO */}
 //         <Link
 //           className="navbar-brand d-flex align-items-center text-decoration-none"
 //           to="/">
@@ -73,6 +77,7 @@
 //           )}
 //         </Link>
 
+//         {/* MOBILE TOGGLE */}
 //         <button
 //           className="navbar-toggler border-0 shadow-none bg-light"
 //           type="button"
@@ -81,6 +86,7 @@
 //           <span className="navbar-toggler-icon"></span>
 //         </button>
 
+//         {/* MENU */}
 //         <div
 //           className="offcanvas offcanvas-end bg-white border-0"
 //           id="navbarOffcanvas"
@@ -166,10 +172,11 @@
 //                       </small>
 //                     </div>
 
+//                     {/* PROFILE IMAGE LOGIC */}
 //                     {profileImgPath && !imageError ? (
 //                       <img
-//                         key={profileImgPath} // Force re-render when path changes
-//                         src={getImgURL(profileImgPath)}
+//                         key={profileImgPath}
+//                         src={getImgURL(profileImgPath.trim())} // Added .trim() to fix extra spaces
 //                         alt="Profile"
 //                         className="rounded-circle border"
 //                         style={{
@@ -265,7 +272,6 @@
 //     </nav>
 //   );
 // }
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -277,25 +283,54 @@ export default function Navbar() {
   const location = useLocation();
   const dispatch = useDispatch();
 
-  // Get Auth State from Redux
-  const { token, user: userData } = useSelector((state) => state.auth);
-console.log("Navbar User Data:", userData); 
+  // Redux Auth State
+  const {
+    token,
+    user: userData,
+    isAuthenticated,
+  } = useSelector((state) => state.auth);
+
   const [logoUrl, setLogoUrl] = useState("");
   const [imageError, setImageError] = useState(false);
 
-  const role = userData?.role;
-  const fullName = userData?.fullName || "Guest";
+  // Auth Logic
+  const isLoggedIn = !!(token || userData?.token || isAuthenticated);
+  const role = userData?.role || "";
+  const fullName = userData?.fullName || userData?.name || "User";
   const profileImgPath = userData?.profileImage;
   const firstLetter = fullName.charAt(0).toUpperCase();
 
   const isActive = (path) => location.pathname === path;
 
-  // Reset image error state when profile path changes
+  // ⭐ CRITICAL FIX: Auto-close sidebar whenever URL changes
   useEffect(() => {
-    setImageError(false);
-  }, [profileImgPath]);
+    const offcanvasElement = document.getElementById("navbarOffcanvas");
+    if (offcanvasElement) {
+      // 1. Get bootstrap instance
+      const bsOffcanvas =
+        window.bootstrap?.Offcanvas.getInstance(offcanvasElement);
+      if (bsOffcanvas) {
+        bsOffcanvas.hide();
+      }
 
-  // Fetch Brand Logo
+      // 2. Manual Cleanup (Backdrop stuck hone se rokne ke liye)
+      const backdrops = document.querySelectorAll(".offcanvas-backdrop");
+      backdrops.forEach((backdrop) => backdrop.remove());
+      document.body.style.overflow = "auto";
+      document.body.style.paddingRight = "0";
+    }
+  }, [location.pathname]); // Yeh line URL change ko monitor karti hai
+
+  const handleNavigation = (path) => {
+    navigate(path);
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/");
+  };
+
+  // Fetch Logo
   useEffect(() => {
     const fetchLogo = async () => {
       try {
@@ -309,21 +344,6 @@ console.log("Navbar User Data:", userData);
     };
     fetchLogo();
   }, []);
-
-  const handleNavigation = (path) => {
-    navigate(path);
-    const offcanvasElement = document.getElementById("navbarOffcanvas");
-    if (offcanvasElement) {
-      const bsOffcanvas =
-        window.bootstrap?.Offcanvas.getInstance(offcanvasElement);
-      if (bsOffcanvas) bsOffcanvas.hide();
-    }
-  };
-
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/");
-  };
 
   return (
     <nav className="navbar navbar-expand-lg bg-white fixed-top shadow-sm w-100 border-0 py-2">
@@ -340,7 +360,10 @@ console.log("Navbar User Data:", userData);
             />
           ) : (
             <span className="brand-text text-dark fs-3 fw-bold">
-              My<span className="text-tan">Uma</span>
+              My
+              <span className="text-tan" style={{ color: "#de9f57" }}>
+                Uma
+              </span>
             </span>
           )}
         </Link>
@@ -354,7 +377,7 @@ console.log("Navbar User Data:", userData);
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        {/* MENU */}
+        {/* MENU (Offcanvas) */}
         <div
           className="offcanvas offcanvas-end bg-white border-0"
           id="navbarOffcanvas"
@@ -398,7 +421,8 @@ console.log("Navbar User Data:", userData);
                 </button>
               </li>
 
-              {token && role === "owner" && (
+              {/* OWNER BUTTON */}
+              {isLoggedIn && role === "owner" && (
                 <li className="nav-item mt-2 mt-lg-0 ms-lg-2">
                   <button
                     onClick={() => handleNavigation("/listing")}
@@ -407,6 +431,8 @@ console.log("Navbar User Data:", userData);
                       fontSize: "13px",
                       borderRadius: "20px",
                       padding: "8px 20px",
+                      backgroundColor: "#de9f57",
+                      color: "#002147",
                     }}>
                     New Listing
                   </button>
@@ -414,8 +440,9 @@ console.log("Navbar User Data:", userData);
               )}
             </ul>
 
+            {/* PROFILE SECTION */}
             <div className="d-flex align-items-center mt-3 mt-lg-0 ms-lg-3 ps-lg-3 border-lg-start">
-              {token ? (
+              {isLoggedIn ? (
                 <div className="dropdown">
                   <button
                     className="btn bg-transparent border-0 p-0 d-flex align-items-center flex-nowrap gap-3 shadow-none dropdown-toggle-no-caret"
@@ -434,23 +461,22 @@ console.log("Navbar User Data:", userData);
                         {fullName}
                       </div>
                       <small
-                        className="text-muted text-capitalize d-block"
-                        style={{ fontSize: "11px" }}>
+                        className="text-muted text-capitalize d-block fw-bold"
+                        style={{ fontSize: "11px", color: "#de9f57" }}>
                         {role}
                       </small>
                     </div>
 
-                    {/* PROFILE IMAGE LOGIC */}
                     {profileImgPath && !imageError ? (
                       <img
-                        key={profileImgPath}
-                        src={getImgURL(profileImgPath.trim())} // Added .trim() to fix extra spaces
+                        src={getImgURL(profileImgPath.trim())}
                         alt="Profile"
                         className="rounded-circle border"
                         style={{
                           width: "42px",
                           height: "42px",
                           objectFit: "cover",
+                          border: "2px solid #de9f57",
                         }}
                         onError={() => setImageError(true)}
                       />
@@ -462,7 +488,7 @@ console.log("Navbar User Data:", userData);
                           height: "42px",
                           backgroundColor: "#001f3f",
                           fontSize: "18px",
-                          border: "2px solid #f39c12",
+                          border: "2px solid #de9f57",
                         }}>
                         {firstLetter}
                       </div>
@@ -470,7 +496,7 @@ console.log("Navbar User Data:", userData);
                   </button>
 
                   <ul className="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                    {role === "owner" && (
+                    {role === "owner" ? (
                       <>
                         <li>
                           <button
@@ -489,23 +515,19 @@ console.log("Navbar User Data:", userData);
                         <li>
                           <button
                             className="dropdown-item py-2"
-                            onClick={() => handleNavigation("/booking")}>
+                            onClick={() => handleNavigation("/bookmarks")}>
                             Bookmarks
                           </button>
                         </li>
                         <li>
                           <button
-                            className="dropdown-item py-2"
+                            className="dropdown-item py-2 fw-bold"
                             onClick={() => handleNavigation("/profile")}>
-                            My Profile
+                            My Account
                           </button>
                         </li>
-                        <li>
-                          <hr className="dropdown-divider" />
-                        </li>
                       </>
-                    )}
-                    {role === "user" && (
+                    ) : (
                       <li>
                         <button
                           className="dropdown-item py-2 fw-bold"
@@ -516,6 +538,9 @@ console.log("Navbar User Data:", userData);
                         </button>
                       </li>
                     )}
+                    <li>
+                      <hr className="dropdown-divider" />
+                    </li>
                     <li>
                       <button
                         className="dropdown-item text-danger fw-bold"
@@ -529,7 +554,11 @@ console.log("Navbar User Data:", userData);
                 <button
                   onClick={() => handleNavigation("/login")}
                   className="uma-btn-navy py-2 px-4 fw-bold text-nowrap shadow-none border-0"
-                  style={{ borderRadius: "20px" }}>
+                  style={{
+                    borderRadius: "20px",
+                    backgroundColor: "#002147",
+                    color: "white",
+                  }}>
                   Sign In
                 </button>
               )}

@@ -528,10 +528,203 @@
 
 // export default VerifyOtp;
 
+// import React, { useState, useEffect } from "react";
+// import { useDispatch } from "react-redux";
+// import { verifyOtp } from "../auth/authSlice";
+// import { resendOtpAPI } from "../../services/authService";
+// import { toast } from "react-toastify";
+// import { useLocation, useNavigate } from "react-router-dom";
+
+// const VerifyOtp = () => {
+//   const location = useLocation();
+//   const navigate = useNavigate();
+//   const dispatch = useDispatch();
+
+//   const [otp, setOtp] = useState("");
+//   const [loading, setLoading] = useState(false);
+//   const [timeLeft, setTimeLeft] = useState(120); // 2 Minute Timer
+//   const [canResend, setCanResend] = useState(false);
+
+//   const email = location.state?.email;
+//   const type = location.state?.type;
+//   const roleFromRegister = location.state?.role;
+//   const pendingData = location.state?.pendingData; // Logic added to catch registration data
+
+//   // Timer logic for OTP expiry and Resend button
+//   useEffect(() => {
+//     let timer;
+//     if (timeLeft > 0) {
+//       timer = setInterval(() => {
+//         setTimeLeft((prev) => prev - 1);
+//       }, 1000);
+//     } else {
+//       setCanResend(true);
+//       clearInterval(timer);
+//     }
+//     return () => clearInterval(timer);
+//   }, [timeLeft]);
+
+//   // Redirect to login if accessed without email (security)
+//   useEffect(() => {
+//     if (!email || !type) {
+//       navigate("/login");
+//     }
+//   }, [email, type, navigate]);
+
+//   const formatTime = (seconds) => {
+//     const mins = Math.floor(seconds / 60);
+//     const secs = seconds % 60;
+//     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+//   };
+
+//   const handleVerify = async (e) => {
+//     e.preventDefault();
+
+//     if (timeLeft === 0) {
+//       return toast.error("OTP has expired. Please request a new code.");
+//     }
+
+//     if (otp.length < 4) {
+//       return toast.error("Please enter the full verification code.");
+//     }
+
+//     setLoading(true);
+//     try {
+//       // Logic added: Dispatching OTP along with pendingData to update Navbar instantly
+//       const result = await dispatch(
+//         verifyOtp({
+//           email,
+//           otp,
+//           pendingUser: pendingData,
+//         }),
+//       );
+
+//       if (result.meta.requestStatus === "fulfilled") {
+//         toast.success("Identity Verified Successfully!");
+
+//         const userData = result.payload.user || result.payload.auth;
+
+//         const finalRole = (
+//           userData?.role ||
+//           roleFromRegister ||
+//           "user"
+//         ).toLowerCase();
+
+//         if (finalRole === "owner") {
+//           navigate("/pricing");
+//         } else {
+//           navigate("/");
+//         }
+//       } else {
+//         toast.error(result.payload || "Incorrect code. Please try again.");
+//       }
+//     } catch (error) {
+//       console.error("Verification error:", error);
+//       toast.error("Something went wrong. Please try again.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleResend = async () => {
+//     setLoading(true);
+//     try {
+//       await resendOtpAPI({ email });
+//       toast.success("A new verification code has been sent!");
+//       setTimeLeft(120);
+//       setCanResend(false);
+//       setOtp("");
+//     } catch (error) {
+//       const errorMsg =
+//         error.response?.data?.message || "Failed to resend code.";
+//       toast.error(errorMsg);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="container d-flex align-items-center justify-content-center min-vh-100">
+//       <div
+//         className="card shadow-lg border-0 p-4"
+//         style={{ maxWidth: "400px", width: "100%", borderRadius: "20px" }}>
+//         <h4 className="text-center fw-bold mb-2">Verify Account</h4>
+//         <p className="text-center text-muted small mb-4">
+//           Please enter the code sent to: <br />
+//           <span className="text-dark fw-bold">{email}</span>
+//         </p>
+
+//         <form onSubmit={handleVerify}>
+//           <div className="mb-2 text-center">
+//             <input
+//               type="text"
+//               className={`form-control form-control-lg text-center fw-bold ${
+//                 timeLeft === 0 ? "is-invalid" : ""
+//               }`}
+//               placeholder="••••••"
+//               maxLength="6"
+//               required
+//               value={otp}
+//               disabled={timeLeft === 0 || loading}
+//               onChange={(e) => setOtp(e.target.value)}
+//               style={{
+//                 letterSpacing: "8px",
+//                 border: "2px solid #001f3f",
+//                 fontSize: "24px",
+//               }}
+//             />
+//           </div>
+
+//           <div className="text-center mb-4">
+//             {timeLeft > 0 ? (
+//               <small className="text-muted">
+//                 Time remaining:{" "}
+//                 <span className="text-danger fw-bold">
+//                   {formatTime(timeLeft)}
+//                 </span>
+//               </small>
+//             ) : (
+//               <small className="text-danger fw-bold">
+//                 Verification code expired
+//               </small>
+//             )}
+//           </div>
+
+//           <button
+//             className="btn btn-lg w-100 text-white shadow mb-3"
+//             style={{ backgroundColor: "#001f3f", borderRadius: "10px" }}
+//             disabled={loading || timeLeft === 0}>
+//             {loading ? (
+//               <span className="spinner-border spinner-border-sm me-2"></span>
+//             ) : (
+//               "Verify Code"
+//             )}
+//           </button>
+//         </form>
+
+//         <div className="text-center">
+//           <p className="small text-muted mb-0">
+//             Didn't receive the code?{" "}
+//             <button
+//               onClick={handleResend}
+//               disabled={!canResend || loading}
+//               className="btn btn-link btn-sm p-0 fw-bold text-decoration-none"
+//               style={{ color: canResend ? "#001f3f" : "#ccc" }}>
+//               Resend New Code
+//             </button>
+//           </p>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default VerifyOtp;
+
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { verifyOtp } from "../auth/authSlice";
-import { resendOtpAPI } from "../../services/authService";
+import { resendOtpAPI, verifyOtpAPI } from "../../services/authService"; // Ensure verifyOtpAPI is exported
 import { toast } from "react-toastify";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -542,15 +735,14 @@ const VerifyOtp = () => {
 
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(120); // 2 Minute Timer
+  const [timeLeft, setTimeLeft] = useState(120);
   const [canResend, setCanResend] = useState(false);
 
   const email = location.state?.email;
-  const type = location.state?.type;
+  const type = location.state?.type; // 'signup' or 'reset'
   const roleFromRegister = location.state?.role;
-  const pendingData = location.state?.pendingData; // Logic added to catch registration data
+  const pendingData = location.state?.pendingData;
 
-  // Timer logic for OTP expiry and Resend button
   useEffect(() => {
     let timer;
     if (timeLeft > 0) {
@@ -564,9 +756,9 @@ const VerifyOtp = () => {
     return () => clearInterval(timer);
   }, [timeLeft]);
 
-  // Redirect to login if accessed without email (security)
   useEffect(() => {
     if (!email || !type) {
+      toast.error("Invalid session. Please start again.");
       navigate("/login");
     }
   }, [email, type, navigate]);
@@ -581,46 +773,66 @@ const VerifyOtp = () => {
     e.preventDefault();
 
     if (timeLeft === 0) {
-      return toast.error("OTP has expired. Please request a new code.");
+      return toast.error("Verification code has expired. Please resend.");
     }
 
-    if (otp.length < 4) {
-      return toast.error("Please enter the full verification code.");
+    if (otp.length < 6) {
+      return toast.error("Please enter the full 6-digit code.");
     }
 
     setLoading(true);
     try {
-      // Logic added: Dispatching OTP along with pendingData to update Navbar instantly
-      const result = await dispatch(
-        verifyOtp({
-          email,
-          otp,
-          pendingUser: pendingData,
-        }),
-      );
+      if (type === "signup") {
+        // --- SIGNUP FLOW ---
+        const result = await dispatch(
+          verifyOtp({
+            email,
+            otp,
+            pendingUser: pendingData,
+          }),
+        );
 
-      if (result.meta.requestStatus === "fulfilled") {
-        toast.success("Identity Verified Successfully!");
+        if (result.meta.requestStatus === "fulfilled") {
+          toast.success("Account verified successfully!");
+          const userData = result.payload.user || result.payload.auth;
+          const finalRole = (
+            userData?.role ||
+            roleFromRegister ||
+            "user"
+          ).toLowerCase();
 
-        const userData = result.payload.user || result.payload.auth;
-
-        const finalRole = (
-          userData?.role ||
-          roleFromRegister ||
-          "user"
-        ).toLowerCase();
-
-        if (finalRole === "owner") {
-          navigate("/pricing");
+          if (finalRole === "owner") {
+            navigate("/pricing");
+          } else {
+            navigate("/");
+          }
         } else {
-          navigate("/");
+          toast.error(result.payload || "Invalid verification code.");
         }
       } else {
-        toast.error(result.payload || "Incorrect code. Please try again.");
+        // --- RESET PASSWORD FLOW ---
+        const response = await verifyOtpAPI({ email, otp });
+
+        if (
+          response.status === "success" ||
+          response.message?.includes("success") ||
+          response.token
+        ) {
+          toast.success("OTP Verified! You can now reset your password.");
+          // Send email and token to the reset password page
+          navigate("/reset-password", {
+            state: { email, token: response.token || otp },
+          });
+        } else {
+          toast.error("Invalid OTP for password reset.");
+        }
       }
     } catch (error) {
+      const errorMsg =
+        error.response?.data?.message ||
+        "Verification failed. Please try again.";
+      toast.error(errorMsg);
       console.error("Verification error:", error);
-      toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -630,14 +842,12 @@ const VerifyOtp = () => {
     setLoading(true);
     try {
       await resendOtpAPI({ email });
-      toast.success("A new verification code has been sent!");
+      toast.info("A new 6-digit code has been sent to your email.");
       setTimeLeft(120);
       setCanResend(false);
       setOtp("");
     } catch (error) {
-      const errorMsg =
-        error.response?.data?.message || "Failed to resend code.";
-      toast.error(errorMsg);
+      toast.error(error.response?.data?.message || "Failed to resend code.");
     } finally {
       setLoading(false);
     }
@@ -648,25 +858,24 @@ const VerifyOtp = () => {
       <div
         className="card shadow-lg border-0 p-4"
         style={{ maxWidth: "400px", width: "100%", borderRadius: "20px" }}>
-        <h4 className="text-center fw-bold mb-2">Verify Account</h4>
+        <h4 className="text-center fw-bold mb-2">
+          {type === "reset" ? "Reset Security" : "Verify Account"}
+        </h4>
         <p className="text-center text-muted small mb-4">
-          Please enter the code sent to: <br />
-          <span className="text-dark fw-bold">{email}</span>
+          Code sent to: <span className="text-dark fw-bold">{email}</span>
         </p>
 
         <form onSubmit={handleVerify}>
           <div className="mb-2 text-center">
             <input
               type="text"
-              className={`form-control form-control-lg text-center fw-bold ${
-                timeLeft === 0 ? "is-invalid" : ""
-              }`}
-              placeholder="••••••"
+              className={`form-control form-control-lg text-center fw-bold ${timeLeft === 0 ? "is-invalid" : ""}`}
+              placeholder="000000"
               maxLength="6"
               required
               value={otp}
               disabled={timeLeft === 0 || loading}
-              onChange={(e) => setOtp(e.target.value)}
+              onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ""))}
               style={{
                 letterSpacing: "8px",
                 border: "2px solid #001f3f",
@@ -684,9 +893,7 @@ const VerifyOtp = () => {
                 </span>
               </small>
             ) : (
-              <small className="text-danger fw-bold">
-                Verification code expired
-              </small>
+              <small className="text-danger fw-bold">Code expired</small>
             )}
           </div>
 
@@ -697,20 +904,20 @@ const VerifyOtp = () => {
             {loading ? (
               <span className="spinner-border spinner-border-sm me-2"></span>
             ) : (
-              "Verify Code"
+              "Confirm Code"
             )}
           </button>
         </form>
 
         <div className="text-center">
           <p className="small text-muted mb-0">
-            Didn't receive the code?{" "}
+            Didn't get it?{" "}
             <button
               onClick={handleResend}
               disabled={!canResend || loading}
               className="btn btn-link btn-sm p-0 fw-bold text-decoration-none"
               style={{ color: canResend ? "#001f3f" : "#ccc" }}>
-              Resend New Code
+              Resend Code
             </button>
           </p>
         </div>
