@@ -52,11 +52,17 @@ export default function Navbar() {
     navigate(path);
   };
 
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/");
-  };
-
+  // const handleLogout = () => {
+  //   dispatch(logout());
+  //   navigate("/");
+  // };
+const handleLogout = () => {
+  localStorage.removeItem("user");
+  localStorage.removeItem("token");
+  localStorage.removeItem("sessionExpiry");
+  // localStorage.clear();  <-- Is line ko COMMENT kar den ya hata den
+  navigate("/login");
+};
   // Fetch Logo
   useEffect(() => {
     const fetchLogo = async () => {

@@ -1,170 +1,8 @@
-// import React, { useState } from "react";
-// import { useLocation, useNavigate } from "react-router-dom";
-// import { toast } from "react-toastify";
-// import { checkoutAPI } from "../services/authService";
-// import { getUser } from "../utils/storage";
 
-// const CheckoutPage = () => {
-//   const location = useLocation();
-//   const navigate = useNavigate();
-//   const [loading, setLoading] = useState(false);
-//   const [showSuccess, setShowSuccess] = useState(false);
 
-//   // Data from previous page and storage
-//   const plan = location.state?.plan;
-//   const user = getUser();
-
-//   if (!plan || !user) {
-//     return (
-//       <div className="vh-100 bg-dark text-white d-flex align-items-center justify-content-center">
-//         <div className="text-center">
-//           <h3>Session Expired</h3>
-//           <button
-//             className="btn uma-btn-outline mt-3"
-//             onClick={() => navigate("/pricing")}>
-//             Back to Pricing
-//           </button>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   const planPrice = Number(plan.price);
-
-//   const handlePayNow = async () => {
-//     setLoading(true);
-//     try {
-//       // Calling your actual API
-//       const response = await checkoutAPI({
-//         planId: plan._id,
-//         userId: user._id || user.id,
-//         email: user.email,
-//       });
-
-//       if (response?.url) {
-//         window.location.href = response.url;
-//       } else {
-//         // If it's a direct success
-//         setShowSuccess(true);
-//       }
-//     } catch (err) {
-//       toast.error("Checkout Failed");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div
-//       className="min-vh-100 py-5 d-flex align-items-center justify-content-center"
-//       style={{ backgroundColor: "#121418" }}>
-//       <div
-//         className="p-4 rounded-5 shadow-lg"
-//         style={{
-//           width: "100%",
-//           maxWidth: "420px",
-//           backgroundColor: "#1c1f26",
-//           color: "#ffffff",
-//         }}>
-//         <div className="d-flex align-items-center mb-4">
-//           <button
-//             onClick={() => navigate(-1)}
-//             className="btn text-white p-0 me-3 shadow-none">
-//             <i className="bi bi-chevron-left fs-4"></i>
-//           </button>
-//           <h4 className="mb-0 fw-bold">Checkout</h4>
-//         </div>
-
-//         {/* Plan Card */}
-//         <div
-//           className="p-4 rounded-4 mb-3 border border-secondary d-flex justify-content-between align-items-center"
-//           style={{ backgroundColor: "#252932" }}>
-//           <div>
-//             <h6 className="mb-0 fw-bold text-white">{plan.name}</h6>
-//             <small className="text-muted">Subscription Plan</small>
-//           </div>
-//           <div className="text-end">
-//             <h5 className="mb-0" style={{ color: "var(--tan)" }}>
-//               ${planPrice}
-//             </h5>
-//           </div>
-//         </div>
-
-//         {/* Price Breakdown (Tax Removed) */}
-//         <div
-//           className="p-4 rounded-4 mb-4"
-//           style={{ border: "1px solid #333" }}>
-//           <div className="d-flex justify-content-between mb-3 border-bottom border-secondary pb-3">
-//             <span className="text-muted">Plan Price</span>
-//             <span className="fw-bold">${planPrice}</span>
-//           </div>
-//           <div className="d-flex justify-content-between align-items-center pt-1">
-//             <span className="h6 fw-bold mb-0">Total Amount</span>
-//             <span className="h5 fw-bold mb-0" style={{ color: "var(--tan)" }}>
-//               ${planPrice}
-//             </span>
-//           </div>
-//         </div>
-
-//         {/* Pay Button - Using Blue color from your image but Uma style */}
-//         <button
-//           onClick={handlePayNow}
-//           disabled={loading}
-//           className="btn btn-lg w-100 py-3 rounded-4 fw-bold mb-3 shadow transition-hover"
-//           style={{
-//             backgroundColor: "#6366f1",
-//             color: "white",
-//             border: "none",
-//           }}>
-//           {loading ? (
-//             <span className="spinner-border spinner-border-sm me-2"></span>
-//           ) : (
-//             `🔒 Pay $${planPrice} Now`
-//           )}
-//         </button>
-
-//         <p className="text-center small text-muted mb-0">
-//           Secured • Cancel anytime
-//         </p>
-//       </div>
-
-//       {/* SUCCESS POPUP */}
-//       {showSuccess && (
-//         <div
-//           className="modal fade show d-block"
-//           style={{ backgroundColor: "rgba(0,0,0,0.9)" }}>
-//           <div className="modal-dialog modal-dialog-centered">
-//             <div
-//               className="modal-content border-0 rounded-5 p-5 text-center shadow-lg"
-//               style={{ backgroundColor: "#1c1f26", color: "white" }}>
-//               <div className="mb-4">
-//                 <i
-//                   className="bi bi-check-circle-fill text-tan"
-//                   style={{ fontSize: "70px" }}></i>
-//               </div>
-//               <h2 className="fw-bold">Awesome!</h2>
-//               <p className="text-muted mb-4">
-//                 Welcome <strong>{user.fullName}</strong>. Your payment was
-//                 successful and your account is now active.
-//               </p>
-//               <button
-//                 className="btn btn-lg w-100 py-3 rounded-pill fw-bold uma-btn-navy"
-//                 onClick={() => navigate("/")}>
-//                 Go to Home
-//               </button>
-//             </div>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default CheckoutPage;
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-// import { checkoutAPI } from "../services/authService"; // Commented out for now
 import { getUser } from "../utils/storage";
 
 const CheckoutPage = () => {
@@ -172,6 +10,7 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [receipt, setReceipt] = useState(null);
 
   const plan = location.state?.plan;
   const user = getUser();
@@ -180,9 +19,9 @@ const CheckoutPage = () => {
     return (
       <div className="vh-100 bg-dark text-white d-flex align-items-center justify-content-center">
         <div className="text-center">
-          <h3>Session Expired</h3>
+          <h3>Missing Checkout Information</h3>
           <button
-            className="btn uma-btn-outline mt-3"
+            className="btn btn-warning mt-3"
             onClick={() => navigate("/pricing")}>
             Back to Pricing
           </button>
@@ -191,32 +30,48 @@ const CheckoutPage = () => {
     );
   }
 
-  const planPrice = Number(plan.price);
+  const formatDuration = (count, unit) => {
+    return `${count} ${unit.charAt(0).toUpperCase() + unit.slice(1)}${count > 1 ? "s" : ""}`;
+  };
 
+  const calculateEndDate = (duration, count) => {
+    let date = new Date();
+    if (duration === "day") date.setDate(date.getDate() + count);
+    else if (duration === "week") date.setDate(date.getDate() + count * 7);
+    else if (duration === "month") date.setMonth(date.getMonth() + count);
+    else if (duration === "year") date.setFullYear(date.getFullYear() + count);
+    return date;
+  };
+
+  // handlePayNow ke andar ye badlav karein
   const handlePayNow = async () => {
     setLoading(true);
 
-    /* 
-      --- REAL STRIPE LOGIC (COMMENTED OUT AS REQUESTED) ---
-      try {
-        const response = await checkoutAPI({
-          planId: plan._id,
-          userId: user._id || user.id,
-          email: user.email,
-        });
-        if (response?.url) {
-          window.location.href = response.url; // Redirects to Stripe
-        }
-      } catch (err) {
-        toast.error("Checkout Failed");
-      } 
-    */
-
-    // --- MOCK SUCCESS LOGIC (Temporary) ---
     setTimeout(() => {
+      const endDate = calculateEndDate(plan.duration, plan.durationCount);
+
+      const mockSub = {
+        planName: plan.name,
+        price: plan.price,
+        userId: user._id || user.id, // User ID save karein
+        subscriptionStartDate: new Date().toISOString(),
+        subscriptionEndDate: endDate.toISOString(),
+        status: "success",
+        subscriptionStatus: "active",
+      };
+
+      // USER-SPECIFIC KEY: Taaki logout/login ke baad bhi ye record rahe
+      const storageKey = `active_plan_${user._id || user.id}`;
+      localStorage.setItem(storageKey, JSON.stringify(mockSub));
+
+      // Backup ke liye temp_active_sub bhi rakhen
+      localStorage.setItem("temp_active_sub", JSON.stringify(mockSub));
+
+      setReceipt(mockSub);
       setLoading(false);
-      setShowSuccess(true); // Directly show the success popup
-    }, 2000);
+      setShowSuccess(true);
+      toast.success("Payment Successful!");
+    }, 1500);
   };
 
   return (
@@ -224,108 +79,145 @@ const CheckoutPage = () => {
       className="min-vh-100 py-5 d-flex align-items-center justify-content-center"
       style={{ backgroundColor: "#121418" }}>
       <div
-        className="p-4 rounded-5 shadow-lg"
-        style={{
-          width: "100%",
-          maxWidth: "420px",
-          backgroundColor: "#1c1f26",
-          color: "#ffffff",
-        }}>
+        className="p-4 rounded-5 shadow-lg bg-dark text-white border border-secondary"
+        style={{ width: "100%", maxWidth: "480px" }}>
+        {/* TOP BAR WITH BACK BUTTON */}
         <div className="d-flex align-items-center mb-4">
           <button
             onClick={() => navigate(-1)}
-            className="btn text-white p-0 me-3 shadow-none">
-            <i className="bi bi-chevron-left fs-4"></i>
+            className="btn btn-outline-light border-0 rounded-circle p-2 me-3"
+            style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
+            <i className="bi bi-chevron-left"></i>
           </button>
-          <h4 className="mb-0 fw-bold">Checkout</h4>
+          <h4 className="mb-0 fw-bold">Checkout Summary</h4>
         </div>
 
-        {/* Plan Info Card */}
+        {/* OWNER INFO */}
         <div
-          className="p-4 rounded-4 mb-3 border border-secondary d-flex justify-content-between align-items-center"
-          style={{ backgroundColor: "#252932" }}>
-          <div>
-            <h6 className="mb-0 fw-bold text-white">{plan.name}</h6>
-            <small className="text-muted">Premium Access</small>
-          </div>
-          <div className="text-end">
-            <h5 className="mb-0" style={{ color: "var(--tan)" }}>
-              ${planPrice}
-            </h5>
+          className="mb-4 p-3 rounded-4"
+          style={{ backgroundColor: "rgba(255,255,255,0.05)" }}>
+          <small
+            className="text-white text-uppercase fw-bold ls-1"
+            style={{ fontSize: "10px" }}>
+            Purchasing As
+          </small>
+          <div className="d-flex align-items-center mt-2">
+            <div>
+              <h6 className="mb-0 text-white">Name : {user.fullName}</h6>
+              <small className="text-white">Email : {user.email}</small>
+            </div>
           </div>
         </div>
 
-        {/* Breakdown (No Tax) */}
+        {/* PLAN DETAILS SECTION */}
         <div
-          className="p-4 rounded-4 mb-4"
-          style={{ border: "1px solid #333" }}>
-          <div className="d-flex justify-content-between mb-3 border-bottom border-secondary pb-3">
-            <span className="text-white">Plan Price</span>
-            <span className="fw-bold">${planPrice}</span>
+          className="p-4 rounded-4 mb-4 border border-secondary"
+          style={{ backgroundColor: "#1c1f26" }}>
+          <div className="mb-3">
+            <span className="badge bg-primary bg-opacity-25 text-primary mb-2">
+              Selected Plan
+            </span>
+            <h3 className="fw-bold text-warning mb-0">{plan.name}</h3>
           </div>
-          <div className="d-flex justify-content-between align-items-center pt-1">
-            <span className="h6 fw-bold mb-0">Total Amount</span>
-            <span className="h5 fw-bold mb-0" style={{ color: "var(--tan)" }}>
-              ${planPrice}
+
+          <div className="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-50">
+            <span className="text-white text-start">Duration</span>
+            <span className="fw-bold">
+              {formatDuration(plan.durationCount, plan.duration)}
+            </span>
+          </div>
+
+          <div className="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-50">
+            <span className="text-white text-start">Features</span>
+            <span className="fw-bold">
+              {plan.features?.length || 0} Included
+            </span>
+          </div>
+
+          <div className="d-flex justify-content-between align-items-center pt-3">
+            <span className="h5 mb-0 fw-bold">Total Amount</span>
+            <span className="display-6 fw-bold text-success">
+              ${plan.price}
             </span>
           </div>
         </div>
 
-        {/* Blue/Indigo Button */}
+        {/* PAY BUTTON */}
         <button
           onClick={handlePayNow}
           disabled={loading}
-          className="btn btn-lg w-100 py-3 rounded-4 fw-bold mb-3 shadow"
-          style={{
-            backgroundColor: "#6366f1",
-            color: "white",
-            border: "none",
-          }}>
+          className="btn btn-warning btn-lg w-100 py-3 rounded-pill fw-bold mb-3 shadow">
           {loading ? (
             <span>
               <span className="spinner-border spinner-border-sm me-2"></span>
               Processing...
             </span>
           ) : (
-            `🔒 Pay $${planPrice} Now`
+            `🔒 Securely Pay $${plan.price}`
           )}
         </button>
 
         <p className="text-center small text-muted mb-0">
-          Secured • Powered by MyUma
+          <i className="bi bi-shield-lock-fill me-2"></i>
+          Encrypted & Secure Payment
         </p>
       </div>
 
-      {/* SUCCESS POPUP MODAL */}
-      {showSuccess && (
+      {/* SUCCESS MODAL */}
+      {showSuccess && receipt && (
         <div
           className="modal fade show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.9)" }}>
+          style={{
+            backgroundColor: "rgba(0,0,0,0.9)",
+            backdropFilter: "blur(8px)",
+          }}>
           <div className="modal-dialog modal-dialog-centered">
-            <div
-              className="modal-content border-0 rounded-5 p-5 text-center shadow-lg"
-              style={{ backgroundColor: "#1c1f26", color: "white" }}>
-              <div className="mb-4">
+            <div className="modal-content bg-dark text-white border-0 rounded-5 shadow-lg overflow-hidden">
+              <div className="bg-success py-4 text-center">
                 <i
-                  className="bi bi-check-circle-fill text-tan"
-                  style={{ fontSize: "70px" }}></i>
+                  className="bi bi-check-circle-fill"
+                  style={{ fontSize: "4rem" }}></i>
+                <h2 className="fw-bold mt-2">Payment Success!</h2>
               </div>
-              <h2 className="fw-bold">Awesome!</h2>
-              <p className="text-white mb-4">
-                Welcome <strong>{user.fullName}</strong>. Your payment was
-                successful and your account is now active.
-              </p>
-              <button
-                className="btn btn-lg w-100 py-3 rounded-pill fw-bold uma-btn-navy"
-                onClick={() => navigate("/")}>
-                Go to Home
-              </button>
+              <div className="modal-body p-4 p-md-5">
+                <div className="bg-light bg-opacity-10 p-4 rounded-4">
+                  <div className="text-center mb-4 border-bottom border-secondary pb-3">
+                    <h5 className="text-warning fw-bold mb-1">
+                      {receipt.planName}
+                    </h5>
+                    <p className="small text-white">
+                      Subscription is now active
+                    </p>
+                  </div>
+                  <div className="d-flex justify-content-between mb-2">
+                    <span className="text-white">Owner:</span>
+                    <span className="fw-bold">{receipt.ownerName}</span>
+                  </div>
+                  <div className="d-flex justify-content-between mb-2">
+                    <span className="text-white">Validity:</span>
+                    <span className="fw-bold">{receipt.durationText}</span>
+                  </div>
+                  <div className="d-flex justify-content-between">
+                    <span className="text-white">Expires On:</span>
+                    <span className="fw-bold text-info">
+                      {new Date(
+                        receipt.subscriptionEndDate,
+                      ).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  className="btn btn-warning btn-lg w-100 mt-4 py-3 rounded-pill fw-bold"
+                  onClick={() => navigate("/pricing")}>
+                  Finish & Go Back
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
     </div>
   );
-};
+};;
 
 export default CheckoutPage;
