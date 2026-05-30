@@ -1,7 +1,7 @@
 import API from "./apiClient";
 // services/authService.js
 
-const IMAGE_BASE_URL = "https://node.myuma.net"; 
+const IMAGE_BASE_URL = "https://node.myuma.net";
 
 export const getImgURL = (imagePath) => {
   if (!imagePath || imagePath === "null")
@@ -35,7 +35,7 @@ export const verifyOtpAPI = async (data) => {
     return response.data; // Component receives this in 'res'
   } catch (error) {
     // This is vital: throw the error so the .jsx catch block triggers
-    throw error; 
+    throw error;
   }
 };
 // Method to resend OTP
@@ -85,7 +85,7 @@ export const getBannerAPI = async () => {
 
 export const getProfileAPI = async (id) => {
   const response = await API.get(`/auth/get-by-id/${id}`);
-   // Adjust URL to your backend
+  // Adjust URL to your backend
   return response.data;
 };
 // update profile
@@ -390,19 +390,79 @@ export const deleteBookingAPI = async (id) => {
   }
 };
 
-// Get all pricing plans
+// ==========================================
+// 8. PRICING MANAGEMENT APIS (Full CRUD)
+// ==========================================
+
+// GET ALL Plans
 export const getPlansAPI = async () => {
   try {
     const response = await API.get("/pricing/get-all");
-    // This will return the structure: { status: true, data: [ { bannerText, plan: [...] } ] }
     return response.data;
   } catch (error) {
-    console.error("get plans API error:", error);
+    console.error("Error fetching plans:", error);
     throw error;
   }
 };
 
+// ADD New Pricing (bannerText, plan array)
+export const addPricingAPI = async (data) => {
+  const response = await API.post("/pricing/add", data);
+  return response.data;
+};
 
+// GET Pricing By ID
+export const getPricingByIdAPI = async (id) => {
+  const response = await API.get(`/pricing/get-by-id/${id}`);
+  return response.data;
+};
+
+// UPDATE Pricing
+export const updatePricingAPI = async (id, data) => {
+  const response = await API.put(`/pricing/update/${id}`, data);
+  return response.data;
+};
+
+// DELETE Pricing
+export const deletePricingAPI = async (id) => {
+  const response = await API.delete(`/pricing/delete/${id}`);
+  return response.data;
+};
+
+// ==========================================
+// 13. PAYMENT & WEBHOOK APIS
+// ==========================================
+
+// 1. Checkout (Body: planId, userId, email)
+export const checkoutAPI = async (data) => {
+  const response = await API.post("/payment/checkout", data);
+  return response.data;
+};
+
+// 2. Webhook (Automatic status change - backend handles this)
+// Frontend can call this for manual simulation if needed
+export const paymentWebhookAPI = async () => {
+  const response = await API.post("/payment/webhook");
+  return response.data;
+};
+
+// 3. Get All Payments (Admin)
+export const getAllPaymentsAPI = async () => {
+  const response = await API.get("/payment/get-all");
+  return response.data;
+};
+
+// 4. Get Payment By ID
+export const getPaymentByIdAPI = async (id) => {
+  const response = await API.get(`/payment/get-by-id/${id}`);
+  return response.data;
+};
+
+// 5. Get Payments By User ID (For User Dashboard/Pricing check)
+export const getPaymentsByUserIdAPI = async (userId) => {
+  const response = await API.get(`/payment/get-by-userId/${userId}`);
+  return response.data;
+};
 
 // ==========================================
 // COMMENT API METHODS
@@ -462,8 +522,8 @@ export const createListingAPI = async (formData) => {
 export const getCategoriesAPI = async () => {
   try {
     const response = await API.get("/category/get-all"); // Adjust to your actual endpoint
-    console.log("category response",response.data);
-    
+    console.log("category response", response.data);
+
     return response.data; // This returns the whole object { success, categories, etc. }
   } catch (error) {
     console.error("Error in getCategoriesAPI:", error);
@@ -516,13 +576,17 @@ export const sendMessageAPI = async (data) => {
 
 // 1. History for User <-> Owner
 export const getChatHistoryAPI = async (userId, ownerId) => {
-  const response = await API.get(`/chat/get-by-user-owner/${userId}/${ownerId}`);
-  return response.data; 
+  const response = await API.get(
+    `/chat/get-by-user-owner/${userId}/${ownerId}`,
+  );
+  return response.data;
 };
 
 // 2. History for Admin <-> Owner (New Endpoint)
 export const getChatAdminOwnerHistoryAPI = async (adminId, ownerId) => {
-  const response = await API.get(`/chat/get-by-admin-owner/${adminId}/${ownerId}`);
+  const response = await API.get(
+    `/chat/get-by-admin-owner/${adminId}/${ownerId}`,
+  );
   return response.data;
 };
 
@@ -555,7 +619,10 @@ export const sendInquireApi = async (data) => {
     console.log("✅ SEND SUCCESS. Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("❌ ERROR in sendInquireApi:", error.response?.data || error.message);
+    console.error(
+      "❌ ERROR in sendInquireApi:",
+      error.response?.data || error.message,
+    );
     throw error;
   }
 };
@@ -565,10 +632,18 @@ export const getInquiriesApi = async () => {
   try {
     console.log("📡 FETCHING ALL INQUIRIES FROM DB...");
     const response = await API.get("/inquire/get-all");
-    console.log("✅ FETCH ALL SUCCESS. Count:", response.data?.count, "Data:", response.data);
+    console.log(
+      "✅ FETCH ALL SUCCESS. Count:",
+      response.data?.count,
+      "Data:",
+      response.data,
+    );
     return response.data;
   } catch (error) {
-    console.error("❌ ERROR in getInquiriesApi:", error.response?.data || error.message);
+    console.error(
+      "❌ ERROR in getInquiriesApi:",
+      error.response?.data || error.message,
+    );
     throw error;
   }
 };
@@ -581,7 +656,10 @@ export const getInquireByIdApi = async (id) => {
     console.log("✅ FETCH BY ID SUCCESS:", response.data);
     return response.data;
   } catch (error) {
-    console.error("❌ ERROR in getInquireByIdApi:", error.response?.data || error.message);
+    console.error(
+      "❌ ERROR in getInquireByIdApi:",
+      error.response?.data || error.message,
+    );
     throw error;
   }
 };
@@ -594,7 +672,10 @@ export const updateInquireApi = async (id, data) => {
     console.log("✅ UPDATE SUCCESS:", response.data);
     return response.data;
   } catch (error) {
-    console.error("❌ ERROR in updateInquireApi:", error.response?.data || error.message);
+    console.error(
+      "❌ ERROR in updateInquireApi:",
+      error.response?.data || error.message,
+    );
     throw error;
   }
 };
@@ -607,7 +688,10 @@ export const deleteInquireApi = async (id) => {
     console.log("✅ DELETE SUCCESS:", response.data);
     return response.data;
   } catch (error) {
-    console.error("❌ ERROR in deleteInquireApi:", error.response?.data || error.message);
+    console.error(
+      "❌ ERROR in deleteInquireApi:",
+      error.response?.data || error.message,
+    );
     throw error;
   }
 };
@@ -620,7 +704,10 @@ export const getInquiriesByOwnerApi = async (ownerId) => {
     console.log("✅ FETCH BY OWNER SUCCESS. Data:", response.data);
     return response.data;
   } catch (error) {
-    console.error("❌ ERROR in getInquiriesByOwnerApi:", error.response?.data || error.message);
+    console.error(
+      "❌ ERROR in getInquiriesByOwnerApi:",
+      error.response?.data || error.message,
+    );
     throw error;
   }
 };
@@ -633,7 +720,10 @@ export const getInquiriesByItemApi = async (itemId) => {
     console.log("✅ FETCH BY ITEM SUCCESS:", response.data);
     return response.data;
   } catch (error) {
-    console.error("❌ ERROR in getInquiriesByItemApi:", error.response?.data || error.message);
+    console.error(
+      "❌ ERROR in getInquiriesByItemApi:",
+      error.response?.data || error.message,
+    );
     throw error;
   }
 };
@@ -646,95 +736,25 @@ export const getInquireByUserIdApi = async (userId) => {
     console.log("✅ FETCH BY USER SUCCESS:", response.data);
     return response.data;
   } catch (error) {
-    console.error("❌ ERROR in getInquireByUserIdApi:", error.response?.data || error.message);
+    console.error(
+      "❌ ERROR in getInquireByUserIdApi:",
+      error.response?.data || error.message,
+    );
     throw error;
   }
 };
-// ==========================================
-// PAYMENT API METHODS
-// ==========================================
 
-/**
- * Get Active Subscription by User ID
- * Filters the payment list to find a successful, active subscription
- */
 export const getMySubscriptionAPI = async (userId) => {
+  console.log("📡 [API REQUEST] Fetching payments for User:", userId);
   try {
     const response = await API.get(`/payment/get-by-userId/${userId}`);
-    if (response.data.success && response.data.payments.length > 0) {
-      // Find the most recent successful and active subscription
-      const activeSubscription = response.data.payments.find(
-        (p) => p.status === "success" && p.subscriptionStatus === "active"
-      );
-      return { success: true, data: activeSubscription };
-    }
-    return { success: true, data: null };
-  } catch (error) {
-    console.error("Error in getMySubscriptionAPI:", error);
-    throw error;
-  }
-};
-export const checkoutAPI = async (data) => {
-  try {
-    const response = await API.post("/payment/checkout", data);
-    console.log("Checkout Response:", response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Error in checkoutAPI:", error);
-    throw error;
-  }
-};
 
-/**
- * Webhook (Status update)
- * Note: Webhooks are usually handled automatically by the backend, 
- * but if you need to call it manually:
- */
-export const paymentWebhookAPI = async () => {
-  try {
-    const response = await API.post("/payment/webhook");
-    return response.data;
-  } catch (error) {
-    console.error("Error in paymentWebhookAPI:", error);
-    throw error;
-  }
-};
+    // YAHAN DEKHO: Server se kya raw data aaya
+    console.log("📥 [API RESPONSE] Raw JSON from Server:", response.data);
 
-/**
- * Get All Payments
- */
-export const getAllPaymentsAPI = async () => {
-  try {
-    const response = await API.get("/payment/get-all");
     return response.data;
   } catch (error) {
-    console.error("Error in getAllPaymentsAPI:", error);
-    throw error;
-  }
-};
-
-/**
- * Get Payment By ID
- */
-export const getPaymentByIdAPI = async (id) => {
-  try {
-    const response = await API.get(`/payment/get-by-id/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error("Error in getPaymentByIdAPI:", error);
-    throw error;
-  }
-};
-
-/**
- * Get Payments By User ID
- */
-export const getPaymentsByUserIdAPI = async (userId) => {
-  try {
-    const response = await API.get(`/payment/get-by-userId/${userId}`);
-    return response.data;
-  } catch (error) {
-    console.error("Error in getPaymentsByUserIdAPI:", error);
+    console.error("❌ [API ERROR] getMySubscriptionAPI failed:", error);
     throw error;
   }
 };
