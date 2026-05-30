@@ -63,17 +63,26 @@ export default function Navbar() {
 //   // localStorage.clear();  <-- Is line ko COMMENT kar den ya hata den
 //   navigate("/login");
 // };
+
+
+
 const handleLogout = () => {
-  // 1. Data remove karein
-  localStorage.removeItem("user");
-  localStorage.removeItem("token");
-  localStorage.removeItem("sessionExpiry");
+  // 1. Redux State Clear
+  dispatch(logout());
 
-  // Note: temp_active_sub ko remove mat karna agar aap chahti hain
-  // ki login ke baad fake plan dikhta rahe.
+  // 2. Sidebar Cleanup (Backdrop removal)
+  const offcanvasElement = document.getElementById("navbarOffcanvas");
+  if (offcanvasElement) {
+    const bsOffcanvas = window.bootstrap?.Offcanvas?.getInstance(offcanvasElement);
+    if (bsOffcanvas) bsOffcanvas.hide();
+  }
+  const backdrops = document.querySelectorAll(".offcanvas-backdrop");
+  backdrops.forEach((backdrop) => backdrop.remove());
+  document.body.style.overflow = "auto";
 
-  // 2. Page ko Login par redirect karein aur Refresh karein
-  window.location.href = "/login";
+  // 3. ⭐ CRITICAL FIX: Reset the base URL to root and clear the /login path
+  // Ye line URL se /login ko hata degi aur sirf localhost:5173/#/ rakhegi
+  window.location.href = "/#/"; 
 };
   // Fetch Logo
   useEffect(() => {
