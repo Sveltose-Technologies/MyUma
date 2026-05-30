@@ -123,7 +123,7 @@ useEffect(() => {
 
       <div
         className="container"
-        style={{ marginTop: "-120px", position: "relative", zIndex: "10" }}>
+        style={{ marginTop: "-90px", position: "relative", zIndex: "10" }}>
         {activeSub && (
           <div className="row justify-content-center mb-5">
             <div className="col-lg-8">

@@ -53,15 +53,27 @@ export default function Navbar() {
   };
 
   // const handleLogout = () => {
-  //   dispatch(logout());
-  //   navigate("/");
+    // dispatch(logout());
+    // navigate("/");
   // };
+// const handleLogout = () => {
+//   localStorage.removeItem("user");
+//   localStorage.removeItem("token");
+//   localStorage.removeItem("sessionExpiry");
+//   // localStorage.clear();  <-- Is line ko COMMENT kar den ya hata den
+//   navigate("/login");
+// };
 const handleLogout = () => {
+  // 1. Data remove karein
   localStorage.removeItem("user");
   localStorage.removeItem("token");
   localStorage.removeItem("sessionExpiry");
-  // localStorage.clear();  <-- Is line ko COMMENT kar den ya hata den
-  navigate("/login");
+
+  // Note: temp_active_sub ko remove mat karna agar aap chahti hain
+  // ki login ke baad fake plan dikhta rahe.
+
+  // 2. Page ko Login par redirect karein aur Refresh karein
+  window.location.href = "/login";
 };
   // Fetch Logo
   useEffect(() => {

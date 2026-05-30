@@ -1,4 +1,223 @@
+// import React, { useState } from "react";
+// import { useLocation, useNavigate } from "react-router-dom";
+// import { toast } from "react-toastify";
+// import { getUser } from "../utils/storage";
 
+// const CheckoutPage = () => {
+//   const location = useLocation();
+//   const navigate = useNavigate();
+//   const [loading, setLoading] = useState(false);
+//   const [showSuccess, setShowSuccess] = useState(false);
+//   const [receipt, setReceipt] = useState(null);
+
+//   const plan = location.state?.plan;
+//   const user = getUser();
+
+//   if (!plan || !user) {
+//     return (
+//       <div className="vh-100 bg-dark text-white d-flex align-items-center justify-content-center">
+//         <div className="text-center">
+//           <h3>Missing Checkout Information</h3>
+//           <button
+//             className="btn btn-warning mt-3"
+//             onClick={() => navigate("/pricing")}>
+//             Back to Pricing
+//           </button>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   const formatDuration = (count, unit) => {
+//     return `${count} ${unit.charAt(0).toUpperCase() + unit.slice(1)}${count > 1 ? "s" : ""}`;
+//   };
+
+//   const calculateEndDate = (duration, count) => {
+//     let date = new Date();
+//     if (duration === "day") date.setDate(date.getDate() + count);
+//     else if (duration === "week") date.setDate(date.getDate() + count * 7);
+//     else if (duration === "month") date.setMonth(date.getMonth() + count);
+//     else if (duration === "year") date.setFullYear(date.getFullYear() + count);
+//     return date;
+//   };
+
+//   // handlePayNow ke andar ye badlav karein
+//   const handlePayNow = async () => {
+//     setLoading(true);
+
+//     setTimeout(() => {
+//       const endDate = calculateEndDate(plan.duration, plan.durationCount);
+
+//       const mockSub = {
+//         planName: plan.name,
+//         price: plan.price,
+//         userId: user._id || user.id, // User ID save karein
+//         subscriptionStartDate: new Date().toISOString(),
+//         subscriptionEndDate: endDate.toISOString(),
+//         status: "success",
+//         subscriptionStatus: "active",
+//       };
+
+//       // USER-SPECIFIC KEY: Taaki logout/login ke baad bhi ye record rahe
+//       const storageKey = `active_plan_${user._id || user.id}`;
+//       localStorage.setItem(storageKey, JSON.stringify(mockSub));
+
+//       // Backup ke liye temp_active_sub bhi rakhen
+//       localStorage.setItem("temp_active_sub", JSON.stringify(mockSub));
+
+//       setReceipt(mockSub);
+//       setLoading(false);
+//       setShowSuccess(true);
+//       toast.success("Payment Successful!");
+//     }, 1500);
+//   };
+
+//   return (
+//     <div
+//       className="min-vh-100 py-5 d-flex align-items-center justify-content-center"
+//       style={{ backgroundColor: "#121418" }}>
+//       <div
+//         className="p-4 rounded-5 shadow-lg bg-dark text-white border border-secondary"
+//         style={{ width: "100%", maxWidth: "480px" }}>
+//         {/* TOP BAR WITH BACK BUTTON */}
+//         <div className="d-flex align-items-center mb-4">
+//           <button
+//             onClick={() => navigate(-1)}
+//             className="btn btn-outline-light border-0 rounded-circle p-2 me-3"
+//             style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
+//             <i className="bi bi-chevron-left"></i>
+//           </button>
+//           <h4 className="mb-0 fw-bold">Checkout Summary</h4>
+//         </div>
+
+//         {/* OWNER INFO */}
+//         <div
+//           className="mb-4 p-3 rounded-4"
+//           style={{ backgroundColor: "rgba(255,255,255,0.05)" }}>
+//           <small
+//             className="text-white text-uppercase fw-bold ls-1"
+//             style={{ fontSize: "10px" }}>
+//             Purchasing As
+//           </small>
+//           <div className="d-flex align-items-center mt-2">
+//             <div>
+//               <h6 className="mb-0 text-white">Name : {user.fullName}</h6>
+//               <small className="text-white">Email : {user.email}</small>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* PLAN DETAILS SECTION */}
+//         <div
+//           className="p-4 rounded-4 mb-4 border border-secondary"
+//           style={{ backgroundColor: "#1c1f26" }}>
+//           <div className="mb-3">
+//             <span className="badge bg-primary bg-opacity-25 text-primary mb-2">
+//               Selected Plan
+//             </span>
+//             <h3 className="fw-bold text-warning mb-0">{plan.name}</h3>
+//           </div>
+
+//           <div className="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-50">
+//             <span className="text-white text-start">Duration</span>
+//             <span className="fw-bold">
+//               {formatDuration(plan.durationCount, plan.duration)}
+//             </span>
+//           </div>
+//           {/*
+//           <div className="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-50">
+//             <span className="text-white text-start">Features</span>
+//             <span className="fw-bold">
+//               {plan.features?.length || 0} Included
+//             </span>
+//           </div> */}
+
+//           <div className="d-flex justify-content-between align-items-center pt-3">
+//             <span className="h5 mb-0 fw-bold">Total Amount</span>
+//             <span className="display-6 fw-bold text-success">
+//               ${plan.price}
+//             </span>
+//           </div>
+//         </div>
+
+//         {/* PAY BUTTON */}
+//         <button
+//           onClick={handlePayNow}
+//           disabled={loading}
+//           className="btn btn-warning btn-lg w-100 py-3 rounded-pill fw-bold mb-3 shadow">
+//           {loading ? (
+//             <span>
+//               <span className="spinner-border spinner-border-sm me-2"></span>
+//               Processing...
+//             </span>
+//           ) : (
+//             `🔒 Securely Pay $${plan.price}`
+//           )}
+//         </button>
+
+//         <p className="text-center small text-muted mb-0">
+//           <i className="bi bi-shield-lock-fill me-2"></i>
+//           Encrypted & Secure Payment
+//         </p>
+//       </div>
+
+//       {/* SUCCESS MODAL */}
+//       {showSuccess && receipt && (
+//         <div
+//           className="modal fade show d-block"
+//           style={{
+//             backgroundColor: "rgba(0,0,0,0.9)",
+//             backdropFilter: "blur(8px)",
+//           }}>
+//           <div className="modal-dialog modal-dialog-centered">
+//             <div className="modal-content bg-dark text-white border-0 rounded-5 shadow-lg overflow-hidden">
+//               <div className="bg-success py-4 text-center">
+//                 <i
+//                   className="bi bi-check-circle-fill"
+//                   style={{ fontSize: "4rem" }}></i>
+//                 <h2 className="fw-bold mt-2">Payment Success!</h2>
+//               </div>
+//               <div className="modal-body p-4 p-md-5">
+//                 <div className="bg-light bg-opacity-10 p-4 rounded-4">
+//                   <div className="text-center mb-4 border-bottom border-secondary pb-3">
+//                     <h5 className="text-warning fw-bold mb-1">
+//                       {receipt.planName}
+//                     </h5>
+//                     <p className="small text-white">
+//                       Subscription is now active
+//                     </p>
+//                   </div>
+
+//                   <div className="d-flex justify-content-between mb-3">
+//                     <span className="text-white">Validity:</span>
+//                     <span className="fw-bold text-white">
+//                       {receipt.durationText}
+//                     </span>
+//                   </div>
+//                   <div className="d-flex justify-content-between">
+//                     <span className="text-white">Expires On:</span>
+//                     <span className="fw-bold text-info">
+//                       {new Date(
+//                         receipt.subscriptionEndDate,
+//                       ).toLocaleDateString()}
+//                     </span>
+//                   </div>
+//                 </div>
+//                 <button
+//                   className="btn btn-warning btn-lg w-100 mt-4 py-3 rounded-pill fw-bold"
+//                   onClick={() => navigate("/pricing")}>
+//                   Finish & Go Back
+//                 </button>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };;
+
+// export default CheckoutPage;
 
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -18,20 +237,20 @@ const CheckoutPage = () => {
   if (!plan || !user) {
     return (
       <div className="vh-100 bg-dark text-white d-flex align-items-center justify-content-center">
-        <div className="text-center">
-          <h3>Missing Checkout Information</h3>
-          <button
-            className="btn btn-warning mt-3"
-            onClick={() => navigate("/pricing")}>
-            Back to Pricing
-          </button>
-        </div>
+        <button
+          className="btn btn-warning"
+          onClick={() => navigate("/pricing")}>
+          Back to Pricing
+        </button>
       </div>
     );
   }
 
+  // Validity format helper
   const formatDuration = (count, unit) => {
-    return `${count} ${unit.charAt(0).toUpperCase() + unit.slice(1)}${count > 1 ? "s" : ""}`;
+    if (!count || !unit) return "Plan";
+    const u = unit.charAt(0).toUpperCase() + unit.slice(1);
+    return `${count} ${u}${count > 1 ? "s" : ""}`;
   };
 
   const calculateEndDate = (duration, count) => {
@@ -43,28 +262,31 @@ const CheckoutPage = () => {
     return date;
   };
 
-  // handlePayNow ke andar ye badlav karein
   const handlePayNow = async () => {
     setLoading(true);
 
-    setTimeout(() => {
-      const endDate = calculateEndDate(plan.duration, plan.durationCount);
+    const dText = formatDuration(plan.durationCount, plan.duration);
+    const eDate = calculateEndDate(plan.duration, plan.durationCount);
 
+    setTimeout(() => {
       const mockSub = {
         planName: plan.name,
         price: plan.price,
-        userId: user._id || user.id, // User ID save karein
+        userName: user.fullName,
+        userEmail: user.email,
+        durationText: dText,
         subscriptionStartDate: new Date().toISOString(),
-        subscriptionEndDate: endDate.toISOString(),
+        subscriptionEndDate: eDate.toISOString(),
         status: "success",
         subscriptionStatus: "active",
+        userId: user._id || user.id,
       };
 
-      // USER-SPECIFIC KEY: Taaki logout/login ke baad bhi ye record rahe
-      const storageKey = `active_plan_${user._id || user.id}`;
-      localStorage.setItem(storageKey, JSON.stringify(mockSub));
-
-      // Backup ke liye temp_active_sub bhi rakhen
+      // Storage logic (Logout ke baad bhi data rahega)
+      localStorage.setItem(
+        `active_plan_${user._id || user.id}`,
+        JSON.stringify(mockSub),
+      );
       localStorage.setItem("temp_active_sub", JSON.stringify(mockSub));
 
       setReceipt(mockSub);
@@ -78,89 +300,55 @@ const CheckoutPage = () => {
     <div
       className="min-vh-100 py-5 d-flex align-items-center justify-content-center"
       style={{ backgroundColor: "#121418" }}>
+      {/* CHECKOUT CARD */}
       <div
         className="p-4 rounded-5 shadow-lg bg-dark text-white border border-secondary"
         style={{ width: "100%", maxWidth: "480px" }}>
-        {/* TOP BAR WITH BACK BUTTON */}
         <div className="d-flex align-items-center mb-4">
           <button
             onClick={() => navigate(-1)}
-            className="btn btn-outline-light border-0 rounded-circle p-2 me-3"
-            style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
+            className="btn btn-outline-light border-0 rounded-circle p-2 me-3 shadow-none">
             <i className="bi bi-chevron-left"></i>
           </button>
           <h4 className="mb-0 fw-bold">Checkout Summary</h4>
         </div>
 
-        {/* OWNER INFO */}
-        <div
-          className="mb-4 p-3 rounded-4"
-          style={{ backgroundColor: "rgba(255,255,255,0.05)" }}>
-          <small
-            className="text-white text-uppercase fw-bold ls-1"
-            style={{ fontSize: "10px" }}>
-            Purchasing As
-          </small>
-          <div className="d-flex align-items-center mt-2">
-            <div>
-              <h6 className="mb-0 text-white">Name : {user.fullName}</h6>
-              <small className="text-white">Email : {user.email}</small>
-            </div>
-          </div>
-        </div>
-
-        {/* PLAN DETAILS SECTION */}
+        {/* DETAILS BOX */}
         <div
           className="p-4 rounded-4 mb-4 border border-secondary"
           style={{ backgroundColor: "#1c1f26" }}>
-          <div className="mb-3">
-            <span className="badge bg-primary bg-opacity-25 text-primary mb-2">
-              Selected Plan
-            </span>
-            <h3 className="fw-bold text-warning mb-0">{plan.name}</h3>
-          </div>
+          <h5 className="text-white-50 small text-uppercase fw-bold mb-3">
+            Order Details
+          </h5>
+          <h3 className="fw-bold text-warning mb-3">{plan.name}</h3>
 
-          <div className="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-50">
-            <span className="text-white text-start">Duration</span>
+          <div className="d-flex justify-content-between mb-2 text-white">
+            <span>Name:</span>
+            <span className="fw-bold">{user.fullName}</span>
+          </div>
+          <div className="d-flex justify-content-between mb-2 text-white text-truncate">
+            <span>Email:</span>
+            <span className="fw-bold ms-2">{user.email}</span>
+          </div>
+          <div className="d-flex justify-content-between mb-2 text-white">
+            <span>Validity:</span>
             <span className="fw-bold">
               {formatDuration(plan.durationCount, plan.duration)}
             </span>
           </div>
 
-          <div className="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-50">
-            <span className="text-white text-start">Features</span>
-            <span className="fw-bold">
-              {plan.features?.length || 0} Included
-            </span>
-          </div>
-
-          <div className="d-flex justify-content-between align-items-center pt-3">
-            <span className="h5 mb-0 fw-bold">Total Amount</span>
-            <span className="display-6 fw-bold text-success">
-              ${plan.price}
-            </span>
+          <div className="d-flex justify-content-between pt-3 border-top border-secondary mt-3">
+            <span className="h5 fw-bold text-white">Total:</span>
+            <span className="h4 fw-bold text-success">${plan.price}</span>
           </div>
         </div>
 
-        {/* PAY BUTTON */}
         <button
           onClick={handlePayNow}
           disabled={loading}
-          className="btn btn-warning btn-lg w-100 py-3 rounded-pill fw-bold mb-3 shadow">
-          {loading ? (
-            <span>
-              <span className="spinner-border spinner-border-sm me-2"></span>
-              Processing...
-            </span>
-          ) : (
-            `🔒 Securely Pay $${plan.price}`
-          )}
+          className="btn btn-warning btn-lg w-100 py-3 rounded-pill fw-bold shadow">
+          {loading ? "Processing..." : `Pay $${plan.price} Now`}
         </button>
-
-        <p className="text-center small text-muted mb-0">
-          <i className="bi bi-shield-lock-fill me-2"></i>
-          Encrypted & Secure Payment
-        </p>
       </div>
 
       {/* SUCCESS MODAL */}
@@ -168,8 +356,8 @@ const CheckoutPage = () => {
         <div
           className="modal fade show d-block"
           style={{
-            backgroundColor: "rgba(0,0,0,0.9)",
-            backdropFilter: "blur(8px)",
+            backgroundColor: "rgba(0,0,0,0.95)",
+            backdropFilter: "blur(10px)",
           }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content bg-dark text-white border-0 rounded-5 shadow-lg overflow-hidden">
@@ -177,39 +365,46 @@ const CheckoutPage = () => {
                 <i
                   className="bi bi-check-circle-fill"
                   style={{ fontSize: "4rem" }}></i>
-                <h2 className="fw-bold mt-2">Payment Success!</h2>
+                <h2 className="fw-bold mt-2 text-white">Payment Successful</h2>
               </div>
+
               <div className="modal-body p-4 p-md-5">
-                <div className="bg-light bg-opacity-10 p-4 rounded-4">
+                <div className="bg-white bg-opacity-10 p-4 rounded-4 border border-secondary border-opacity-50">
                   <div className="text-center mb-4 border-bottom border-secondary pb-3">
-                    <h5 className="text-warning fw-bold mb-1">
+                    <h4 className="text-warning fw-bold mb-0">
                       {receipt.planName}
-                    </h5>
-                    <p className="small text-white">
-                      Subscription is now active
-                    </p>
+                    </h4>
+                    <p className="text-white small mb-0">Subscription Active</p>
                   </div>
-                  <div className="d-flex justify-content-between mb-2">
-                    <span className="text-white">Owner:</span>
-                    <span className="fw-bold">{receipt.ownerName}</span>
+
+                 
+
+                  <div className="d-flex justify-content-between mb-3">
+                    <span className="text-white opacity-75">Validity:</span>
+                    <span className="fw-bold text-white">
+                      {receipt.durationText}
+                    </span>
                   </div>
-                  <div className="d-flex justify-content-between mb-2">
-                    <span className="text-white">Validity:</span>
-                    <span className="fw-bold">{receipt.durationText}</span>
-                  </div>
+
                   <div className="d-flex justify-content-between">
-                    <span className="text-white">Expires On:</span>
+                    <span className="text-white opacity-75">Expires On:</span>
                     <span className="fw-bold text-info">
-                      {new Date(
-                        receipt.subscriptionEndDate,
-                      ).toLocaleDateString()}
+                      {new Date(receipt.subscriptionEndDate).toLocaleDateString(
+                        "en-GB",
+                        {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        },
+                      )}
                     </span>
                   </div>
                 </div>
+
                 <button
-                  className="btn btn-warning btn-lg w-100 mt-4 py-3 rounded-pill fw-bold"
+                  className="btn btn-warning btn-lg w-100 mt-4 py-3 rounded-pill fw-bold shadow"
                   onClick={() => navigate("/pricing")}>
-                  Finish & Go Back
+                  Done & Go to Dashboard
                 </button>
               </div>
             </div>
@@ -218,6 +413,6 @@ const CheckoutPage = () => {
       )}
     </div>
   );
-};;
+};
 
 export default CheckoutPage;

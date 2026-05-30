@@ -19,22 +19,42 @@ const Sidebar = () => {
     }
   };
 
-  const ownerMenuItems = [
-    { name: "Dashboard", icon: "bi-grid", path: "/owner-dashboard" },
-    { name: "My Listing", icon: "bi-list-ul", path: "/listing" },
-    { name: "Reviews", icon: "bi-star", path: "/reviews" },
-    { name: "Bookmarks", icon: "bi-bookmark", path: "/bookmarks" },
-    { name: "Inquiries", icon: "bi-envelope", path: "/inquiries" },
-    { name: "My Profile", icon: "bi-person", path: "/profile" },
-  ];
+ const ownerMenuItems = [
+   { name: "Dashboard", icon: "bi-speedometer2", path: "/owner-dashboard" },
+   { name: "My Listing", icon: "bi-file-earmark-plus", path: "/listing" },
+   { name: "Listing Manage", icon: "bi-kanban", path: "/manage-listings" },
+   { name: "Messages", icon: "bi-chat-dots", path: "/messages" },
+   { name: "Reviews", icon: "bi-star", path: "/reviews" },
+   { name: "Bookmarks", icon: "bi-bookmark-check", path: "/bookmarks" },
+   {
+     name: "Blog Comments",
+     icon: "bi-chat-left-quote",
+     path: "/blog-comments",
+   },
+   { name: "Inquiries", icon: "bi-envelope-paper", path: "/inquiries" },
+   { name: "My Profile", icon: "bi-person-gear", path: "/profile" },
+ ];
 
-  const userMenuItems = [
-    { name: "My Account", icon: "bi-person", path: "/user-update-profile" },
-    { name: "My Bookmarks", icon: "bi-bookmark-heart", path: "/user-bookmarks" },
-    { name: "My Reviews", icon: "bi-star", path: "/user-reviews" },
-    { name: "My Inquiries", icon: "bi-question-circle", path: "/user-inquiries" },
-    { name: "My Favorites", icon: "bi-heart", path: "/user-favorites" },
-  ];
+ const userMenuItems = [
+   {
+     name: "My Account",
+     icon: "bi-person-circle",
+     path: "/user-update-profile",
+   },
+   { name: "My Bookmarks", icon: "bi-bookmark-heart", path: "/user-bookmarks" },
+   { name: "My Reviews", icon: "bi-star-half", path: "/user-reviews" },
+   {
+     name: "My Inquiries",
+     icon: "bi-question-circle",
+     path: "/user-inquiries",
+   },
+   {
+     name: "My Blog Comments",
+     icon: "bi-chat-left-text",
+     path: "/user-blog-comments",
+   },
+   { name: "My Favorites", icon: "bi-heart-fill", path: "/user-favorites" },
+ ];
 
   const menuItems = role === "owner" ? ownerMenuItems : userMenuItems;
 
