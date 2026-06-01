@@ -1,6 +1,6 @@
 import React from "react";
 import {
-    HashRouter as Router,
+    BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
@@ -52,6 +52,8 @@ import UserInquiry from "../pages/UserInquiry";
 import UserBlogComments from "../pages/UserBlogComments";
 import OwnerDashboard from "../pages/OwnerDashboard";
 import CheckoutPage from "../pages/CheckoutPage";
+import OwnerSubscription from "../pages/OwnerSubscription";
+import SuccessPage from "../pages/SuccessPage";
 const ProtectedRoute = () => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
@@ -96,6 +98,7 @@ const AppRoutes = () => {
           <Route path="/browse/:slug" element={<BrowseDetails />} />
           <Route path="/browse" element={<BrowseListings />} />
           <Route path="/checkout-details" element={<CheckoutPage />} />
+          <Route path="success" element={<SuccessPage />} />
           {/* --- PROTECTED ROUTES --- */}
           <Route element={<ProtectedRoute />}>
             <Route path="/reviews/:slug" element={<ListingReviews />} />
@@ -122,6 +125,7 @@ const AppRoutes = () => {
                 path="/user-blog-comments"
                 element={<UserBlogComments />}
               />
+              <Route path="/subscription" element={<OwnerSubscription />} />
               <Route path="/owner-dashboard" element={<OwnerDashboard />} />
             </Route>
           </Route>

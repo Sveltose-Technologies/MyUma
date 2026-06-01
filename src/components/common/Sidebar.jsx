@@ -31,6 +31,11 @@ const Sidebar = () => {
      icon: "bi-chat-left-quote",
      path: "/blog-comments",
    },
+   {
+     name: "My Subscription",
+     icon: "bi-wallet2",
+     path: "/subscription",
+   },
    { name: "Inquiries", icon: "bi-envelope-paper", path: "/inquiries" },
    { name: "My Profile", icon: "bi-person-gear", path: "/profile" },
  ];

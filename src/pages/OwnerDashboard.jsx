@@ -1,35 +1,54 @@
 
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  getAllListingsApi, 
-  getBookingsByOwnerAPI, 
-  getRatingsAPI 
+import {
+  getAllListingsApi,
+  getBookingsByOwnerAPI,
+  getRatingsAPI,
+  getMySubscriptionAPI, // Add this
+  getPlansAPI, // Add this to calculate expiry
 } from "../services/authService";
 import { getUser } from "../utils/storage";
-import { Layers, BookmarkCheck, Star, ArrowRight } from "lucide-react";
+import {
+  Layers,
+  BookmarkCheck,
+  Star,
+  ArrowRight,
+  CreditCard,
+  Clock,
+  RefreshCw,
+} from "lucide-react";
 
-// 1. StatCard is now defined outside to prevent re-mounting issues and linting errors
-const StatCard = ({ title, count, icon: Icon, link, bgColor, iconColor, navigate }) => (
+const StatCard = ({
+  title,
+  count,
+  icon: Icon,
+  link,
+  bgColor,
+  iconColor,
+  navigate,
+}) => (
   <div className="col-md-4 mb-4">
-    <div className="card border-0 shadow-sm rounded-4 p-4 h-100 transition-hover">
+    <div className="card border-0 shadow-sm rounded-4 p-4 h-100">
       <div className="d-flex justify-content-between align-items-start mb-3">
         <div>
-          <h6 className="text-muted fw-bold text-uppercase mb-2" style={{ fontSize: '11px', letterSpacing: '1px' }}>
+          <h6
+            className="text-muted fw-bold text-uppercase mb-2"
+            style={{ fontSize: "11px", letterSpacing: "1px" }}>
             {title}
           </h6>
-          <h1 className="fw-800 text-navy mb-0" style={{ fontSize: '32px' }}>{count}</h1>
+          <h1 className="fw-800 text-navy mb-0" style={{ fontSize: "32px" }}>
+            {count}
+          </h1>
         </div>
         <div className="p-3 rounded-4" style={{ backgroundColor: bgColor }}>
           <Icon size={26} color={iconColor} />
         </div>
       </div>
       <hr className="my-3 opacity-25" />
-      <button 
+      <button
         onClick={() => navigate(link)}
-        className="btn btn-link p-0 text-decoration-none fw-bold text-navy d-flex align-items-center gap-1 small"
-      >
+        className="btn btn-link p-0 text-decoration-none fw-bold text-navy d-flex align-items-center gap-1 small">
         View All <ArrowRight size={14} />
       </button>
     </div>
@@ -38,11 +57,14 @@ const StatCard = ({ title, count, icon: Icon, link, bgColor, iconColor, navigate
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
-  const [stats, setStats] = useState({ 
-    totalListings: 0, 
-    totalBookmarks: 0, 
-    totalReviews: 0 
+  const [stats, setStats] = useState({
+    totalListings: 0,
+    totalBookmarks: 0,
+    totalReviews: 0,
   });
+
+  const [activeSub, setActiveSub] = useState(null);
+  const [subLoading, setSubLoading] = useState(true);
 
   const currentUser = getUser();
   const currentUserId = currentUser?._id || currentUser?.id;
@@ -50,26 +72,25 @@ const OwnerDashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        console.log("--- Dashboard Debug ---");
-        console.log("Logged In Owner ID:", currentUserId);
+        setSubLoading(true);
+        const [listingsRes, ratingsRes, bookingsRes, subRes, plansRes] =
+          await Promise.all([
+            getAllListingsApi(),
+            getRatingsAPI(),
+            getBookingsByOwnerAPI(currentUserId),
+            getMySubscriptionAPI(currentUserId),
+            getPlansAPI(),
+          ]);
 
-        const [listingsRes, ratingsRes, bookingsRes] = await Promise.all([
-          getAllListingsApi(),
-          getRatingsAPI(),
-          getBookingsByOwnerAPI(currentUserId)
-        ]);
-
-        // 1. My Listings Count
-        const myListings = listingsRes?.listings?.filter(
-          (l) => (l.ownerId?._id || l.ownerId)?.toString() === currentUserId?.toString()
-        ) || [];
-
-        // 2. My Bookmarks Count
+        // 1. Stats Logic (Existing)
+        const myListings =
+          listingsRes?.listings?.filter(
+            (l) =>
+              (l.ownerId?._id || l.ownerId)?.toString() ===
+              currentUserId?.toString(),
+          ) || [];
         const myBookmarks = bookingsRes?.bookings || [];
-
-        // 3. REVIEWS RECEIVED COUNT
-        const ratingsData = ratingsRes?.data || [];
-        const myReceivedReviews = ratingsData.filter((rate) => {
+        const myReceivedReviews = (ratingsRes?.data || []).filter((rate) => {
           const itemOwnerId = rate.itemId?.ownerId?._id || rate.itemId?.ownerId;
           return itemOwnerId?.toString() === currentUserId?.toString();
         });
@@ -80,8 +101,38 @@ const OwnerDashboard = () => {
           totalReviews: myReceivedReviews.length,
         });
 
+        // 2. Subscription Expiry Logic
+        if (subRes?.success && subRes.payments?.length > 0) {
+          const latest = [...subRes.payments]
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .find((p) => p.status === "success");
+
+          if (latest) {
+            const availablePlans = plansRes.data?.[0]?.Plan || [];
+            const planMeta = availablePlans.find(
+              (p) => p.name === latest.planName,
+            );
+
+            if (planMeta) {
+              const start = new Date(latest.createdAt);
+              const end = new Date(start);
+              const count = planMeta.durationCount || 1;
+              const unit = planMeta.duration?.toLowerCase();
+
+              if (unit === "day") end.setDate(end.getDate() + count);
+              else if (unit === "week") end.setDate(end.getDate() + count * 7);
+              else if (unit === "month") end.setMonth(end.getMonth() + count);
+              else if (unit === "year")
+                end.setFullYear(end.getFullYear() + count);
+
+              setActiveSub({ ...latest, expiryDate: end });
+            }
+          }
+        }
       } catch (error) {
         console.error("Dashboard Fetch Error:", error);
+      } finally {
+        setSubLoading(false);
       }
     };
 
@@ -90,42 +141,99 @@ const OwnerDashboard = () => {
 
   return (
     <div className="container-fluid py-4 bg-light min-vh-100 text-start">
-      <div className="mb-5">
-        <h2 className="fw-800 text-navy">Welcome, {currentUser?.fullName?.split(' ')[0]}.</h2>
-        <p className="text-muted small">Real-time statistics from your business listings.</p>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 className="fw-800 text-navy mb-1">
+            Welcome, {currentUser?.fullName?.split(" ")[0]}.
+          </h2>
+          <p className="text-muted small mb-0">
+            Overview of your business performance.
+          </p>
+        </div>
+        <button
+          onClick={() => navigate("/pricing")}
+          className="btn btn-navy rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center gap-2">
+          <RefreshCw size={16} /> Renew Plan
+        </button>
+      </div>
+
+      {/* NEW: SUBSCRIPTION STATUS BANNER */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between p-4 bg-white border-start border-4 border-warning">
+              <div className="d-flex align-items-center gap-3 mb-3 mb-md-0">
+                <div className="p-3 bg-light rounded-circle text-warning">
+                  <CreditCard size={24} />
+                </div>
+                <div>
+                  <h6 className="text-muted extra-small fw-bold text-uppercase m-0 ls-1">
+                    Current Plan
+                  </h6>
+                  <h5 className="fw-bold text-navy mb-0">
+                    {activeSub ? activeSub.planName : "No Active Plan"}
+                  </h5>
+                </div>
+              </div>
+
+              {activeSub && (
+                <div className="d-flex align-items-center gap-3 mb-3 mb-md-0">
+                  <div className="p-3 bg-light rounded-circle text-info">
+                    <Clock size={24} />
+                  </div>
+                  <div>
+                    <h6 className="text-muted extra-small fw-bold text-uppercase m-0 ls-1">
+                      Expires On
+                    </h6>
+                    <h5 className="fw-bold text-danger mb-0">
+                      {activeSub.expiryDate.toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </h5>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <button
+                  onClick={() => navigate("/subscription")}
+                  className="btn btn-gold text-navy fw-bold rounded-pill px-4 shadow-sm">
+                  {activeSub ? "View Billing" : "Subscribe Now"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="row">
-        {/* Box 1 */}
-        <StatCard 
-          title="Listings" 
-          count={stats.totalListings} 
-          icon={Layers} 
-          bgColor="#eef5ff" 
-          iconColor="#448ef6" 
-          link="/manage-listings" 
+        <StatCard
+          title="Listings"
+          count={stats.totalListings}
+          icon={Layers}
+          bgColor="#eef5ff"
+          iconColor="#448ef6"
+          link="/manage-listings"
           navigate={navigate}
         />
-
-        {/* Box 2 */}
-        <StatCard 
-          title="Bookmarks" 
-          count={stats.totalBookmarks} 
-          icon={BookmarkCheck} 
-          bgColor="#fff0f0" 
-          iconColor="#f64444" 
-          link="/bookmarks" 
+        <StatCard
+          title="Bookmarks"
+          count={stats.totalBookmarks}
+          icon={BookmarkCheck}
+          bgColor="#fff0f0"
+          iconColor="#f64444"
+          link="/bookmarks"
           navigate={navigate}
         />
-
-        {/* Box 3 */}
-        <StatCard 
-          title="Reviews Received" 
-          count={stats.totalReviews} 
-          icon={Star} 
-          bgColor="#fff9e6" 
-          iconColor="#f6b144" 
-          link="/reviews" 
+        <StatCard
+          title="Reviews Received"
+          count={stats.totalReviews}
+          icon={Star}
+          bgColor="#fff9e6"
+          iconColor="#f6b144"
+          link="/reviews"
           navigate={navigate}
         />
       </div>
@@ -133,8 +241,11 @@ const OwnerDashboard = () => {
       <style>{`
         .fw-800 { font-weight: 800; }
         .text-navy { color: #001f3f; }
-        .transition-hover { transition: transform 0.3s ease; }
-        .transition-hover:hover { transform: translateY(-5px); }
+        .btn-navy { background-color: #001f3f; border: none; }
+        .btn-gold { background-color: #de9f57; border: none; color: #001f3f; }
+        .ls-1 { letter-spacing: 1px; }
+        .extra-small { font-size: 10px; }
+       
       `}</style>
     </div>
   );
