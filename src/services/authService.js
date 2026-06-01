@@ -744,17 +744,13 @@ export const getInquireByUserIdApi = async (userId) => {
   }
 };
 
-export const getMySubscriptionAPI = async (userId) => {
-  console.log("📡 [API REQUEST] Fetching payments for User:", userId);
+export const getMySubscriptionAPI = async (ownerId) => {
   try {
-    const response = await API.get(`/payment/get-by-userId/${userId}`);
-
-    // YAHAN DEKHO: Server se kya raw data aaya
-    console.log("📥 [API RESPONSE] Raw JSON from Server:", response.data);
-
+    // URL changed from get-by-userId to get-by-ownerId
+    const response = await API.get(`/payment/get-by-ownerId/${ownerId}`);
     return response.data;
   } catch (error) {
-    console.error("❌ [API ERROR] getMySubscriptionAPI failed:", error);
+    console.error("Error in getMySubscriptionAPI:", error);
     throw error;
   }
 };

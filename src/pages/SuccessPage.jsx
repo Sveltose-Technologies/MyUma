@@ -19,7 +19,7 @@ const SuccessPage = () => {
 
         <h1 className="fw-bold text-navy mb-3">Payment Successful!</h1>
         <p className="text-muted fs-5 mb-4">
-          Hooray! Your payment has been processed. Your premium subscription is
+        Your payment has been processed. Your premium subscription is
           now active.
         </p>
 

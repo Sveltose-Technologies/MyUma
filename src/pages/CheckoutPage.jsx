@@ -507,7 +507,7 @@ const handlePayNow = async () => {
 
   const payload = {
     planId: plan._id,
-    userId: user._id || user.id,
+    ownerId: user._id || user.id,
     email: user.email,
   };
 

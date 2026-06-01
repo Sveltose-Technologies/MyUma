@@ -777,55 +777,74 @@ const Pricing = () => {
 
   // 2. Fetch Data (Plans + Subscription)
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const res = await getPlansAPI();
-        const rawPlans = res?.data?.[0]?.Plan || res?.data || [];
-        setPlans(rawPlans);
+   const fetchData = async () => {
+     setLoading(true);
+     try {
+       // 1. Fetch available plans from Master API
+       const res = await getPlansAPI();
+       const currentPlans = res?.data?.[0]?.Plan || res?.data || [];
+       setPlans(currentPlans);
 
-        if (user) {
-          const uId = user._id || user.id;
-          const subRes = await getMySubscriptionAPI(uId);
+       if (user) {
+         const oId = user._id || user.id;
+         const subRes = await getMySubscriptionAPI(oId);
 
-          if (subRes?.success && subRes.payments?.length > 0) {
-            const latest = [...subRes.payments]
-              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-              .find((p) => p.status === "success");
+         if (subRes?.success && subRes.payments?.length > 0) {
+           // 2. Filter for SUCCESSFUL payments and sort by Newest first
+           const successfulPayments = [...subRes.payments]
+             .filter((p) => p.status === "success")
+             .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-            if (latest) {
-              const planDetails = rawPlans.find(
-                (p) => p.name === latest.planName,
-              );
-              if (planDetails) {
-                const startDate = new Date(latest.createdAt);
-                const endDate = new Date(startDate);
-                const count = planDetails.durationCount || 1;
-                const unit = planDetails.duration?.toLowerCase();
+           // 3. Find the best record to show (prefer "active" status)
+           let latest =
+             successfulPayments.find(
+               (p) => p.subscriptionStatus === "active",
+             ) || successfulPayments[0]; // Fallback to newest successful if none are active
 
-                if (unit === "day") endDate.setDate(endDate.getDate() + count);
-                else if (unit === "week")
-                  endDate.setDate(endDate.getDate() + count * 7);
-                else if (unit === "month")
-                  endDate.setMonth(endDate.getMonth() + count);
-                else if (unit === "year")
-                  endDate.setFullYear(endDate.getFullYear() + count);
+           if (latest) {
+             // --- FIX FOR MISSING DATES ---
+             let start = latest.subscriptionStartDate
+               ? new Date(latest.subscriptionStartDate)
+               : new Date(latest.createdAt);
+             let end = latest.subscriptionEndDate
+               ? new Date(latest.subscriptionEndDate)
+               : null;
 
-                setActiveSub({
-                  ...latest,
-                  subscriptionStartDate: startDate,
-                  subscriptionEndDate: endDate,
-                });
-              }
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Pricing Page Error:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+             // If Backend sent null dates (like in record ...1621), calculate them manually
+             if (!end || isNaN(end.getTime())) {
+               const planMeta = currentPlans.find(
+                 (p) => p.name === latest.planName,
+               );
+               end = new Date(start);
+               if (planMeta) {
+                 const count = planMeta.durationCount || 1;
+                 const unit = planMeta.duration?.toLowerCase();
+                 if (unit === "day") end.setDate(end.getDate() + count);
+                 else if (unit === "week")
+                   end.setDate(end.getDate() + count * 7);
+                 else if (unit === "month")
+                   end.setMonth(end.getMonth() + count);
+                 else if (unit === "year")
+                   end.setFullYear(end.getFullYear() + count);
+               } else {
+                 end.setMonth(end.getMonth() + 1); // Default fallback
+               }
+             }
+
+             setActiveSub({
+               ...latest,
+               subscriptionStartDate: start,
+               subscriptionEndDate: end,
+             });
+           }
+         }
+       }
+     } catch (error) {
+       console.error("Fetch Logic Error:", error);
+     } finally {
+       setLoading(false);
+     }
+   };
     fetchData();
   }, [user?._id]);
 
@@ -843,14 +862,20 @@ const Pricing = () => {
     };
   };
 
-  const handleSelect = (plan) => {
-    if (!user) return navigate("/login");
-    if (user.role !== "owner" && user.role !== "admin") {
-      return toast.warning("Subscriptions are for Owners/Admins only.");
-    }
-    navigate("/checkout-details", { state: { plan } });
-  };
+const handleSelect = (plan) => {
+  // 1. Agar login nahi hai toh login page bhejien
+  if (!user) return navigate("/login");
 
+  // 2. Agar user ka role "user" hai, toh toast dikhayein
+  if (user.role === "user") {
+    return toast.info(
+      "Access Denied: Only business owners can purchase subscriptions.",
+    );
+  }
+
+  // 3. Agar Owner/Admin hai toh checkout par bhejien
+  navigate("/checkout-details", { state: { plan } });
+};
   if (loading) {
     return (
       <div className="vh-100 d-flex flex-column align-items-center justify-content-center bg-white">
@@ -878,26 +903,37 @@ const Pricing = () => {
         style={{ marginTop: "-90px", position: "relative", zIndex: "10" }}>
         {activeSub && (
           <div className="row justify-content-center mb-5">
-            <div className="col-lg-8">
-              <div
-                className="card border-0 shadow-lg rounded-4 p-4 bg-white"
-                style={{ borderLeft: `6px solid ${accent}` }}>
+            <div className="col-lg-10">
+              <div className="card border-0 shadow-lg rounded-4 p-4 bg-white border-start border-5 border-success">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div>
-                    <h5 className="fw-bold mb-0">
+                    <h5 className="fw-bold mb-1 text-navy">
                       Active Plan: {activeSub.planName}
                     </h5>
-                    <p className="text-muted small mb-0">
-                      Renewal Date:{" "}
-                      {new Date(
-                        activeSub.subscriptionEndDate,
-                      ).toLocaleDateString()}
-                    </p>
+                    {/* Proper Date Display */}
+                    <div className="d-flex flex-wrap gap-3 mt-1">
+                      <span className="small text-muted">
+                        <i className="bi bi-calendar-check me-1"></i>
+                        <strong>Started:</strong>{" "}
+                        {activeSub.subscriptionStartDate.toLocaleDateString(
+                          "en-GB",
+                        )}
+                      </span>
+                      <span className="small text-danger">
+                        <i className="bi bi-calendar-x me-1"></i>
+                        <strong>Expires:</strong>{" "}
+                        {activeSub.subscriptionEndDate.toLocaleDateString(
+                          "en-GB",
+                        )}
+                      </span>
+                    </div>
                   </div>
-                  <span className="badge rounded-pill bg-success px-3 py-2">
+                  <span className="badge rounded-pill bg-success px-4 py-2">
                     ACTIVE
                   </span>
                 </div>
+
+                {/* Progress Bar Logic */}
                 {(() => {
                   const prog = getProgress(
                     activeSub.subscriptionStartDate,
@@ -905,24 +941,19 @@ const Pricing = () => {
                   );
                   return (
                     prog && (
-                      <>
+                      <div className="mt-3">
                         <div
                           className="progress mb-2"
                           style={{ height: "10px", borderRadius: "10px" }}>
                           <div
-                            className="progress-bar progress-bar-striped progress-bar-animated"
-                            style={{
-                              width: `${prog.percent}%`,
-                              backgroundColor: accent,
-                            }}></div>
+                            className="progress-bar bg-warning progress-bar-striped progress-bar-animated"
+                            style={{ width: `${prog.percent}%` }}></div>
                         </div>
-                        <div className="d-flex justify-content-between small fw-bold">
+                        <div className="d-flex justify-content-between small fw-bold text-navy">
                           <span>{prog.used} Days Completed</span>
-                          <span style={{ color: "#002147" }}>
-                            {prog.remaining} Days Left
-                          </span>
+                          <span>{prog.remaining} Days Remaining</span>
                         </div>
-                      </>
+                      </div>
                     )
                   );
                 })()}
