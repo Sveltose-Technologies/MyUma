@@ -531,6 +531,7 @@ const handlePayNow = async () => {
   }
 };
 
+
   return (
     <div className="min-vh-100 py-5 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#121418" }}>
       <div className="p-4 rounded-5 shadow-lg bg-dark text-white border border-secondary w-100" style={{ maxWidth: "450px" }}>
