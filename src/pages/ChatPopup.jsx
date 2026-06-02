@@ -88,32 +88,32 @@ const ChatPopup = ({ show, onClose, listing, isOwner, currentId }) => {
   // };
   // Inside ChatPopup.jsx handleSend function:
 
-  const handleSend = async (e) => {
-    e.preventDefault();
-    if (!newMessage.trim() || isSending) return;
+const handleSend = async (e) => {
+  e.preventDefault();
+  if (!newMessage.trim() || isSending) return;
+  
+  setIsSending(true);
+  try {
+    const payload = {
+      senderId: currentId,
+      // If I am NOT the owner, I am sending to the Owner.
+      // If I AM the owner (viewing my own chat list), the logic changes.
+      receiverId: ownerId, 
+      listingId: listingId,
+      message: newMessage.trim(),
+    };
 
-    setIsSending(true);
-    try {
-      const payload = {
-        senderId: currentId,
-        // If I am NOT the owner, I am sending to the Owner.
-        // If I AM the owner (viewing my own chat list), the logic changes.
-        receiverId: ownerId,
-        listingId: listingId,
-        message: newMessage.trim(),
-      };
-
-      const res = await sendMessageAPI(payload);
-      if (res) {
-        setNewMessage("");
-        fetchChatHistory();
-      }
-    } catch (err) {
-      toast.error("Message not sent. Owner's plan might have expired.");
-    } finally {
-      setIsSending(false);
+    const res = await sendMessageAPI(payload);
+    if (res) {
+      setNewMessage("");
+      fetchChatHistory();
     }
-  };
+  } catch (err) {
+    toast.error("Message not sent. Owner's plan might have expired.");
+  } finally {
+    setIsSending(false);
+  }
+};
 
   if (!show) return null;
 
@@ -254,6 +254,6 @@ const ChatPopup = ({ show, onClose, listing, isOwner, currentId }) => {
       </form>
     </div>
   );
-};;
+};
 
 export default ChatPopup;
