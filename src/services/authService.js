@@ -754,3 +754,14 @@ export const getMySubscriptionAPI = async (ownerId) => {
     throw error;
   }
 };
+// authService.js
+export const getListingsByOwnerAPI = async (ownerId) => {
+  try {
+    // Aapka bataya hua route: /newListing/get-by-owner/:ownerId
+    const response = await API.get(`/newListing/get-by-owner/${ownerId}`);
+    return response.data; // Yeh response.data.data (array) return karega
+  } catch (error) {
+    console.error("Error fetching owner listings:", error);
+    throw error;
+  }
+};

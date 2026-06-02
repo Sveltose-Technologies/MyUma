@@ -135,7 +135,6 @@ const Login = () => {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
-  // 24 Hours in Milliseconds
   const SESSION_DURATION = 24 * 60 * 60 * 1000;
 
   const startSession = () => {

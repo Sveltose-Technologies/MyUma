@@ -320,6 +320,10 @@
 //     </nav>
 //   );
 // }
+
+
+
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -359,7 +363,7 @@ export default function Navbar() {
   const handleLogout = () => {
     dispatch(logout());
     setIsNavOpen(false);
-    window.location.href = "/#/";
+    window.location.href = "/";
   };
 
   useEffect(() => {
@@ -418,7 +422,7 @@ export default function Navbar() {
           </div>
 
           <div className="offcanvas-body align-items-center">
-            <ul className="navbar-nav mx-auto text-start text-lg-center mb-4 mb-lg-0 w-100 justify-content-center align-items-lg-center gap-lg-2">
+            {/* <ul className="navbar-nav mx-auto text-start text-lg-center mb-4 mb-lg-0 w-100 justify-content-center align-items-lg-center gap-lg-2">
               {["/", "/pricing", "/blog", "/contact"].map((path) => (
                 <li className="nav-item" key={path}>
                   <Link
@@ -431,6 +435,44 @@ export default function Navbar() {
                   </Link>
                 </li>
               ))}
+
+              {isLoggedIn && role === "owner" && (
+                <li className="nav-item mt-2 mt-lg-0 ms-lg-2">
+                  <Link
+                    to="/listing"
+                    className="uma-btn-primary btn-sm px-3 text-nowrap w-100 fw-bold border-0 text-decoration-none text-center d-block"
+                    style={{
+                      fontSize: "13px",
+                      borderRadius: "20px",
+                      padding: "8px 20px",
+                      backgroundColor: "#de9f57",
+                      color: "#002147",
+                    }}>
+                    New Listing
+                  </Link>
+                </li>
+              )}
+            </ul> */}
+            <ul className="navbar-nav mx-auto text-start text-lg-center mb-4 mb-lg-0 w-100 justify-content-center align-items-lg-center gap-lg-2">
+              {["/", "/pricing", "/blog", "/contact"].map((path) => {
+                // Agar path pricing hai aur role "user" hai, toh kuch mat dikhao (return null)
+                if (path === "/pricing" && role === "user") return null;
+
+                return (
+                  <li className="nav-item" key={path}>
+                    <Link
+                      to={path}
+                      className={`nav-link-uma bg-transparent border-0 text-black py-2 px-3 fw-bold text-decoration-none d-block ${
+                        isActive(path) ? "active text-tan" : ""
+                      }`}>
+                      {path === "/"
+                        ? "Home"
+                        : path.replace("/", "").charAt(0).toUpperCase() +
+                          path.slice(2).replace("-", " ")}
+                    </Link>
+                  </li>
+                );
+              })}
 
               {isLoggedIn && role === "owner" && (
                 <li className="nav-item mt-2 mt-lg-0 ms-lg-2">

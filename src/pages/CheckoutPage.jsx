@@ -501,8 +501,36 @@ const CheckoutPage = () => {
   if (!plan || !user) {
     return <div className="vh-100 d-flex align-items-center justify-content-center bg-dark"><button className="btn btn-warning" onClick={() => navigate("/pricing")}>Go Back</button></div>;
   }
+// const handlePayNow = async () => {
+//   console.log("💳 [CHECKOUT] Pay Now clicked. Plan:", plan.name);
+//   setLoading(true);
+
+//   const payload = {
+//     planId: plan._id,
+//     ownerId: user._id || user.id,
+//     email: user.email,
+//   };
+
+//   console.log("🚀 [CHECKOUT] Sending Payload to API:", payload);
+
+//   try {
+//     const res = await checkoutAPI(payload);
+//     console.log("📩 [CHECKOUT] API Success Response:", res);
+
+//     if (res.success && res.url) {
+//       console.log("🔗 [CHECKOUT] Redirecting to Stripe URL:", res.url);
+//       window.location.href = res.url;
+//     }
+//   } catch (error) {
+//     console.error(
+//       "❌ [CHECKOUT] API Call failed:",
+//       error.response?.data || error.message,
+//     );
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 const handlePayNow = async () => {
-  console.log("💳 [CHECKOUT] Pay Now clicked. Plan:", plan.name);
   setLoading(true);
 
   const payload = {
@@ -511,26 +539,27 @@ const handlePayNow = async () => {
     email: user.email,
   };
 
-  console.log("🚀 [CHECKOUT] Sending Payload to API:", payload);
-
   try {
     const res = await checkoutAPI(payload);
-    console.log("📩 [CHECKOUT] API Success Response:", res);
+
+    // --- यहाँ देखें क्या आ रहा है ---
+    console.log("📥 RESPONSE DATA:", res);
 
     if (res.success && res.url) {
-      console.log("🔗 [CHECKOUT] Redirecting to Stripe URL:", res.url);
       window.location.href = res.url;
+    } else if (res.clientSecret) {
+      // अगर यहाँ पहुँच रहे हैं, तो Backend गलत डेटा भेज रहा है
+      console.error(
+        "🛑 ERROR: Backend sent 'clientSecret' instead of 'url'. Redirect is not possible!",
+      );
+      toast.error("Backend Error: Redirect URL missing.");
     }
   } catch (error) {
-    console.error(
-      "❌ [CHECKOUT] API Call failed:",
-      error.response?.data || error.message,
-    );
+    console.error("❌ API ERROR:", error);
   } finally {
     setLoading(false);
   }
 };
-
 
   return (
     <div className="min-vh-100 py-5 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#121418" }}>

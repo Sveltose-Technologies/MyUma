@@ -109,13 +109,13 @@ useEffect(() => {
             <p className="text-muted fs-5 mb-4">
               Thank you for choosing **MyUma**. Your premium membership has been activated and is ready to use.
             </p>
-
+{/* 
             <div className="bg-success bg-opacity-5 p-3 rounded-4 mb-4 text-start border border-success border-opacity-25">
                 <div className="d-flex align-items-center gap-2">
                    <PartyPopper size={20} className="text-success" />
                    <span className="fw-bold text-success">Membership Status: ACTIVE</span>
                 </div>
-            </div>
+            </div> */}
 
             <div className="row g-2">
                <div className="col-12">
