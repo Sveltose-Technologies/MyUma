@@ -220,7 +220,8 @@ const ManageListings = () => {
                       {item.address?.length > 20 && (
                         <button
                           onClick={() => setSelectedAddress(item.address)}
-                          className="btn btn-link btn-sm p-0 ms-1 text-decoration-none fw-bold">
+                          className="btn btn-link btn-sm p-0 ms-1 text-decoration-none fw-bold"
+                        >
                           View
                         </button>
                       )}
@@ -228,7 +229,7 @@ const ManageListings = () => {
                   </td>
                   <td className="px-4">
                     <div className="fw-bold text-dark">
-                      ₹{item.items?.[0]?.price || "0"}
+                      ${item.items?.[0]?.price || "0"}
                     </div>
                     <div className="small text-muted">
                       {item.items?.[0]?.name || "Service"}
@@ -238,12 +239,14 @@ const ManageListings = () => {
                     <div className="d-flex justify-content-center gap-2">
                       <button
                         onClick={() => handleEditClick(item)}
-                        className="btn btn-sm btn-outline-primary rounded-circle">
+                        className="btn btn-sm btn-outline-primary rounded-circle"
+                      >
                         <Edit size={16} />
                       </button>
                       <button
                         onClick={() => handleDelete(item._id)}
-                        className="btn btn-sm btn-outline-danger rounded-circle">
+                        className="btn btn-sm btn-outline-danger rounded-circle"
+                      >
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -261,7 +264,8 @@ const ManageListings = () => {
           <button
             className="btn btn-white btn-sm shadow-sm rounded-circle border"
             disabled={currentPage === 1}
-            onClick={() => setCurrentPage(currentPage - 1)}>
+            onClick={() => setCurrentPage(currentPage - 1)}
+          >
             <ChevronLeft size={20} />
           </button>
           <span className="fw-bold small">
@@ -270,7 +274,8 @@ const ManageListings = () => {
           <button
             className="btn btn-white btn-sm shadow-sm rounded-circle border"
             disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(currentPage + 1)}>
+            onClick={() => setCurrentPage(currentPage + 1)}
+          >
             <ChevronRight size={20} />
           </button>
         </div>
@@ -280,11 +285,13 @@ const ManageListings = () => {
       {editItem && (
         <div
           className="modal show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.7)", zIndex: 1050 }}>
+          style={{ backgroundColor: "rgba(0,0,0,0.7)", zIndex: 1050 }}
+        >
           <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <form
               onSubmit={handleUpdate}
-              className="modal-content rounded-4 border-0 shadow-lg">
+              className="modal-content rounded-4 border-0 shadow-lg"
+            >
               <div className="modal-header border-bottom p-4 bg-dark text-white">
                 <h5 className="m-0 fw-bold">Update Listing Information</h5>
                 <X
@@ -337,7 +344,8 @@ const ManageListings = () => {
                       name="categoryId"
                       className="form-select"
                       value={selectedCategoryId}
-                      onChange={(e) => setSelectedCategoryId(e.target.value)}>
+                      onChange={(e) => setSelectedCategoryId(e.target.value)}
+                    >
                       {categories.map((cat) => (
                         <option key={cat._id} value={cat._id}>
                           {cat.name}
@@ -346,19 +354,13 @@ const ManageListings = () => {
                     </select>
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label small fw-bold">
-                      Sub-Category
-                    </label>
-                    <select
-                      name="subCategoryId"
-                      className="form-select"
-                      defaultValue={editItem.subCategoryId?._id}>
-                      {filteredSubCategories.map((sub) => (
-                        <option key={sub._id} value={sub._id}>
-                          {sub.subcategoryName}
-                        </option>
-                      ))}
-                    </select>
+                    <label className="form-label small fw-bold">Notes</label>
+                    <input
+                      name="notes"
+                      defaultValue={editItem.notes}
+                      className="form-control"
+                      placeholder="Internal notes for this listing"
+                    />
                   </div>
 
                   {/* Pricing */}
@@ -374,7 +376,7 @@ const ManageListings = () => {
                   </div>
                   <div className="col-md-6">
                     <label className="form-label small fw-bold">
-                      Price (₹)
+                      Price ($)
                     </label>
                     <input
                       name="price"
@@ -435,6 +437,16 @@ const ManageListings = () => {
                     </div>
                   </div>
 
+                  <div className="col-12">
+                    <label className="form-label small fw-bold">Notes</label>
+                    <input
+                      name="notes"
+                      defaultValue={editItem.notes}
+                      className="form-control"
+                      placeholder="Internal notes for this listing"
+                    />
+                  </div>
+
                   <div className="col-md-12">
                     <label className="form-label small fw-bold">
                       YouTube Video URL
@@ -452,7 +464,8 @@ const ManageListings = () => {
                       name="address"
                       defaultValue={editItem.address}
                       className="form-control"
-                      rows="2"></textarea>
+                      rows="2"
+                    ></textarea>
                   </div>
                   <div className="col-12">
                     <label className="form-label small fw-bold">
@@ -462,7 +475,8 @@ const ManageListings = () => {
                       name="description"
                       defaultValue={editItem.description}
                       className="form-control"
-                      rows="3"></textarea>
+                      rows="3"
+                    ></textarea>
                   </div>
 
                   {/* Socials */}
@@ -527,7 +541,8 @@ const ManageListings = () => {
                 <button
                   type="button"
                   className="btn btn-outline-secondary px-4"
-                  onClick={() => setEditItem(null)}>
+                  onClick={() => setEditItem(null)}
+                >
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-dark px-5 shadow">
@@ -543,10 +558,12 @@ const ManageListings = () => {
       {selectedAddress && (
         <div
           className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center px-3"
-          style={{ zIndex: 11000, backgroundColor: "rgba(0,0,0,0.5)" }}>
+          style={{ zIndex: 11000, backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div
             className="bg-white rounded-4 shadow-lg w-100 p-4"
-            style={{ maxWidth: "450px" }}>
+            style={{ maxWidth: "450px" }}
+          >
             <div className="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
               <h6 className="m-0 fw-bold text-dark">
                 <MapPin size={18} className="text-danger me-2" />
@@ -560,7 +577,8 @@ const ManageListings = () => {
             <p className="text-muted mb-4">{selectedAddress}</p>
             <button
               className="btn btn-dark w-100 rounded-pill"
-              onClick={() => setSelectedAddress(null)}>
+              onClick={() => setSelectedAddress(null)}
+            >
               Close
             </button>
           </div>

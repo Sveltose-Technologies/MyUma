@@ -134,7 +134,8 @@ const Pricing = () => {
         style={{
           backgroundColor: "#002147",
           borderBottom: `4px solid ${accent}`,
-        }}>
+        }}
+      >
         <div className="container py-4">
           <h1 className="display-5 fw-bold text-white mb-3 text-uppercase ls-1">
             {bannerHeading}
@@ -144,7 +145,8 @@ const Pricing = () => {
 
       <div
         className="container"
-        style={{ marginTop: "-80px", position: "relative", zIndex: "10" }}>
+        style={{ marginTop: "-80px", position: "relative", zIndex: "10" }}
+      >
         {activeSub && (
           <div className="row justify-content-center mb-5">
             <div className="col-lg-10">
@@ -185,10 +187,12 @@ const Pricing = () => {
                       <div className="mt-3">
                         <div
                           className="progress mb-2"
-                          style={{ height: "10px", borderRadius: "10px" }}>
+                          style={{ height: "10px", borderRadius: "10px" }}
+                        >
                           <div
                             className="progress-bar bg-warning progress-bar-striped progress-bar-animated"
-                            style={{ width: `${prog.percent}%` }}></div>
+                            style={{ width: `${prog.percent}%` }}
+                          ></div>
                         </div>
                         <div className="d-flex justify-content-between small fw-bold text-navy">
                           <span>{prog.used} Days Completed</span>
@@ -213,7 +217,8 @@ const Pricing = () => {
                     style={{
                       height: "10px",
                       backgroundColor: isCurrent ? accent : "#002147",
-                    }}></div>
+                    }}
+                  ></div>
                   <div className="card-body p-4 p-xl-5 d-flex flex-column">
                     {isCurrent && (
                       <div className="badge bg-warning text-dark mb-2 align-self-start shadow-sm">
@@ -232,40 +237,50 @@ const Pricing = () => {
 
                     <div
                       className="mb-4 p-3 rounded-4 bg-light border-start border-4 shadow-sm"
-                      style={{ borderColor: accent }}>
+                      style={{ borderColor: accent }}
+                    >
                       <div className="d-flex align-items-center mb-2">
                         <i
                           className="bi bi-file-earmark-plus-fill me-2"
-                          style={{ color: "#002147" }}></i>
+                          style={{ color: "#002147" }}
+                        ></i>
                         <span className="small fw-bold text-navy">
                           {plan.listings > 0
-                            ? `${plan.listings} Listings Allowed`
+                            ? `Unlimited Listings`
                             : "Unlimited Listings"}
                         </span>
                       </div>
-                      <div className="d-flex align-items-center">
+                      {/* <div className="d-flex align-items-center">
                         <i
-                          className={`bi ${plan.chatIsActive ? "bi-chat-dots-fill text-success" : "bi-chat-left-x-fill text-danger"} me-2`}></i>
+                          className={`bi ${plan.chatIsActive ? "bi-chat-dots-fill text-success" : "bi-chat-left-x-fill text-danger"} me-2`}
+                        ></i>
                         <span
-                          className={`small fw-bold ${plan.chatIsActive ? "text-navy" : "text-muted opacity-75"}`}>
+                          className={`small fw-bold ${plan.chatIsActive ? "text-navy" : "text-muted opacity-75"}`}
+                        >
                           {plan.chatIsActive
                             ? "Instant Chat Available"
                             : "Chat Not Included"}
                         </span>
-                      </div>
+                      </div> */}
                     </div>
 
                     <ul className="list-unstyled mb-5">
-                      {plan.features?.map((f, i) => (
+                      {/* {plan.features?.map((f, i) => (
                         <li
                           key={i}
-                          className="mb-3 d-flex align-items-start small text-muted">
+                          className="mb-3 d-flex align-items-start small text-muted"
+                        >
                           <i
                             className="bi bi-check-circle-fill me-2"
-                            style={{ color: accent }}></i>{" "}
+                            style={{ color: accent }}
+                          ></i>{" "}
                           {f}
                         </li>
-                      ))}
+                      ))} */}
+                      {/* <li className="mb-3 d-flex align-items-start small text-muted">
+                        <i className="bi bi-check-circle-fill me-2"></i>
+                        {"market place , will be free"}
+                      </li> */}
                     </ul>
 
                     <button
@@ -274,8 +289,9 @@ const Pricing = () => {
                       className="btn w-100 text-white py-3 rounded-pill fw-bold border-0 mt-auto shadow-sm"
                       style={{
                         backgroundColor: isCurrent ? "#adb5bd" : "#002147",
-                      }}>
-                      {isCurrent ? "Plan Active" : "Upgrade Plan"}
+                      }}
+                    >
+                      {isCurrent ? "Plan Active" : "Purchase Plan"}
                     </button>
                   </div>
                 </div>
@@ -294,13 +310,15 @@ const Pricing = () => {
             backgroundColor: "rgba(0,0,0,0.7)",
             backdropFilter: "blur(8px)",
             zIndex: 1050,
-          }}>
+          }}
+        >
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 rounded-5 shadow-lg overflow-hidden py-4 px-3">
               <div className="text-end">
                 <button
                   className="btn border-0 p-0 text-muted"
-                  onClick={() => setShowSuccessPopup(false)}>
+                  onClick={() => setShowSuccessPopup(false)}
+                >
                   <X size={24} />
                 </button>
               </div>
@@ -321,7 +339,8 @@ const Pricing = () => {
                     color: "white",
                     border: "none",
                   }}
-                  onClick={() => setShowSuccessPopup(false)}>
+                  onClick={() => setShowSuccessPopup(false)}
+                >
                   Great, Let's Start!
                 </button>
               </div>

@@ -48,7 +48,21 @@ const HomeSearchBar = () => {
         const catRes = await getCategoriesAPI();
         if (catRes.success) setCategoriesData(catRes.categories || []);
         const subRes = await getAllSubCategoriesApi();
-        if (subRes.success) setDropdownData(subRes.data || []);
+        if (subRes.success) {
+          const sortedData = (subRes.data || [])
+            .map((item) => ({
+              ...item,
+              subcategories: (item.subcategories || []).sort((a, b) =>
+                a.subcategoryName.localeCompare(b.subcategoryName),
+              ),
+            }))
+            .sort((a, b) =>
+              (a.categoryId?.name || "").localeCompare(
+                b.categoryId?.name || "",
+              ),
+            );
+          setDropdownData(sortedData);
+        }
         const listRes = await getAllListingsApi();
         if (listRes?.listings) setAllListings(listRes.listings);
       } catch (err) {

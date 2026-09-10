@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import {
@@ -74,22 +73,22 @@ const BusinessDetailsUI = ({
     return reviewUserId?.toString() === currentUserId?.toString();
   });
 
-const getEmbedUrl = (url) => {
-  if (!url) return null;
+  const getEmbedUrl = (url) => {
+    if (!url) return null;
 
-  // Regex to capture ID from standard, shorts, or mobile links
-  const regExp =
-    /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
-  const match = url.match(regExp);
+    // Regex to capture ID from standard, shorts, or mobile links
+    const regExp =
+      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+    const match = url.match(regExp);
 
-  if (match && match[2].length === 11) {
-    const videoId = match[2];
-    // Use clean HTTPS embed link without extra parameters that cause Error 153
-    return `https://www.youtube.com/embed/${videoId}`;
-  }
+    if (match && match[2].length === 11) {
+      const videoId = match[2];
+      // Use clean HTTPS embed link without extra parameters that cause Error 153
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
 
-  return null;
-};
+    return null;
+  };
   useEffect(() => {
     if (listing?.address) {
       fetch(
@@ -136,7 +135,7 @@ const getEmbedUrl = (url) => {
           {listing.description || "No description provided."}
         </p>
       </div>
-      {getEmbedUrl(listing.video || listing.youtubeVideo) && (
+      {/* {getEmbedUrl(listing.video || listing.youtubeVideo) && (
         <div className="bg-white p-4 rounded-4 shadow-sm mb-4 border">
           <h5 className="fw-800 mb-3 text-navy d-flex align-items-center gap-2 text-uppercase">
             <PlayCircle size={20} className="text-danger" /> Video Tour
@@ -149,10 +148,11 @@ const getEmbedUrl = (url) => {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
-              style={{ border: 0 }}></iframe>
+              style={{ border: 0 }}
+            ></iframe>
           </div>
         </div>
-      )}
+      )} */}
 
       <div className="bg-white p-4 rounded-4 shadow-sm mb-4 border d-flex justify-content-between align-items-center">
         <div className="cursor-pointer" onClick={() => setShowListModal(true)}>
@@ -172,14 +172,16 @@ const getEmbedUrl = (url) => {
           ) : (
             <button
               onClick={() => setShowAddModal(true)}
-              className="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">
+              className="btn btn-danger rounded-pill px-4 fw-bold shadow-sm"
+            >
               Write Review
             </button>
           ))}
         {!isLoggedIn && (
           <button
             onClick={() => navigate("/login")}
-            className="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">
+            className="btn btn-danger rounded-pill px-4 fw-bold shadow-sm"
+          >
             Write Review
           </button>
         )}
@@ -191,11 +193,13 @@ const getEmbedUrl = (url) => {
         </h5>
         <div
           style={{ height: "350px" }}
-          className="rounded-4 overflow-hidden border shadow-sm">
+          className="rounded-4 overflow-hidden border shadow-sm"
+        >
           <MapContainer
             center={coords}
             zoom={13}
-            style={{ height: "100%", width: "100%" }}>
+            style={{ height: "100%", width: "100%" }}
+          >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             <ChangeView center={coords} />
             <Marker position={coords} />
@@ -229,9 +233,8 @@ const getEmbedUrl = (url) => {
                     <div
                       className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden listing-card bg-white"
                       style={{ cursor: "pointer", transition: "0.3s" }}
-                      onClick={() =>
-                        navigate(`/browse/${slugify(item.title)}`)
-                      }>
+                      onClick={() => navigate(`/browse/${slugify(item.title)}`)}
+                    >
                       <div className="ratio ratio-4x3 position-relative">
                         <img
                           src={getImgURL(item.images?.[0])}
@@ -240,7 +243,8 @@ const getEmbedUrl = (url) => {
                         />
                         <div
                           className="position-absolute top-0 start-0 w-100 d-flex justify-content-between align-items-start p-3"
-                          style={{ zIndex: 10 }}>
+                          style={{ zIndex: 10 }}
+                        >
                           <span className="badge bg-white text-navy shadow-sm fw-800 px-3 py-2 rounded-3">
                             ${item.items?.[0]?.price?.toLocaleString() || 0}
                           </span>
@@ -255,7 +259,8 @@ const getEmbedUrl = (url) => {
                             onClick={(e) => {
                               e.stopPropagation();
                               handleBookmark(e, item);
-                            }}>
+                            }}
+                          >
                             <Heart
                               size={20}
                               color="#ff4d4d"
@@ -269,15 +274,17 @@ const getEmbedUrl = (url) => {
                           <div className="d-flex flex-column">
                             <small
                               className="text-warning fw-800 text-uppercase"
-                              style={{ fontSize: "10px" }}>
+                              style={{ fontSize: "10px" }}
+                            >
                               {item.categoryId?.name}
                             </small>
-                            {item.subCategoryId?.subcategoryName && (
+                            {listing && (
                               <small
                                 className="text-navy fw-bold"
-                                style={{ fontSize: "11px" }}>
+                                style={{ fontSize: "11px" }}
+                              >
                                 <Layers size={10} className="me-1" />{" "}
-                                {item.subCategoryId.subcategoryName}
+                                {listing.notes || "No Notes"}
                               </small>
                             )}
                           </div>
@@ -297,7 +304,8 @@ const getEmbedUrl = (url) => {
                               window.open(
                                 `https://www.google.com/maps/search/${encodeURIComponent(item.address)}`,
                               );
-                            }}>
+                            }}
+                          >
                             <Navigation size={18} className="text-navy" />
                           </button>
                         </div>
@@ -318,21 +326,29 @@ const getEmbedUrl = (url) => {
       {showAddModal && (
         <div
           className="modal show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.7)", zIndex: 12000 }}>
+          style={{ backgroundColor: "rgba(0,0,0,0.7)", zIndex: 12000 }}
+        >
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content rounded-4 border-0 shadow-lg">
               <div
-                className="modal-header border-0 bg-navy text-white p-4"
-                style={{ backgroundColor: "#001f3f" }}>
+                className="modal-header border-0 bg-navy text-white p-4 d-flex justify-content-between align-items-center w-100"
+                style={{ backgroundColor: "#001f3f" }}
+              >
                 <h5 className="m-0 fw-bold">Write a Review</h5>
-                <X
-                  className="cursor-pointer"
+                <button
+                  type="button"
+                  className="btn rounded-circle p-2 d-flex align-items-center justify-content-center"
                   onClick={() => setShowAddModal(false)}
-                />
+                  style={{ width: "36px", height: "36px", backgroundColor: "rgba(255,255,255,0.1)", border: "none" }}
+                  title="Close"
+                >
+                  <X size={20} className="text-white" strokeWidth={2.5} />
+                </button>
               </div>
               <form
                 onSubmit={handleRatingSubmit}
-                className="modal-body p-4 text-center">
+                className="modal-body p-4 text-center"
+              >
                 <div className="d-flex justify-content-center gap-2 mb-4">
                   {[1, 2, 3, 4, 5].map((n) => (
                     <Star
@@ -357,7 +373,8 @@ const getEmbedUrl = (url) => {
                   type="submit"
                   disabled={submitting}
                   className="btn w-100 mt-4 rounded-pill fw-bold py-2 text-white"
-                  style={{ backgroundColor: "#001f3f" }}>
+                  style={{ backgroundColor: "#001f3f" }}
+                >
                   {submitting ? "SUBMITTING..." : "POST REVIEW"}
                 </button>
               </form>
@@ -369,23 +386,30 @@ const getEmbedUrl = (url) => {
       {showListModal && (
         <div
           className="modal show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.7)", zIndex: 12000 }}>
+          style={{ backgroundColor: "rgba(0,0,0,0.7)", zIndex: 12000 }}
+        >
           <div className="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
             <div className="modal-content rounded-4 border-0 shadow-lg">
-              <div className="modal-header bg-light border-bottom p-4">
+              <div className="modal-header bg-light border-bottom p-4 d-flex justify-content-between align-items-center w-100">
                 <h5 className="fw-800 m-0 text-navy">
                   Customer Feedback ({listingRatings?.length || 0})
                 </h5>
-                <X
-                  className="cursor-pointer"
+                <button
+                  type="button"
+                  className="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm border"
                   onClick={() => setShowListModal(false)}
-                />
+                  style={{ width: "36px", height: "36px" }}
+                  title="Close"
+                >
+                  <X size={20} className="text-danger" strokeWidth={2.5} />
+                </button>
               </div>
               <div className="modal-body p-4">
                 {listingRatings?.map((r) => (
                   <div
                     key={r._id}
-                    className="bg-white p-3 rounded-4 mb-3 border shadow-sm">
+                    className="bg-white p-3 rounded-4 mb-3 border shadow-sm"
+                  >
                     <div className="d-flex justify-content-between align-items-center mb-2">
                       <div className="d-flex align-items-center gap-2">
                         {r.userId?.profileImage ? (

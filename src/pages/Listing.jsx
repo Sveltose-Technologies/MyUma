@@ -580,6 +580,7 @@ const Listing = () => {
     subCategoryId: "",
     title: "",
     description: "",
+    notes: "",
     address: "",
     phone: "",
     whatsappNo: "",
@@ -608,21 +609,38 @@ const Listing = () => {
             getSubCategoriesAPI(),
           ]);
 
-        // 1. Sync Plan and find numerical limit
+        // 1. Sync Plan, check Expiry, and find numerical limit
         const payments = subRes?.payments || [];
+
         const latestSuccess = payments
           .filter((p) => p.status === "success")
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
 
+        console.log("paymants ", latestSuccess);
         if (latestSuccess) {
-          setHasValidPlan(true);
-          setActivePlanName(latestSuccess.planName);
+          // NEW: Get today's date and the plan's expiry date
+          const currentDate = new Date();
 
-          const masterPlans = plansRes?.data?.[0]?.Plan || [];
-          const matchedPlan = masterPlans.find(
-            (p) => p.name === latestSuccess.planName,
+          // CHANGE 'expiryDate' TO MATCH YOUR BACKEND FIELD (e.g., endDate, validUntil)
+          const planExpiryDate = new Date(
+            latestSuccess.expiryDate || subRes.expiryDate,
           );
-          if (matchedPlan) setListingLimit(Number(matchedPlan.listings));
+          console.log("planExpiryDate", planExpiryDate);
+
+          // Check if the plan is still active
+          if (planExpiryDate >= currentDate) {
+            setHasValidPlan(true);
+            setActivePlanName(latestSuccess.planName);
+
+            const masterPlans = plansRes?.data?.[0]?.Plan || [];
+            const matchedPlan = masterPlans.find(
+              (p) => p.name === latestSuccess.planName,
+            );
+            if (matchedPlan) setListingLimit(Number(matchedPlan.listings));
+          } else {
+            // Plan has expired
+            setHasValidPlan(false);
+          }
         }
 
         // 2. Count owner's current items
@@ -640,6 +658,56 @@ const Listing = () => {
     };
     initializeListingFlow();
   }, [user]);
+
+  // useEffect(() => {
+  //   const initializeListingFlow = async () => {
+  //     if (!user) return;
+  //     setIsChecking(true);
+  //     const oId = user._id || user.id;
+
+  //     try {
+  //       // Parallel API fetching
+  //       const [subRes, listRes, plansRes, catRes, subDataRes] =
+  //         await Promise.all([
+  //           getMySubscriptionAPI(oId),
+  //           getListingsByOwnerAPI(oId),
+  //           getPlansAPI(),
+  //           getCategoriesAPI(),
+  //           getSubCategoriesAPI(),
+  //         ]);
+
+  //       // 1. Sync Plan and find numerical limit
+  //       const payments = subRes?.payments || [];
+  //       const latestSuccess = payments
+  //         .filter((p) => p.status === "success")
+  //         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+
+  //       if (latestSuccess) {
+  //         setHasValidPlan(true);
+  //         setActivePlanName(latestSuccess.planName);
+
+  //         const masterPlans = plansRes?.data?.[0]?.Plan || [];
+  //         const matchedPlan = masterPlans.find(
+  //           (p) => p.name === latestSuccess.planName,
+  //         );
+  //         if (matchedPlan) setListingLimit(Number(matchedPlan.listings));
+  //       }
+
+  //       // 2. Count owner's current items
+  //       const existing = listRes?.listings || listRes?.data || [];
+  //       setCurrentCount(existing.length);
+
+  //       // 3. Setup Dropdowns
+  //       setCategories(catRes.categories || []);
+  //       setMasterSubData(subDataRes.data || []);
+  //     } catch (err) {
+  //       console.error("Dashboard Sync Error:", err);
+  //     } finally {
+  //       setIsChecking(false);
+  //     }
+  //   };
+  //   initializeListingFlow();
+  // }, [user]);
 
   // --- Handlers ---
   const handleInputChange = (e) => {
@@ -671,7 +739,7 @@ const Listing = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (hasValidPlan && Number(currentCount) >= Number(listingLimit)) {
+    if (hasValidPlan) {
       return toast.error("Usage limit reached. Upgrade to add more.");
     }
 
@@ -727,15 +795,18 @@ const Listing = () => {
   // --- HARD BLOCK LOGIC ---
   const isLimitReached =
     hasValidPlan && Number(currentCount) >= Number(listingLimit);
+  console.log("isLimitReached", isLimitReached);
 
-  if (!hasValidPlan || isLimitReached) {
+  if (isLimitReached) {
     return (
       <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light px-4">
         <div
           className="card border-0 shadow-lg p-5 rounded-5 text-center"
-          style={{ maxWidth: "500px" }}>
+          style={{ maxWidth: "500px" }}
+        >
           <div
-            className={`d-inline-flex p-4 rounded-circle mb-4 ${hasValidPlan ? "bg-warning" : "bg-danger"} bg-opacity-10`}>
+            className={`d-inline-flex p-4 rounded-circle mb-4 ${hasValidPlan ? "bg-warning" : "bg-danger"} bg-opacity-10`}
+          >
             {hasValidPlan ? (
               <AlertTriangle size={60} className="text-warning" />
             ) : (
@@ -752,7 +823,8 @@ const Listing = () => {
           </p>
           <button
             className="btn btn-warning btn-lg w-100 rounded-pill fw-bold py-3 shadow"
-            onClick={() => navigate("/pricing")}>
+            onClick={() => navigate("/pricing")}
+          >
             Upgrade Membership
           </button>
         </div>
@@ -763,7 +835,8 @@ const Listing = () => {
   return (
     <div
       className="min-vh-100 py-5 text-start"
-      style={{ backgroundColor: theme.lightBg }}>
+      style={{ backgroundColor: theme.lightBg }}
+    >
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-lg-10">
@@ -771,8 +844,9 @@ const Listing = () => {
               {/* Header: Slot Usage Counter */}
               <div
                 className="p-4 text-white d-flex flex-column flex-md-row justify-content-between align-items-center px-md-5"
-                style={{ backgroundColor: theme.primary }}>
-                <div>
+                style={{ backgroundColor: theme.primary }}
+              >
+                {/* <div>
                   <h3 className="fw-bold m-0">Publish Professional Listing</h3>
                   <small className="opacity-75">
                     Active Plan:{" "}
@@ -780,14 +854,14 @@ const Listing = () => {
                       {activePlanName}
                     </span>
                   </small>
-                </div>
-                <div className="bg-white bg-opacity-10 p-2 px-4 rounded-pill border border-white border-opacity-25 mt-3 mt-md-0 fw-bold">
+                </div> */}
+                {/* <div className="bg-white bg-opacity-10 p-2 px-4 rounded-pill border border-white border-opacity-25 mt-3 mt-md-0 fw-bold">
                   Slots Remaining:{" "}
                   <span className="text-warning">
                     {listingLimit - currentCount}
                   </span>{" "}
                   of {listingLimit}
-                </div>
+                </div> */}
               </div>
 
               <form className="p-4 p-md-5 bg-white" onSubmit={handleSubmit}>
@@ -821,7 +895,8 @@ const Listing = () => {
                         className="form-select py-2"
                         value={formData.categoryId}
                         onChange={handleInputChange}
-                        required>
+                        required
+                      >
                         <option value="">Choose Main Category</option>
                         {categories.map((c) => (
                           <option key={c._id} value={c._id}>
@@ -840,7 +915,8 @@ const Listing = () => {
                         value={formData.subCategoryId}
                         onChange={handleInputChange}
                         required
-                        disabled={!formData.categoryId}>
+                        disabled={!formData.categoryId}
+                      >
                         <option value="">Choose Subcategory</option>
                         {filteredSubCats.map((s) => (
                           <option key={s._id} value={s._id}>
@@ -868,19 +944,34 @@ const Listing = () => {
                       rows="4"
                       value={formData.description}
                       onChange={handleInputChange}
-                      placeholder="Tell us more about your business..."></textarea>
+                      placeholder="Tell us more about your business..."
+                    ></textarea>
+                    <div className="mt-3">
+                      <label className="form-label small fw-bold">
+                        Notes (optional)
+                      </label>
+                      <input
+                        type="text"
+                        name="notes"
+                        className="form-control shadow-none"
+                        placeholder="Internal notes for this listing"
+                        value={formData.notes}
+                        onChange={handleInputChange}
+                      />
+                    </div>
                   </div>
 
                   <div className="d-flex justify-content-between align-items-center mb-3">
                     <label className="form-label small fw-bold m-0 text-muted">
                       MENU / CATALOGUE ITEMS
                     </label>
-                    <button
+                    {/* <button
                       type="button"
                       onClick={addItemRow}
-                      className="btn btn-sm btn-outline-primary rounded-pill px-3">
+                      className="btn btn-sm btn-outline-primary rounded-pill px-3"
+                    >
                       <Plus size={14} /> Add Item
-                    </button>
+                    </button> */}
                   </div>
                   {items.map((item, index) => (
                     <div className="row g-2 mb-2" key={index}>
@@ -904,14 +995,15 @@ const Listing = () => {
                           onChange={(e) => handleItemChange(index, e)}
                         />
                       </div>
-                      <div className="col-2">
+                      {/* <div className="col-2">
                         <button
                           type="button"
                           onClick={() => removeItemRow(index)}
-                          className="btn btn-sm text-danger w-100 border-0 shadow-none">
+                          className="btn btn-sm text-danger w-100 border-0 shadow-none"
+                        >
                           <Trash2 size={18} />
                         </button>
-                      </div>
+                      </div> */}
                     </div>
                   ))}
                 </div>
@@ -1058,7 +1150,8 @@ const Listing = () => {
                   type="submit"
                   disabled={loading}
                   className="btn btn-lg text-white w-100 fw-bold shadow-lg py-3 rounded-pill border-0 transition-all mt-4"
-                  style={{ backgroundColor: theme.primary }}>
+                  style={{ backgroundColor: theme.primary }}
+                >
                   {loading
                     ? "Syncing with Server..."
                     : "Submit and Publish Listing"}
